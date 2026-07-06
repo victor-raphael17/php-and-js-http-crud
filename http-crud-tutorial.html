@@ -1,0 +1,2746 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curso CRUD — API PHP + Frontend JS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box }
+
+        :root {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface2: #172033;
+            --border: #334155;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --accent: #38bdf8;
+            --green: #4ade80;
+            --yellow: #facc15;
+            --red: #f87171;
+            --purple: #a78bfa;
+            --orange: #fb923c;
+            --pink: #f472b6;
+        }
+
+        html { scroll-behavior: smooth }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+
+        code, pre { font-family: 'Fira Code', ui-monospace, 'Cascadia Code', Consolas, monospace }
+
+        /* ───── Top bar ───── */
+        .topbar {
+            position: sticky; top: 0; z-index: 50;
+            background: rgba(15, 23, 42, .92);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--border);
+            padding: .6rem 1rem;
+        }
+        .topbar-inner { max-width: 1000px; margin: 0 auto; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap }
+        .brand { font-weight: 700; font-size: .95rem; letter-spacing: -.3px; white-space: nowrap; display: flex; align-items: center; gap: .5rem }
+        .brand .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent) }
+        .nav { display: flex; gap: .35rem; flex-wrap: wrap; margin-left: auto }
+        .nav-item {
+            display: flex; align-items: center; gap: .4rem;
+            padding: .35rem .7rem; border-radius: 8px; border: 1px solid transparent;
+            background: transparent; color: var(--muted); cursor: pointer;
+            font-size: .78rem; font-weight: 600; font-family: inherit; transition: all .18s; user-select: none;
+        }
+        .nav-item:hover { color: var(--text); background: var(--surface) }
+        .nav-item.active { color: var(--bg); background: var(--accent); border-color: var(--accent) }
+        .nav-item .n {
+            width: 18px; height: 18px; border-radius: 50%; background: var(--border); color: var(--text);
+            font-size: .62rem; display: flex; align-items: center; justify-content: center; font-weight: 700;
+        }
+        .nav-item.active .n { background: rgba(0,0,0,.25); color: #fff }
+        .nav-item.done .n::after { content: '' }
+
+        /* ───── Layout ───── */
+        .module { display: none; animation: fade .3s ease }
+        .module.active { display: block }
+        @keyframes fade { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
+
+        .wrap { max-width: 820px; margin: 0 auto; padding: 1.5rem 1.25rem 4rem }
+
+        .eyebrow { color: var(--accent); font-size: .72rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase }
+        h1.title { font-size: 1.9rem; font-weight: 800; letter-spacing: -.8px; margin: .5rem 0 }
+        h2.sec { font-size: 1.3rem; font-weight: 700; letter-spacing: -.4px; margin: 2.2rem 0 .4rem; scroll-margin-top: 70px }
+        h2.sec:first-of-type { margin-top: 1rem }
+        h3.sub { font-size: 1rem; font-weight: 700; margin: 1.4rem 0 .3rem; color: var(--text) }
+        .lead { color: var(--muted); font-size: .95rem; line-height: 1.7; margin: .4rem 0 }
+        p.txt { color: var(--muted); font-size: .88rem; line-height: 1.7; margin: .5rem 0 }
+        .txt strong, .lead strong, li strong { color: var(--text) }
+        .rule { height: 1px; background: var(--border); border: 0; margin: 1.5rem 0 }
+        a { color: var(--accent); text-decoration: none } a:hover { text-decoration: underline }
+
+        ul.list, ol.list { margin: .5rem 0 .5rem 1.1rem; color: var(--muted); font-size: .88rem; line-height: 1.75 }
+        ul.list li, ol.list li { margin: .2rem 0 }
+
+        code.i { background: var(--surface); padding: .12rem .4rem; border-radius: 4px; font-size: .82em; color: var(--accent); border: 1px solid var(--border) }
+
+        /* ───── Panels & callouts ───── */
+        .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.1rem 1.25rem; margin: 1rem 0 }
+        .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem }
+        @media (max-width: 680px) { .grid2 { grid-template-columns: 1fr } }
+
+        .callout { border-radius: 10px; padding: .8rem 1rem; margin: 1rem 0; font-size: .85rem; line-height: 1.65; border: 1px solid var(--border); background: var(--surface2); position: relative; padding-left: 1.1rem }
+        .callout::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; border-radius: 4px 0 0 4px; background: var(--accent) }
+        .callout .ct { display: block; font-weight: 700; margin-bottom: .2rem; color: var(--text) }
+        .callout.tip::before { background: var(--green) } .callout.tip .ct { color: var(--green) }
+        .callout.warn::before { background: var(--yellow) } .callout.warn .ct { color: var(--yellow) }
+        .callout.danger::before { background: var(--red) } .callout.danger .ct { color: var(--red) }
+        .callout.info::before { background: var(--accent) } .callout.info .ct { color: var(--accent) }
+        .callout code { background: var(--bg); padding: .1rem .35rem; border-radius: 3px; font-size: .85em; color: var(--accent) }
+
+        /* ───── Tables ───── */
+        .table-wrap { overflow-x: auto; margin: 1rem 0; border: 1px solid var(--border); border-radius: 12px }
+        table.tbl { width: 100%; border-collapse: collapse; font-size: .82rem; min-width: 460px }
+        table.tbl th { text-align: left; background: var(--surface); color: var(--text); font-weight: 700; padding: .6rem .8rem; border-bottom: 1px solid var(--border); white-space: nowrap }
+        table.tbl td { padding: .55rem .8rem; border-bottom: 1px solid var(--border); color: var(--muted); vertical-align: top }
+        table.tbl tr:last-child td { border-bottom: 0 }
+        table.tbl td code, table.tbl th code { color: var(--accent); font-size: .92em }
+        table.tbl .mono { font-family: 'Fira Code', monospace; color: var(--accent) }
+
+        /* ───── Code blocks ───── */
+        .code-wrap { position: relative; margin: .8rem 0 }
+        .code-wrap .lang { position: absolute; top: 0; left: .9rem; transform: translateY(-50%); font-size: .62rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); background: var(--bg); padding: .1rem .5rem; border: 1px solid var(--border); border-radius: 20px }
+        pre.code { background: #0b1220; border: 1px solid var(--border); border-radius: 10px; padding: 1rem .9rem .9rem; overflow-x: auto; font-size: .74rem; line-height: 1.65; color: #cbd5e1; white-space: pre }
+        pre.code .cm { color: var(--muted); font-style: italic }
+        .copy-btn { position: absolute; top: .45rem; right: .45rem; font-family: inherit; font-size: .62rem; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--muted); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: .2rem .5rem; cursor: pointer; transition: all .15s; z-index: 2 }
+        .copy-btn:hover { color: var(--accent); border-color: var(--accent) }
+
+        details.file { border: 1px solid var(--border); border-radius: 10px; margin: .6rem 0; background: var(--surface) }
+        details.file > summary { cursor: pointer; padding: .7rem .9rem; font-size: .8rem; font-weight: 600; list-style: none; display: flex; align-items: center; gap: .5rem; user-select: none }
+        details.file > summary::-webkit-details-marker { display: none }
+        details.file > summary::before { content: '▸'; color: var(--accent); transition: transform .2s; display: inline-block }
+        details.file[open] > summary::before { transform: rotate(90deg) }
+        details.file > summary .fpath { font-family: 'Fira Code', monospace; color: var(--accent); font-size: .78rem }
+        details.file .code-wrap { margin: 0 .7rem .7rem }
+
+        /* ───── Flow (reused from content1/content3) ───── */
+        .method-tabs { display: flex; justify-content: center; gap: .5rem; padding: 1rem 0; flex-wrap: wrap }
+        .method-tab { padding: .45rem 1.1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; font-size: .8rem; font-weight: 600; letter-spacing: .5px; transition: all .2s; user-select: none; position: relative }
+        .method-tab:hover { border-color: var(--accent); color: var(--text) }
+        .method-tab.active { color: var(--bg) }
+        .method-tab[data-method="GET"] { --c: var(--green) }
+        .method-tab[data-method="POST"] { --c: var(--yellow) }
+        .method-tab[data-method="PUT"] { --c: var(--orange) }
+        .method-tab[data-method="PATCH"] { --c: var(--purple) }
+        .method-tab[data-method="DELETE"] { --c: var(--red) }
+        .method-tab[data-method="SETUP"] { --c: var(--accent) }
+        .method-tab[data-method="HTML"] { --c: var(--purple) }
+        .method-tab[data-method="CSS"] { --c: var(--pink) }
+        .method-tab[data-method="EDIT"] { --c: var(--orange) }
+        .method-tab.active { background: var(--c); border-color: var(--c) }
+        .tab-number { position: absolute; top: -8px; left: -8px; width: 18px; height: 18px; border-radius: 50%; background: var(--c, var(--accent)); color: var(--bg); font-size: .6rem; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg) }
+
+        .flow-container { max-width: 560px; margin: 0 auto; padding: 1rem 0 2rem; position: relative }
+        .flow-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, transparent, var(--border) 80px, var(--border) calc(100% - 80px), transparent); transform: translateX(-1px); z-index: 0 }
+        .step { position: relative; z-index: 1; margin-bottom: 1rem; opacity: 0; transform: translateY(18px); transition: opacity .4s ease, transform .4s ease }
+        .step.visible { opacity: 1; transform: translateY(0) }
+        .step-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.15rem; position: relative; overflow: hidden; transition: border-color .25s, box-shadow .25s }
+        .step-card:hover { border-color: var(--accent); box-shadow: 0 0 20px rgba(56, 189, 248, .08) }
+        .step-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--step-color, var(--accent)); border-radius: 3px 0 0 3px }
+        .step-header { display: flex; align-items: center; gap: .6rem; margin-bottom: .45rem }
+        .step-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: .85rem; flex-shrink: 0; background: color-mix(in srgb, var(--step-color, var(--accent)) 15%, transparent); color: var(--step-color, var(--accent)) }
+        .step-number { position: absolute; top: -.45rem; right: -.45rem; width: 22px; height: 22px; border-radius: 50%; background: var(--step-color, var(--accent)); color: var(--bg); font-size: .65rem; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 2px solid var(--surface) }
+        .step-title { font-weight: 600; font-size: .9rem }
+        .step-file { font-size: .7rem; color: var(--muted); font-family: 'Fira Code', monospace; background: var(--bg); padding: .15rem .45rem; border-radius: 4px; margin-left: auto; white-space: nowrap }
+        .step-body { font-size: .78rem; color: var(--muted); line-height: 1.55; padding-left: 2.4rem }
+        .step-body code { background: var(--bg); padding: .1rem .35rem; border-radius: 3px; font-family: 'Fira Code', monospace; font-size: .72rem; color: var(--accent) }
+        .arrow { text-align: center; position: relative; z-index: 1; height: 18px; display: flex; align-items: center; justify-content: center; color: var(--border); font-size: .7rem }
+        .step-detail { position: relative; margin-top: .5rem; padding: .55rem .7rem; background: var(--bg); border-radius: 6px; font-size: .72rem; font-family: 'Fira Code', monospace; color: var(--green); line-height: 1.6; margin-left: 2.4rem; white-space: pre-wrap; border: 1px solid color-mix(in srgb, var(--step-color, var(--accent)) 20%, transparent); max-height: 0; overflow: hidden; opacity: 0; transition: max-height .35s ease, opacity .3s ease, margin-top .3s ease }
+        .step-detail.open { max-height: 3400px; opacity: 1 }
+        .step-detail .copy-btn { top: .3rem; right: .3rem }
+        .toggle-detail { display: inline-flex; align-items: center; gap: .3rem; font-size: .68rem; color: var(--accent); cursor: pointer; margin-top: .35rem; margin-left: 2.4rem; user-select: none; transition: color .2s }
+        .toggle-detail:hover { color: var(--text) }
+        .toggle-detail svg { width: 12px; height: 12px; transition: transform .25s }
+        .toggle-detail.open svg { transform: rotate(90deg) }
+        .response-box { margin-top: .5rem; padding: .6rem .8rem; border-radius: 8px; background: color-mix(in srgb, var(--green) 8%, var(--surface)); border: 1px solid color-mix(in srgb, var(--green) 25%, transparent); margin-left: 2.4rem }
+        .response-box .status { font-weight: 700; font-size: .78rem; color: var(--green) }
+        .response-box pre { font-size: .7rem; font-family: 'Fira Code', monospace; color: var(--muted); margin-top: .3rem; line-height: 1.5; white-space: pre-wrap }
+        .tip-box { margin-top: .5rem; padding: .5rem .7rem; border-radius: 8px; background: color-mix(in srgb, var(--yellow) 8%, var(--surface)); border: 1px solid color-mix(in srgb, var(--yellow) 25%, transparent); margin-left: 2.4rem; font-size: .73rem; color: var(--yellow); line-height: 1.5 }
+        .tip-box code { color: var(--yellow); background: var(--bg); padding: .05rem .3rem; border-radius: 3px }
+        .legend { display: flex; justify-content: center; gap: 1.2rem; padding: .3rem 0 .8rem; flex-wrap: wrap }
+        .legend-item { display: flex; align-items: center; gap: .35rem; font-size: .7rem; color: var(--muted) }
+        .legend-dot { width: 8px; height: 8px; border-radius: 50% }
+        .section-intro { max-width: 560px; margin: 0 auto; padding: 0 0 .5rem; font-size: .82rem; color: var(--muted); line-height: 1.6; text-align: center }
+        .section-intro strong { color: var(--text) }
+        @media (max-width: 560px) { .step-file { display: none } }
+
+        /* ───── Hero cards / pills ───── */
+        .hero-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.4rem 0 }
+        @media (max-width: 680px) { .hero-cards { grid-template-columns: 1fr } }
+        .hcard { border: 1px solid var(--border); border-radius: 14px; padding: 1.1rem; background: var(--surface); position: relative; overflow: hidden }
+        .hcard::before { content: ''; position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--c, var(--accent)) }
+        .hcard h4 { font-size: .95rem; display: flex; align-items: center; gap: .5rem; margin-bottom: .3rem }
+        .hcard .tag { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--c, var(--accent)) }
+        .hcard p { color: var(--muted); font-size: .82rem; line-height: 1.6 }
+
+        .pathline { display: flex; flex-direction: column; gap: 0; margin: 1rem 0 }
+        .pstep { display: flex; gap: .9rem; padding: .1rem 0 }
+        .pstep .pnum { flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); color: var(--accent); font-weight: 700; font-size: .8rem; display: flex; align-items: center; justify-content: center; position: relative; z-index: 1 }
+        .pstep .pbody { padding-bottom: 1.1rem; border-left: 2px solid var(--border); margin-left: -16px; padding-left: 26px; margin-top: -2px }
+        .pstep:last-child .pbody { border-left-color: transparent }
+        .pstep .pbody h4 { font-size: .9rem; margin-bottom: .15rem }
+        .pstep .pbody p { color: var(--muted); font-size: .82rem; line-height: 1.55 }
+        .pstep .pbody a { font-size: .78rem; font-weight: 600 }
+
+        .filter-input { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: .6rem .9rem; font-family: inherit; font-size: .85rem; margin: .8rem 0 }
+        .filter-input:focus { outline: none; border-color: var(--accent) }
+        .fn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; margin-top: .5rem }
+        @media (max-width: 680px) { .fn-grid { grid-template-columns: 1fr } }
+        .fn { border: 1px solid var(--border); border-radius: 10px; padding: .75rem .85rem; background: var(--surface) }
+        .fn.hide { display: none }
+        .fn h5 { font-family: 'Fira Code', monospace; font-size: .82rem; color: var(--accent); margin-bottom: .25rem }
+        .fn .cat { font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); float: right }
+        .fn p { font-size: .76rem; color: var(--muted); line-height: 1.5 }
+        .fn .ex { display: block; margin-top: .4rem; font-family: 'Fira Code', monospace; font-size: .7rem; color: var(--green); background: var(--bg); padding: .35rem .5rem; border-radius: 5px; white-space: pre-wrap; word-break: break-word }
+
+        .badge-row { display: flex; flex-wrap: wrap; gap: .4rem; margin: .6rem 0 }
+        .badge { font-size: .68rem; font-weight: 600; padding: .25rem .6rem; border-radius: 20px; border: 1px solid var(--border); color: var(--muted); background: var(--surface) }
+
+        footer { border-top: 1px solid var(--border); padding: 1.5rem 1rem; text-align: center; color: var(--muted); font-size: .78rem }
+        footer .navsteps { display: flex; justify-content: space-between; max-width: 820px; margin: 0 auto 1.2rem; gap: 1rem }
+        footer .navsteps button { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: .7rem 1rem; cursor: pointer; font-family: inherit; font-size: .8rem; font-weight: 600; transition: all .18s }
+        footer .navsteps button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent) }
+        footer .navsteps button:disabled { opacity: .35; cursor: default }
+    </style>
+</head>
+
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <div class="brand"><span class="dot"></span> Curso CRUD · PHP + JS</div>
+            <nav class="nav" id="nav">
+                <button class="nav-item active" data-mod="inicio"><span class="n">1</span> Início</button>
+                <button class="nav-item" data-mod="http"><span class="n">2</span> HTTP</button>
+                <button class="nav-item" data-mod="api"><span class="n">3</span> API PHP</button>
+                <button class="nav-item" data-mod="axios"><span class="n">4</span> Fetch vs Axios</button>
+                <button class="nav-item" data-mod="frontend"><span class="n">5</span> Frontend</button>
+                <button class="nav-item" data-mod="rodar"><span class="n">6</span> Rodar</button>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- ══════════ MÓDULO 1 — INÍCIO ══════════ -->
+        <section class="module active" id="mod-inicio">
+            <div class="wrap">
+                <div class="eyebrow">Módulo 1</div>
+                <h1 class="title">Construindo um CRUD completo, do zero</h1>
+                <p class="lead">Neste curso você vai entender e recriar uma aplicação <strong>CRUD</strong> full-stack: uma <strong>API REST em PHP</strong> que guarda os dados num arquivo JSON, e um <strong>frontend em JavaScript puro</strong> (com Bootstrap) que consome essa API. Ao final, você terá construído — com as próprias mãos — algo equivalente ao projeto de referência.</p>
+
+                <div class="callout info">
+                    <span class="ct">Como usar este material</span>
+                    Use a navegação no topo — ou os botões <strong>Anterior / Próximo</strong> no rodapé — para percorrer os 6 módulos na ordem. Todo bloco de código tem um botão <strong>copiar</strong>. Os módulos <strong>API PHP</strong> e <strong>Frontend</strong> constroem o projeto arquivo por arquivo: siga as seções na ordem e você recria a aplicação inteira do zero.
+                </div>
+
+                <h2 class="sec">O que vamos construir</h2>
+                <div class="hero-cards">
+                    <div class="hcard" style="--c:var(--purple)">
+                        <span class="tag">Backend</span>
+                        <h4>🐘 API REST em PHP</h4>
+                        <p>PHP 8.3 puro, arquitetura em camadas (roteamento → controller → serviço → validação → dados), persistência em <code class="i">data.json</code>, CORS e documentação OpenAPI. Roda em <code class="i">localhost:8000</code>.</p>
+                    </div>
+                    <div class="hcard" style="--c:var(--green)">
+                        <span class="tag">Frontend</span>
+                        <h4>🟨 Interface em JavaScript</h4>
+                        <p>JavaScript vanilla com <strong>ES Modules</strong> e <strong>Bootstrap 5</strong>. Lista usuários em cards e permite criar, editar e deletar. Comunicação via <strong>Fetch</strong> ou <strong>Axios</strong>. Roda em <code class="i">localhost:8080</code>.</p>
+                    </div>
+                </div>
+
+                <h2 class="sec">Como as duas partes conversam</h2>
+                <p class="txt">O frontend nunca acessa o arquivo de dados diretamente. Ele faz <strong>requisições HTTP</strong> para a API, que é a única que lê e escreve no <code class="i">data.json</code>. Essa separação é o coração de qualquer aplicação web moderna.</p>
+                <div class="code-wrap"><span class="lang">arquitetura</span><pre class="code">  ┌─────────────────────────┐      HTTP / JSON       ┌──────────────────────────┐
+  │   FRONTEND (browser)    │  ───── requisição ───▶ │      API REST (PHP)      │
+  │                         │                        │                          │
+  │  index.html + Bootstrap │ ◀──── resposta ─────── │  index.php  (roteamento) │
+  │  app.js  (eventos)      │                        │  api.php    (método)     │
+  │  scripts/api/*.js       │   GET  /api/users      │  controllers.php         │
+  │  scripts/dom/render.js  │   POST /api/users      │  services.php            │
+  │                         │   PUT/PATCH/DELETE     │  validation.php          │
+  │  Fetch API  ou  Axios   │                        │  data.php  ──▶ data.json │
+  └─────────────────────────┘                        └──────────────────────────┘
+         :8080                                                  :8000</pre></div>
+
+                <h2 class="sec">O recurso: <code class="i">User</code></h2>
+                <p class="txt">Toda a aplicação gira em torno de um único recurso — o usuário — com quatro campos:</p>
+                <div class="table-wrap">
+                    <table class="tbl">
+                        <thead><tr><th>Campo</th><th>Tipo</th><th>Descrição</th><th>Obrigatório</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>id</code></td><td>number</td><td>Identificador único</td><td>Gerado pela API</td></tr>
+                            <tr><td><code>name</code></td><td>string</td><td>Nome do usuário</td><td>Sim</td></tr>
+                            <tr><td><code>age</code></td><td>number</td><td>Idade (inteiro, 1–150)</td><td>Sim</td></tr>
+                            <tr><td><code>email</code></td><td>string</td><td>E-mail válido</td><td>Sim</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="sec">A trilha de aprendizado</h2>
+                <div class="pathline">
+                    <div class="pstep"><div class="pnum">2</div><div class="pbody"><h4>Fundamentos HTTP</h4><p>O que é HTTP, REST e JSON. Os métodos GET, POST, PUT, PATCH, DELETE e como o <code class="i">fetch()</code> funciona. <a data-goto="http">Ir para o módulo →</a></p></div></div>
+                    <div class="pstep"><div class="pnum">3</div><div class="pbody"><h4>A API PHP por dentro</h4><p>O caminho de uma requisição pela API, camada por camada, e as funções nativas do PHP usadas. <a data-goto="api">Ir para o módulo →</a></p></div></div>
+                    <div class="pstep"><div class="pnum">4</div><div class="pbody"><h4>Fetch vs Axios</h4><p>Duas formas de fazer requisições no JavaScript, instalação do Node/Axios e uso com Vite ou CDN. <a data-goto="axios">Ir para o módulo →</a></p></div></div>
+                    <div class="pstep"><div class="pnum">5</div><div class="pbody"><h4>Construir o Frontend</h4><p>Passo a passo, do setup até o CRUD completo consumindo a API. <a data-goto="frontend">Ir para o módulo →</a></p></div></div>
+                    <div class="pstep"><div class="pnum">6</div><div class="pbody"><h4>Rodar tudo</h4><p>Subir a API e o frontend com Docker ou manualmente, e o código-fonte real de referência. <a data-goto="rodar">Ir para o módulo →</a></p></div></div>
+                </div>
+
+                <div class="callout tip">
+                    <span class="ct">Pré-requisito</span>
+                    Para os testes práticos, a API PHP precisa estar rodando em <code>http://localhost:8000</code>. O módulo <a data-goto="rodar">Rodar</a> mostra como subir tudo. Se preferir, leia primeiro os módulos 2 a 5 e deixe a execução para o final.
+                </div>
+            </div>
+        </section>
+        <!-- ══════════ MÓDULO 2 — FUNDAMENTOS HTTP ══════════ -->
+        <section class="module" id="mod-http">
+            <div class="wrap">
+                <div class="eyebrow">Módulo 2</div>
+                <h1 class="title">Fundamentos de HTTP</h1>
+                <p class="lead">Antes de escrever código, é preciso entender o protocolo que faz a web funcionar. Tudo que o frontend faz com a API é, no fundo, <strong>enviar requisições HTTP e ler respostas HTTP</strong>.</p>
+
+                <h2 class="sec">O que é HTTP?</h2>
+                <p class="txt">HTTP (<em>HyperText Transfer Protocol</em>) é o protocolo que o navegador usa para conversar com servidores. Toda vez que você acessa um site, clica num link ou envia um formulário, o navegador manda uma <strong>requisição</strong> e recebe uma <strong>resposta</strong>.</p>
+                <div class="code-wrap"><span class="lang">fluxo</span><pre class="code">  Navegador (cliente)                          Servidor (backend)
+  ───────────────────                          ──────────────────
+        │   "me dá a lista de usuários"                │
+        │  ─────────── requisição HTTP ──────────────▶ │
+        │                                         processa...
+        │  ◀────────── resposta HTTP ───────────────── │
+        │   "aqui: [{ name: 'Victor' }, ...]"          │</pre></div>
+
+                <div class="grid2">
+                    <div class="panel">
+                        <h3 class="sub" style="margin-top:0">Uma requisição tem</h3>
+                        <ul class="list">
+                            <li><strong>URL</strong> — para onde vai <span style="color:var(--muted)">(ex: <code class="i">localhost:8000/api/users</code>)</span></li>
+                            <li><strong>Método</strong> — o que fazer <span style="color:var(--muted)">(GET, POST, PUT, PATCH, DELETE)</span></li>
+                            <li><strong>Headers</strong> — metadados <span style="color:var(--muted)">(ex: <code class="i">Content-Type</code>)</span></li>
+                            <li><strong>Body</strong> — dados enviados <span style="color:var(--muted)">(só em POST, PUT, PATCH)</span></li>
+                        </ul>
+                    </div>
+                    <div class="panel">
+                        <h3 class="sub" style="margin-top:0">Uma resposta tem</h3>
+                        <ul class="list">
+                            <li><strong>Status code</strong> — deu certo? <span style="color:var(--muted)">(200, 404, 500…)</span></li>
+                            <li><strong>Headers</strong> — metadados da resposta</li>
+                            <li><strong>Body</strong> — os dados retornados <span style="color:var(--muted)">(geralmente JSON)</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h2 class="sec">O que é uma API REST?</h2>
+                <p class="txt"><strong>API</strong> é uma interface que permite dois programas conversarem. <strong>REST</strong> é um conjunto de regras para organizar essa conversa usando HTTP. A ideia central: <strong>tudo é um recurso</strong> (<em>resource</em>) — usuários, produtos, posts… Cada recurso tem uma URL (endpoint), e o <strong>método</strong> diz o que fazer com ele.</p>
+                <div class="table-wrap">
+                    <table class="tbl">
+                        <thead><tr><th>Método + URL</th><th>O que significa</th></tr></thead>
+                        <tbody>
+                            <tr><td class="mono">GET /api/users</td><td>“me dá a lista de todos os usuários”</td></tr>
+                            <tr><td class="mono">GET /api/users?id=1</td><td>“me dá o usuário 1”</td></tr>
+                            <tr><td class="mono">POST /api/users</td><td>“cria um novo usuário”</td></tr>
+                            <tr><td class="mono">PUT /api/users?id=1</td><td>“substitui o usuário 1 inteiro”</td></tr>
+                            <tr><td class="mono">PATCH /api/users?id=1</td><td>“atualiza só alguns campos do usuário 1”</td></tr>
+                            <tr><td class="mono">DELETE /api/users?id=1</td><td>“deleta o usuário 1”</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="txt">A <strong>URL</strong> diz <em>qual</em> recurso. O <strong>método</strong> diz <em>o que fazer</em> com ele.</p>
+
+                <h3 class="sub">Convenções REST</h3>
+                <ul class="list">
+                    <li><strong>GET</strong> nunca muda dados no servidor — é só leitura.</li>
+                    <li><strong>PUT</strong> e <strong>DELETE</strong> são <em>idempotentes</em> — repetir a requisição dá sempre o mesmo resultado.</li>
+                    <li><strong>POST</strong> <em>não</em> é idempotente — cada POST cria um novo recurso.</li>
+                </ul>
+                <div class="callout tip"><span class="ct">💡 Idempotência na prática</span>
+                    <code>DELETE /users/1</code> três vezes → o usuário 1 continua deletado. <code>PUT /users/1</code> três vezes → sempre o mesmo resultado. Mas <code>POST /users</code> três vezes → 3 usuários criados!</div>
+
+                <h2 class="sec">O que é JSON?</h2>
+                <p class="txt">JSON (<em>JavaScript Object Notation</em>) é o formato padrão de troca de dados entre frontend e backend. Aceita: string, number, boolean, null, array e object.</p>
+                <div class="code-wrap"><span class="lang">json</span><pre class="code">{
+  "name": "Victor",
+  "age": 24,
+  "email": "victor@email.com",
+  "hobbies": ["música", "programação"],
+  "active": true
+}</pre></div>
+                <div class="grid2">
+                    <div>
+                        <h3 class="sub">JSON.stringify() — objeto → string</h3>
+                        <div class="code-wrap"><span class="lang">js</span><pre class="code">const user = { name: "Victor", age: 24 };
+JSON.stringify(user);
+<span class="cm">// '{"name":"Victor","age":24}'  ← STRING</span></pre></div>
+                        <p class="txt">O <code class="i">fetch()</code> só aceita <em>strings</em> no body — por isso o <code class="i">stringify</code>.</p>
+                    </div>
+                    <div>
+                        <h3 class="sub">JSON.parse() — string → objeto</h3>
+                        <div class="code-wrap"><span class="lang">js</span><pre class="code">const json = '{"name":"Victor","age":24}';
+JSON.parse(json);
+<span class="cm">// { name: "Victor", age: 24 }  ← OBJETO</span></pre></div>
+                        <p class="txt"><code class="i">response.json()</code> já faz o <code class="i">JSON.parse</code> automaticamente.</p>
+                    </div>
+                </div>
+
+                <h2 class="sec">fetch() e async/await</h2>
+                <p class="txt">O <code class="i">fetch()</code> é a função nativa do JavaScript para requisições HTTP. Ela retorna uma <strong>Promise</strong> — o resultado não vem na hora, porque a requisição precisa ir até o servidor e voltar. Por isso usamos <code class="i">await</code>, que “pausa” a execução até a resposta chegar. E <code class="i">await</code> só funciona dentro de uma função <code class="i">async</code>.</p>
+                <div class="code-wrap"><span class="lang">js</span><pre class="code">async function loadUsers() {
+  const response = await fetch("http://localhost:8000/api/users");
+  const data = await response.json();
+  console.log(data);
+}</pre></div>
+                <div class="panel">
+                    <h3 class="sub" style="margin-top:0">O fluxo de toda requisição fetch</h3>
+                    <ol class="list">
+                        <li><code class="i">fetch(url, opções)</code> → envia a requisição</li>
+                        <li><code class="i">await</code> → espera a resposta chegar</li>
+                        <li><code class="i">response</code> → objeto Response (status, headers, body como stream)</li>
+                        <li><code class="i">await response.json()</code> → lê o stream e converte para objeto JS</li>
+                        <li><code class="i">data</code> → o objeto/array que o servidor retornou</li>
+                    </ol>
+                </div>
+
+                <h2 class="sec">Cada método na prática</h2>
+
+                <h3 class="sub">GET — buscar dados</h3>
+                <p class="txt">Lê/lista recursos. Não envia body. Sem o segundo argumento, o <code class="i">fetch</code> assume <code class="i">GET</code>. Filtros vão na URL como <em>query string</em>.</p>
+                <div class="code-wrap"><span class="lang">js</span><pre class="code">const response = await fetch("http://localhost:8000/api/users");
+const data = await response.json();
+
+<span class="cm">// filtrando pela URL:</span>
+fetch("http://localhost:8000/api/users?id=1");
+fetch("http://localhost:8000/api/users?age=25&name=Victor");</pre></div>
+
+                <h3 class="sub">POST — criar dados</h3>
+                <p class="txt">Cria um novo recurso. Envia os dados no <code class="i">body</code>. O header <code class="i">Content-Type: application/json</code> é <strong>obrigatório</strong> — sem ele o servidor não sabe o formato do body.</p>
+                <div class="code-wrap"><span class="lang">js</span><pre class="code">const response = await fetch("http://localhost:8000/api/users", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ name: "João", age: 25, email: "joao@email.com" }),
+});
+const created = await response.json();</pre></div>
+
+                <h3 class="sub">PUT — substituição completa</h3>
+                <p class="txt">Substitui o recurso inteiro. Você envia <strong>todos</strong> os campos, mesmo os que não mudaram — se omitir um, ele some. A URL (<code class="i">?id=1</code>) diz <em>qual</em> recurso; o body diz <em>o que</em> colocar no lugar.</p>
+                <div class="code-wrap"><span class="lang">js</span><pre class="code">const response = await fetch("http://localhost:8000/api/users?id=1", {
+  method: "PUT",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ name: "Victor", age: 25, email: "novo@email.com" }),
+});</pre></div>
+
+                <h3 class="sub">PATCH — atualização parcial</h3>
+                <p class="txt">Atualiza apenas alguns campos, sem enviar tudo. O resto permanece como estava.</p>
+                <div class="code-wrap"><span class="lang">js</span><pre class="code">const response = await fetch("http://localhost:8000/api/users?id=1", {
+  method: "PATCH",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ age: 30 }),
+});</pre></div>
+                <div class="callout tip"><span class="ct">💡 PUT vs PATCH</span> PUT é como reescrever a folha inteira. PATCH é como usar corretivo só onde precisa.</div>
+
+                <h3 class="sub">DELETE — remover</h3>
+                <p class="txt">Exclui um recurso. Geralmente sem body — o <code class="i">?id=1</code> na URL já diz qual apagar.</p>
+                <div class="code-wrap"><span class="lang">js</span><pre class="code">const response = await fetch("http://localhost:8000/api/users?id=1", {
+  method: "DELETE",
+});</pre></div>
+
+                <h3 class="sub">OPTIONS — o preflight do CORS</h3>
+                <p class="txt">Quando o frontend (<code class="i">:8080</code>) chama a API (<code class="i">:8000</code>), são <strong>origens diferentes</strong>. Por segurança, o navegador faz antes uma requisição <code class="i">OPTIONS</code> perguntando “posso te fazer requisições?”. Isso é o <strong>CORS</strong> (Cross-Origin Resource Sharing).</p>
+                <div class="code-wrap"><span class="lang">preflight</span><pre class="code">1. Navegador → servidor:  OPTIONS /api/users   "posso fazer POST com JSON?"
+2. Servidor → navegador:  204 + headers CORS   "sim, pode"
+3. Navegador → servidor:  POST /api/users      (a requisição real)
+4. Servidor → navegador:  201 Created          (a resposta real)</pre></div>
+                <div class="callout warn"><span class="ct">⚠ Você NÃO escreve código para OPTIONS</span> O navegador faz isso sozinho, automaticamente. Você nunca vai ver um <code>fetch</code> com <code>method: 'OPTIONS'</code>. O preflight dispara para métodos “não-simples” (PUT, PATCH, DELETE) ou quando há header como <code>Content-Type: application/json</code> — então até o seu POST dispara.</div>
+
+                <h2 class="sec">Tratamento de erros</h2>
+                <p class="txt">Detalhe crucial: o <code class="i">fetch()</code> <strong>não lança erro</strong> quando o servidor retorna 400, 404, 500… Ele só lança quando a requisição nem chega ao servidor (sem internet, servidor caiu, URL inválida). Por isso você precisa verificar <code class="i">response.ok</code> manualmente.</p>
+                <div class="code-wrap"><span class="lang">js</span><pre class="code">try {
+  const response = await fetch("http://localhost:8000/api/users");
+
+  if (!response.ok) {
+    <span class="cm">// servidor respondeu com erro (400, 404, 500...)</span>
+    const error = await response.json();
+    console.error("Erro do servidor:", error.error);
+    return;
+  }
+
+  const data = await response.json();
+  console.log(data);
+} catch (error) {
+  <span class="cm">// o fetch nem conseguiu conectar (erro de rede)</span>
+  console.error("Erro de rede:", error.message);
+}</pre></div>
+                <div class="grid2">
+                    <div class="panel">
+                        <h3 class="sub" style="margin-top:0">try/catch pega</h3>
+                        <ul class="list"><li>Sem internet</li><li>Servidor offline</li><li>URL inválida</li><li>Timeout / erro de CORS</li></ul>
+                    </div>
+                    <div class="panel">
+                        <h3 class="sub" style="margin-top:0">response.ok pega</h3>
+                        <ul class="list"><li>400 Bad Request</li><li>404 Not Found</li><li>405 Method Not Allowed</li><li>500 Internal Server Error</li></ul>
+                    </div>
+                </div>
+
+                <h2 class="sec">Tabelas de referência</h2>
+                <h3 class="sub">O que cada método precisa no fetch()</h3>
+                <div class="table-wrap">
+                    <table class="tbl">
+                        <thead><tr><th>Método</th><th>method:</th><th>headers:</th><th>body:</th></tr></thead>
+                        <tbody>
+                            <tr><td class="mono">GET</td><td>não precisa</td><td>não precisa</td><td>não tem</td></tr>
+                            <tr><td class="mono">POST</td><td>"POST"</td><td>Content-Type: JSON</td><td>JSON.stringify(&#123;...&#125;)</td></tr>
+                            <tr><td class="mono">PUT</td><td>"PUT"</td><td>Content-Type: JSON</td><td>JSON.stringify(&#123;...&#125;)</td></tr>
+                            <tr><td class="mono">PATCH</td><td>"PATCH"</td><td>Content-Type: JSON</td><td>JSON.stringify(&#123;...&#125;)</td></tr>
+                            <tr><td class="mono">DELETE</td><td>"DELETE"</td><td>não precisa</td><td>não tem</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <h3 class="sub">Códigos de status HTTP</h3>
+                <div class="table-wrap">
+                    <table class="tbl">
+                        <thead><tr><th>Código</th><th>Significado</th><th>Quando acontece</th></tr></thead>
+                        <tbody>
+                            <tr><td class="mono">200</td><td>OK</td><td>GET, PUT, PATCH bem-sucedidos</td></tr>
+                            <tr><td class="mono">201</td><td>Created</td><td>POST criou um recurso</td></tr>
+                            <tr><td class="mono">204</td><td>No Content</td><td>OPTIONS ou DELETE sem body de retorno</td></tr>
+                            <tr><td class="mono">400</td><td>Bad Request</td><td>Dados inválidos ou faltando</td></tr>
+                            <tr><td class="mono">404</td><td>Not Found</td><td>Recurso não existe</td></tr>
+                            <tr><td class="mono">405</td><td>Method Not Allowed</td><td>Método HTTP não suportado</td></tr>
+                            <tr><td class="mono">500</td><td>Internal Server Error</td><td>Bug no servidor</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        <!-- ══════════ MÓDULO 3 — API PHP ══════════ -->
+        <section class="module" id="mod-api">
+            <div class="wrap">
+                <div class="eyebrow">Módulo 3</div>
+                <h1 class="title">A API PHP por dentro</h1>
+                <p class="lead">Agora vamos construir o <strong>backend</strong>: uma API REST em PHP puro, organizada em <strong>camadas</strong>. Cada arquivo tem uma única responsabilidade, e toda requisição atravessa essas camadas em ordem — do <code class="i">index.php</code> que recebe o request até o <code class="i">data.json</code> que guarda os dados. Vamos criar arquivo por arquivo, seguindo esse caminho.</p>
+
+                <h2 class="sec">A arquitetura em camadas</h2>
+                <p class="txt">Em vez de um arquivo gigante que faz tudo, o código é dividido em camadas — e cada uma só conhece a próxima. Isso deixa o projeto fácil de entender, testar e modificar: se a validação mudar, você mexe só em <code class="i">validation.php</code>; se um dia trocar o JSON por um banco de verdade, mexe só em <code class="i">data.php</code>.</p>
+                <div class="code-wrap"><span class="lang">arquitetura</span><pre class="code">  Requisição HTTP  <span class="cm"># ex: POST /api/users</span>
+        │
+        ▼
+  index.php     ── CORS + preflight OPTIONS + roteamento por URI
+        │
+        ▼
+  api.php       ── dispatch: escolhe o handler pelo método HTTP
+        │
+        ▼
+  controllers   ── lê o body/id, chama o serviço, chama respond()
+        │
+        ▼
+  services      ── regras de negócio: valida e define o status
+        │
+        ├──────────▶ validation.php   <span class="cm"># confere os campos</span>
+        │
+        ▼
+  data.php      ── loadData / saveData  ◀──▶  data.json
+        │
+        ▼
+  Resposta JSON  <span class="cm"># ex: 201 Created + { ... }</span></pre></div>
+                <div class="table-wrap">
+                    <table class="tbl">
+                        <thead><tr><th>Arquivo</th><th>Camada</th><th>Responsabilidade</th></tr></thead>
+                        <tbody>
+                            <tr><td class="mono">config/config.php</td><td>Config</td><td>Caminho do arquivo de dados e origens liberadas no CORS</td></tr>
+                            <tr><td class="mono">public/index.php</td><td>Roteamento</td><td>Recebe a requisição, trata CORS e o preflight, direciona pela URI</td></tr>
+                            <tr><td class="mono">src/api.php</td><td>Dispatch</td><td>Chama o handler certo conforme o método (GET, POST…)</td></tr>
+                            <tr><td class="mono">src/controllers.php</td><td>Controller</td><td>Lê a entrada, chama o serviço e envia a resposta HTTP</td></tr>
+                            <tr><td class="mono">src/services.php</td><td>Serviço</td><td>Regras de negócio: valida e decide o status de retorno</td></tr>
+                            <tr><td class="mono">src/validation.php</td><td>Validação</td><td>Confere campos obrigatórios, tipos e formatos</td></tr>
+                            <tr><td class="mono">src/data.php</td><td>Dados</td><td>Lê e grava o <code>data.json</code> (a persistência)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="sec">Estrutura de pastas do backend</h2>
+                <div class="code-wrap"><span class="lang">crud-api</span><pre class="code">crud-api/
+├── data/
+│   └── data.json           <span class="cm"># o "banco" de dados</span>
+└── src/
+    ├── config/
+    │   └── config.php       <span class="cm"># $dataFile + $allowedOrigins</span>
+    ├── public/
+    │   └── index.php        <span class="cm"># entry point (roteamento)</span>
+    └── src/
+        ├── api.php          <span class="cm"># dispatch por método</span>
+        ├── controllers.php  <span class="cm"># handlers + respond()</span>
+        ├── services.php     <span class="cm"># regras de negócio</span>
+        ├── validation.php   <span class="cm"># validação dos campos</span>
+        └── data.php         <span class="cm"># lê/grava o JSON</span></pre></div>
+                <div class="callout tip"><span class="ct">💡 Rodando a API enquanto estuda</span> Suba a API com <code>php -S localhost:8000 -t public public/index.php</code> dentro de <code>crud-api/src</code>. O módulo <a data-goto="rodar">Rodar</a> cobre Docker e a execução manual em detalhe.</div>
+
+                <h2 class="sec">1. Configuração — <code class="i">config/config.php</code></h2>
+                <p class="txt">Começamos pela configuração: <em>onde</em> ficam os dados e <em>quais</em> origens podem chamar a API (o CORS que vimos no módulo <a data-goto="http">HTTP</a>).</p>
+                <div class="code-wrap"><span class="lang">config/config.php</span><pre class="code">&lt;?php
+
+$dataFile = __DIR__ . '/../../data/data.json';
+
+$allowedOrigins = [
+    'http://0.0.0.0:8080', 'http://localhost:8080', 'http://127.0.0.1:8080',
+    'http://0.0.0.0:5500', 'http://localhost:5500', 'http://127.0.0.1:5500',
+];</pre></div>
+                <p class="txt"><code class="i">$dataFile</code> aponta para o <code class="i">data.json</code>. <code class="i">$allowedOrigins</code> lista as URLs de frontend autorizadas — <code class="i">8080</code> é o nosso frontend e <code class="i">5500</code> é o Live Server do VS Code. Requisições de origens fora da lista não recebem os headers de CORS e são bloqueadas pelo navegador.</p>
+
+                <h2 class="sec">2. O entry point — <code class="i">public/index.php</code></h2>
+                <p class="txt">Todo request entra por aqui. Este arquivo faz três coisas, nesta ordem: <strong>(1)</strong> aplica os headers de CORS, <strong>(2)</strong> responde ao preflight <code class="i">OPTIONS</code>, e <strong>(3)</strong> roteia pela URL.</p>
+                <div class="code-wrap"><span class="lang">public/index.php</span><pre class="code">&lt;?php
+
+require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/openapi.php';
+
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+
+in_array($origin, $allowedOrigins) ?
+    header("Access-Control-Allow-Origin: $origin") : null;
+header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
+    exit;
+}
+
+$uri = strtok($_SERVER['REQUEST_URI'], '?');
+
+match ($uri) {
+    '/api/users' =&gt; require __DIR__ . '/../src/api.php',
+    '/docs' =&gt; serveView(__DIR__ . '/../views/docs.html'),
+    '/openapi.json' =&gt; serveJson(__DIR__ . '/../openapi.json'),
+    default =&gt; notFound(),
+};
+
+function notFound(): void
+{
+    http_response_code(404);
+    echo json_encode(['error' =&gt; 'Not found']);
+}</pre></div>
+                <ul class="list">
+                    <li><strong>CORS:</strong> se a <code class="i">Origin</code> da requisição está na whitelist, devolve o header <code class="i">Access-Control-Allow-Origin</code>. Os métodos e o header <code class="i">Content-Type</code> são sempre liberados.</li>
+                    <li><strong>Preflight:</strong> se o método é <code class="i">OPTIONS</code>, responde <code class="i">204 No Content</code> e encerra com <code class="i">exit</code> — o navegador só queria checar permissão, não há o que processar.</li>
+                    <li><strong>Roteamento:</strong> <code class="i">strtok($uri, '?')</code> corta a query string (<code class="i">/api/users?id=1</code> vira <code class="i">/api/users</code>) e o <code class="i">match</code> direciona para o <code class="i">api.php</code> ou responde <code class="i">404</code>.</li>
+                </ul>
+                <div class="callout info"><span class="ct">E o openapi.php?</span> O projeto de referência também serve uma documentação em <code>/docs</code> (funções <code>serveView</code>/<code>serveJson</code>). É opcional — para o CRUD funcionar, só a rota <code>/api/users</code> importa. Se não quiser as docs, remova essas duas linhas do <code>match</code> e o <code>require</code> do <code>openapi.php</code>.</div>
+
+                <h2 class="sec">3. Dispatch por método — <code class="i">src/api.php</code></h2>
+                <p class="txt">A URL já foi resolvida; agora precisamos saber <em>o que fazer</em>. Este arquivo olha o método HTTP e chama o handler correspondente. Métodos não suportados caem no <code class="i">405</code>.</p>
+                <div class="code-wrap"><span class="lang">src/api.php</span><pre class="code">&lt;?php
+
+require_once __DIR__ . '/controllers.php';
+
+$method = $_SERVER['REQUEST_METHOD'];
+
+match ($method) {
+    'GET' =&gt; handleGet($dataFile),
+    'POST' =&gt; handlePost($dataFile),
+    'PUT' =&gt; handlePut($dataFile),
+    'PATCH' =&gt; handlePatch($dataFile),
+    'DELETE' =&gt; handleDelete($dataFile),
+    default =&gt; handleMethodNotAllowed(),
+};</pre></div>
+                <p class="txt">Repare que <code class="i">$dataFile</code> vem do <code class="i">config.php</code> (carregado lá no <code class="i">index.php</code>) e é passado adiante para cada handler. A partir daqui, cada método segue seu próprio caminho pelas camadas.</p>
+
+                <h2 class="sec">4. Os controllers — <code class="i">src/controllers.php</code></h2>
+                <p class="txt">O controller é a ponte entre o HTTP e a lógica. Cada handler segue o mesmo roteiro: <strong>lê a entrada</strong> (body JSON e/ou <code class="i">id</code> da URL), <strong>chama o serviço</strong> e <strong>responde</strong>. A função <code class="i">respond()</code> centraliza o envio da resposta.</p>
+                <div class="code-wrap"><span class="lang">controllers.php</span><pre class="code">&lt;?php
+
+require_once __DIR__ . '/services.php';
+
+function respond(array $result): void
+{
+    http_response_code($result['status']);
+
+    if (isset($result['error'])) {
+        echo json_encode(['error' =&gt; $result['error']]);
+    } else {
+        echo json_encode($result['data']);
+    }
+}</pre></div>
+                <p class="txt"><code class="i">respond()</code> recebe um array com <code class="i">status</code> e (<code class="i">data</code> ou <code class="i">error</code>). Ele define o código HTTP e imprime o JSON certo. Todos os serviços retornam nesse formato — por isso o controller fica tão enxuto.</p>
+                <div class="code-wrap"><span class="lang">controllers.php</span><pre class="code">function handleGet(string $dataFile): void
+{
+    try {
+        echo json_encode(getAllUsers($dataFile));
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        echo json_encode(['error' =&gt; 'Internal server error']);
+    }
+}
+
+function handlePost(string $dataFile): void
+{
+    try {
+        $input = json_decode(file_get_contents('php://input'), true);
+        respond(createUser($dataFile, $input));
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        echo json_encode(['error' =&gt; 'Internal server error']);
+    }
+}</pre></div>
+                <ul class="list">
+                    <li><strong>GET</strong> não tem body nem id: chama <code class="i">getAllUsers()</code> e imprime o resultado direto.</li>
+                    <li><strong>POST</strong> lê o corpo com <code class="i">file_get_contents('php://input')</code> e <code class="i">json_decode(..., true)</code> — o <code class="i">true</code> devolve um <em>array associativo</em> em vez de objeto — e passa ao serviço.</li>
+                    <li>O <code class="i">try/catch</code> em cada handler garante que qualquer erro inesperado vire um <code class="i">500</code> em JSON, nunca uma tela branca de erro do PHP.</li>
+                </ul>
+                <p class="txt">Os handlers de <strong>PUT</strong>, <strong>PATCH</strong> e <strong>DELETE</strong> seguem o mesmo formato, mas extraem o <code class="i">id</code> da query string. O PATCH ainda passa <code class="i">partial: true</code> ao serviço:</p>
+                <div class="code-wrap"><span class="lang">controllers.php</span><pre class="code">function handlePut(string $dataFile): void
+{
+    try {
+        $input = json_decode(file_get_contents('php://input'), true);
+        $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
+        respond(editUser($dataFile, $id, $input));
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        echo json_encode(['error' =&gt; 'Internal server error']);
+    }
+}
+
+function handlePatch(string $dataFile): void
+{
+    try {
+        $input = json_decode(file_get_contents('php://input'), true);
+        $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
+        respond(editUser($dataFile, $id, $input, partial: true));
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        echo json_encode(['error' =&gt; 'Internal server error']);
+    }
+}
+
+function handleDelete(string $dataFile): void
+{
+    try {
+        $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
+        respond(removeUser($dataFile, $id));
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        echo json_encode(['error' =&gt; 'Internal server error']);
+    }
+}
+
+function handleMethodNotAllowed(): void
+{
+    http_response_code(405);
+    echo json_encode(['error' =&gt; 'Method not allowed']);
+}</pre></div>
+                <div class="callout tip"><span class="ct">💡 PUT e PATCH usam o mesmo serviço</span> Os dois chamam <code>editUser()</code>. A única diferença é o <code>partial: true</code> do PATCH — que faz a validação pular a exigência de todos os campos. Um só serviço atende os dois métodos.</div>
+
+                <h2 class="sec">5. As regras de negócio — <code class="i">src/services.php</code></h2>
+                <p class="txt">Aqui mora a lógica de verdade. Os serviços validam a entrada, decidem o <strong>status HTTP</strong> e chamam a camada de dados. Todos devolvem o array <code class="i">['data' =&gt; ..., 'status' =&gt; ...]</code> (sucesso) ou <code class="i">['error' =&gt; ..., 'status' =&gt; ...]</code> (falha) que o <code class="i">respond()</code> entende.</p>
+                <div class="code-wrap"><span class="lang">services.php</span><pre class="code">&lt;?php
+
+require_once __DIR__ . '/validation.php';
+require_once __DIR__ . '/data.php';
+
+function getAllUsers(string $dataFile): array
+{
+    $data = loadData($dataFile);
+    return ['users' =&gt; $data['users']];
+}
+
+function createUser(string $dataFile, ?array $input): array
+{
+    if (!is_array($input)) {
+        return ['error' =&gt; 'Invalid JSON body', 'status' =&gt; 400];
+    }
+
+    $error = validateRequiredFields($input, ['name', 'age', 'email']);
+    if ($error) {
+        return ['error' =&gt; $error, 'status' =&gt; 400];
+    }
+
+    $error = validateUserFields($input);
+    if ($error) {
+        return ['error' =&gt; $error, 'status' =&gt; 400];
+    }
+
+    $user = insertUser($dataFile, [
+        'name' =&gt; trim($input['name']),
+        'age' =&gt; (int) $input['age'],
+        'email' =&gt; $input['email'],
+    ]);
+
+    return ['data' =&gt; $user, 'status' =&gt; 201];
+}</pre></div>
+                <p class="txt"><code class="i">createUser()</code> é o pipeline completo: confere se o body é um array, valida os campos obrigatórios, valida os valores e só então insere. Cada falha retorna <code class="i">400</code> com a mensagem; o sucesso retorna <code class="i">201 Created</code> com o usuário. Note o <code class="i">(int) $input['age']</code> — a idade é guardada como <strong>número</strong>, não string.</p>
+                <div class="code-wrap"><span class="lang">services.php</span><pre class="code">function editUser(string $dataFile, ?int $id, ?array $input, bool $partial = false): array
+{
+    if ($id === null) {
+        return ['error' =&gt; 'User id is required', 'status' =&gt; 400];
+    }
+
+    if (!is_array($input)) {
+        return ['error' =&gt; 'Invalid JSON body', 'status' =&gt; 400];
+    }
+
+    if (!$partial) {
+        $error = validateRequiredFields($input, ['name', 'age', 'email']);
+        if ($error) {
+            return ['error' =&gt; $error, 'status' =&gt; 400];
+        }
+    }
+
+    $error = validateUserFields($input);
+    if ($error) {
+        return ['error' =&gt; $error, 'status' =&gt; 400];
+    }
+
+    $allowed = ['name', 'age', 'email'];
+    $fields = array_intersect_key($input, array_flip($allowed));
+
+    if (isset($fields['name'])) {
+        $fields['name'] = trim($fields['name']);
+    }
+
+    if (isset($fields['age'])) {
+        $fields['age'] = (int) $fields['age'];
+    }
+
+    $user = updateUser($dataFile, $id, $fields);
+
+    if ($user === null) {
+        return ['error' =&gt; 'User not found', 'status' =&gt; 404];
+    }
+
+    return ['data' =&gt; $user, 'status' =&gt; 200];
+}</pre></div>
+                <ul class="list">
+                    <li><strong>PUT e PATCH compartilham este serviço.</strong> Quando <code class="i">$partial</code> é <code class="i">false</code> (PUT), exige todos os campos. Quando <code class="i">true</code> (PATCH), pula essa exigência e valida só o que veio.</li>
+                    <li><code class="i">array_intersect_key($input, array_flip($allowed))</code> é um filtro de segurança: mantém apenas <code class="i">name</code>, <code class="i">age</code> e <code class="i">email</code>, descartando qualquer campo extra que o cliente tente injetar (como um <code class="i">id</code> forjado).</li>
+                    <li>Se o <code class="i">updateUser()</code> não encontrar o id, o serviço retorna <code class="i">404</code>.</li>
+                </ul>
+                <div class="code-wrap"><span class="lang">services.php</span><pre class="code">function removeUser(string $dataFile, ?int $id): array
+{
+    if ($id === null) {
+        return ['error' =&gt; 'User id is required', 'status' =&gt; 400];
+    }
+
+    $user = deleteUser($dataFile, $id);
+
+    if ($user === null) {
+        return ['error' =&gt; 'User not found', 'status' =&gt; 404];
+    }
+
+    return ['data' =&gt; ['deleted' =&gt; $user], 'status' =&gt; 200];
+}</pre></div>
+                <p class="txt"><code class="i">removeUser()</code> exige o <code class="i">id</code>, tenta deletar e devolve o usuário removido dentro de <code class="i">{ "deleted": {...} }</code>. Se não existir, <code class="i">404</code>.</p>
+
+                <h2 class="sec">6. A validação — <code class="i">src/validation.php</code></h2>
+                <p class="txt">Duas funções puras: recebem dados e retornam uma mensagem de erro ou <code class="i">null</code>. Separá-las do serviço mantém todas as regras num único lugar.</p>
+                <div class="code-wrap"><span class="lang">validation.php</span><pre class="code">&lt;?php
+
+function validateRequiredFields(array $input, array $fields): ?string
+{
+    $missing = [];
+
+    foreach ($fields as $field) {
+        if (!isset($input[$field])) {
+            $missing[] = $field;
+        }
+    }
+
+    if (!empty($missing)) {
+        return implode(', ', $missing) . ' are required';
+    }
+
+    return null;
+}
+
+function validateUserFields(array $input): ?string
+{
+    if (isset($input['name'])) {
+        $name = trim($input['name']);
+
+        if ($name === '') {
+            return 'Name cannot be empty';
+        }
+
+        if (strlen($name) &gt; 100) {
+            return 'Name must be at most 100 characters';
+        }
+    }
+
+    if (isset($input['age'])) {
+        if (!is_numeric($input['age'])) {
+            return 'Age must be a number';
+        }
+
+        $age = (int) $input['age'];
+
+        if ($age &lt; 1 || $age &gt; 150) {
+            return 'Age must be between 1 and 150';
+        }
+    }
+
+    if (isset($input['email'])) {
+        if (!filter_var($input['email'], FILTER_VALIDATE_EMAIL)) {
+            return 'Invalid email format';
+        }
+    }
+
+    return null;
+}</pre></div>
+                <ul class="list">
+                    <li><strong>validateRequiredFields</strong> monta a lista do que falta e devolve algo como <code class="i">"name, age are required"</code>. É usada só no POST e no PUT.</li>
+                    <li><strong>validateUserFields</strong> valida <em>cada campo que existir</em> — por isso serve tanto para a criação completa quanto para o PATCH parcial. O <code class="i">filter_var(..., FILTER_VALIDATE_EMAIL)</code> checa o e-mail sem precisar de regex.</li>
+                </ul>
+
+                <h2 class="sec">7. A persistência — <code class="i">src/data.php</code></h2>
+                <p class="txt">A camada mais baixa: ninguém mais toca no arquivo. Toda leitura e escrita passa por aqui. Como o "banco" é um JSON, cada operação carrega o arquivo inteiro, mexe no array e grava de volta.</p>
+                <div class="code-wrap"><span class="lang">data.php</span><pre class="code">&lt;?php
+
+function loadData(string $dataFile): array
+{
+    return json_decode(file_get_contents($dataFile), true);
+}
+
+function saveData(string $dataFile, array $data): void
+{
+    file_put_contents($dataFile, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+}</pre></div>
+                <p class="txt"><code class="i">loadData</code> lê e decodifica o JSON; <code class="i">saveData</code> codifica e grava. O <code class="i">JSON_PRETTY_PRINT</code> mantém o arquivo legível (indentado) e o <code class="i">JSON_UNESCAPED_UNICODE</code> preserva os acentos, gravando <code class="i">João</code> diretamente em vez de convertê-lo para uma sequência de escape Unicode.</p>
+                <div class="code-wrap"><span class="lang">data.php</span><pre class="code">function insertUser(string $dataFile, array $user): array
+{
+    $data = loadData($dataFile);
+
+    $id = $data['nextId'] ?? 1;
+    $data['nextId'] = $id + 1;
+
+    $user['id'] = $id;
+    $data['users'][] = $user;
+
+    saveData($dataFile, $data);
+
+    return $user;
+}
+
+function updateUser(string $dataFile, int $id, array $fields): ?array
+{
+    $data = loadData($dataFile);
+
+    foreach ($data['users'] as $index =&gt; $user) {
+        if ($user['id'] === $id) {
+            $data['users'][$index] = array_merge($user, $fields);
+            saveData($dataFile, $data);
+            return $data['users'][$index];
+        }
+    }
+
+    return null;
+}
+
+function deleteUser(string $dataFile, int $id): ?array
+{
+    $data = loadData($dataFile);
+
+    foreach ($data['users'] as $index =&gt; $user) {
+        if ($user['id'] === $id) {
+            array_splice($data['users'], $index, 1);
+            saveData($dataFile, $data);
+            return $user;
+        }
+    }
+
+    return null;
+}</pre></div>
+                <ul class="list">
+                    <li><strong>insertUser</strong> usa <code class="i">nextId</code> como auto-incremento: pega o próximo id, incrementa o contador, carimba o usuário e adiciona ao array.</li>
+                    <li><strong>updateUser</strong> acha o usuário pelo id e usa <code class="i">array_merge($user, $fields)</code> — os campos novos sobrescrevem os antigos e o que não veio permanece. É isso que faz o PATCH parcial funcionar.</li>
+                    <li><strong>deleteUser</strong> remove pelo índice com <code class="i">array_splice</code> e devolve o usuário apagado.</li>
+                    <li>Retornar <code class="i">null</code> quando o id não existe é o que vira <code class="i">404</code> lá no serviço.</li>
+                </ul>
+                <div class="callout warn"><span class="ct">⚠ JSON como banco de dados</span> Guardar tudo num arquivo é ótimo para aprender, mas não escala: cada escrita reescreve o arquivo inteiro e não há controle de acesso concorrente. Num projeto real, troque a camada <code>data.php</code> por um banco (SQLite, MySQL, Postgres) — <strong>o resto da API não muda</strong>, graças à separação em camadas.</div>
+
+                <h2 class="sec">Como cada método percorre as camadas</h2>
+                <p class="txt">Todos entram pelo <code class="i">index.php</code> e pelo <code class="i">api.php</code>. A partir do controller, cada método segue seu caminho até a resposta:</p>
+                <div class="table-wrap">
+                    <table class="tbl">
+                        <thead><tr><th>Método</th><th>Controller</th><th>Serviço</th><th>Camada de dados</th><th>Sucesso</th></tr></thead>
+                        <tbody>
+                            <tr><td class="mono">GET</td><td>handleGet</td><td>getAllUsers</td><td>loadData</td><td>200</td></tr>
+                            <tr><td class="mono">POST</td><td>handlePost</td><td>createUser</td><td>insertUser</td><td>201</td></tr>
+                            <tr><td class="mono">PUT</td><td>handlePut</td><td>editUser</td><td>updateUser</td><td>200</td></tr>
+                            <tr><td class="mono">PATCH</td><td>handlePatch</td><td>editUser (partial)</td><td>updateUser</td><td>200</td></tr>
+                            <tr><td class="mono">DELETE</td><td>handleDelete</td><td>removeUser</td><td>deleteUser</td><td>200</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <hr class="rule">
+                <h2 class="sec">Referência: funções nativas do PHP</h2>
+                <p class="txt">O projeto usa <strong>21 funções nativas</strong> do PHP. Aqui está o que cada uma faz e um exemplo real do código. Use o campo abaixo para filtrar.</p>
+                <input class="filter-input" id="phpFilter" type="text" placeholder="🔎 Filtrar funções (ex: json, array, valida...)" autocomplete="off">
+                <div class="fn-grid" id="phpFns">
+                    <div class="fn" data-search="header http saída"><span class="cat">HTTP</span><h5>header()</h5><p>Envia um cabeçalho HTTP bruto. Deve vir antes de qualquer saída.</p><code class="ex">header('Content-Type: application/json');</code></div>
+                    <div class="fn" data-search="http_response_code status http saída"><span class="cat">HTTP</span><h5>http_response_code()</h5><p>Define o código de status HTTP da resposta.</p><code class="ex">http_response_code(201); // Created</code></div>
+                    <div class="fn" data-search="exit encerra http saída"><span class="cat">HTTP</span><h5>exit</h5><p>Encerra a execução do script atual.</p><code class="ex">http_response_code(204);
+exit; // encerra após o preflight</code></div>
+                    <div class="fn" data-search="json_encode json codificar"><span class="cat">JSON</span><h5>json_encode()</h5><p>Converte um valor PHP em string JSON.</p><code class="ex">json_encode(['error' =&gt; 'Not found']);</code></div>
+                    <div class="fn" data-search="json_decode json decodificar parse"><span class="cat">JSON</span><h5>json_decode()</h5><p>Converte string JSON em valor PHP. Com <code style="color:var(--accent)">true</code>, retorna array associativo.</p><code class="ex">json_decode(file_get_contents('php://input'), true);</code></div>
+                    <div class="fn" data-search="file_get_contents arquivo ler stream"><span class="cat">Arquivos</span><h5>file_get_contents()</h5><p>Lê todo o conteúdo de um arquivo (ou stream) como string.</p><code class="ex">file_get_contents($dataFile); // lê data.json</code></div>
+                    <div class="fn" data-search="file_put_contents arquivo escrever salvar"><span class="cat">Arquivos</span><h5>file_put_contents()</h5><p>Escreve dados em um arquivo, sobrescrevendo o conteúdo.</p><code class="ex">file_put_contents($dataFile, json_encode($data));</code></div>
+                    <div class="fn" data-search="strtok string token dividir uri"><span class="cat">Strings</span><h5>strtok()</h5><p>Divide uma string em tokens por um delimitador. Usado para remover a query string.</p><code class="ex">$uri = strtok($_SERVER['REQUEST_URI'], '?');</code></div>
+                    <div class="fn" data-search="trim string espaços"><span class="cat">Strings</span><h5>trim()</h5><p>Remove espaços em branco do início e do fim de uma string.</p><code class="ex">$name = trim($input['name']);</code></div>
+                    <div class="fn" data-search="strlen string comprimento tamanho"><span class="cat">Strings</span><h5>strlen()</h5><p>Retorna o comprimento (em bytes) de uma string.</p><code class="ex">if (strlen($name) &gt; 100) { ... }</code></div>
+                    <div class="fn" data-search="implode string juntar array"><span class="cat">Strings</span><h5>implode()</h5><p>Junta os elementos de um array numa string com um separador.</p><code class="ex">implode(', ', $missing); // 'name, age'</code></div>
+                    <div class="fn" data-search="in_array array contém procurar"><span class="cat">Arrays</span><h5>in_array()</h5><p>Verifica se um valor existe em um array. Usado no CORS.</p><code class="ex">in_array($origin, $allowedOrigins);</code></div>
+                    <div class="fn" data-search="array_merge array mesclar juntar"><span class="cat">Arrays</span><h5>array_merge()</h5><p>Combina arrays; chaves iguais são sobrescritas. Usado no update.</p><code class="ex">array_merge($user, $fields);</code></div>
+                    <div class="fn" data-search="array_splice array remover deletar"><span class="cat">Arrays</span><h5>array_splice()</h5><p>Remove/insere elementos por posição. Usado para deletar.</p><code class="ex">array_splice($data['users'], $i, 1);</code></div>
+                    <div class="fn" data-search="array_intersect_key array filtrar campos"><span class="cat">Arrays</span><h5>array_intersect_key()</h5><p>Mantém só as entradas cujas chaves existem em todos os arrays. Filtra campos permitidos.</p><code class="ex">array_intersect_key($input, array_flip($allowed));</code></div>
+                    <div class="fn" data-search="array_flip array trocar chaves valores"><span class="cat">Arrays</span><h5>array_flip()</h5><p>Troca chaves por valores. Comum com <code style="color:var(--accent)">array_intersect_key</code>.</p><code class="ex">array_flip(['name','age']); // ['name'=&gt;0,'age'=&gt;1]</code></div>
+                    <div class="fn" data-search="isset tipos definida verificar"><span class="cat">Tipos</span><h5>isset()</h5><p>Verifica se uma variável está definida e não é null.</p><code class="ex">if (isset($_GET['id'])) { ... }</code></div>
+                    <div class="fn" data-search="empty tipos vazio verificar"><span class="cat">Tipos</span><h5>empty()</h5><p>Verifica se uma variável está vazia (null, '', 0, [], false).</p><code class="ex">if (!empty($missing)) { ... }</code></div>
+                    <div class="fn" data-search="is_array tipos array verificar"><span class="cat">Tipos</span><h5>is_array()</h5><p>Verifica se a variável é um array.</p><code class="ex">if (!is_array($input)) { ... }</code></div>
+                    <div class="fn" data-search="is_numeric tipos número verificar"><span class="cat">Tipos</span><h5>is_numeric()</h5><p>Verifica se é número ou string numérica.</p><code class="ex">if (!is_numeric($input['age'])) { ... }</code></div>
+                    <div class="fn" data-search="filter_var tipos validar email"><span class="cat">Tipos</span><h5>filter_var()</h5><p>Filtra/valida uma variável. Com <code style="color:var(--accent)">FILTER_VALIDATE_EMAIL</code>, valida e-mails.</p><code class="ex">filter_var($email, FILTER_VALIDATE_EMAIL);</code></div>
+                </div>
+
+                <h3 class="sub">Constantes e superglobais usadas</h3>
+                <div class="badge-row">
+                    <span class="badge">JSON_PRETTY_PRINT</span>
+                    <span class="badge">JSON_UNESCAPED_UNICODE</span>
+                    <span class="badge">FILTER_VALIDATE_EMAIL</span>
+                    <span class="badge">$_SERVER['REQUEST_URI']</span>
+                    <span class="badge">$_SERVER['REQUEST_METHOD']</span>
+                    <span class="badge">$_SERVER['HTTP_ORIGIN']</span>
+                    <span class="badge">$_GET</span>
+                </div>
+                <p class="txt" style="font-size:.8rem"><code class="i">JSON_PRETTY_PRINT</code> formata o JSON com indentação; <code class="i">JSON_UNESCAPED_UNICODE</code> mantém acentos sem escapar; <code class="i">$_SERVER</code> traz dados da requisição (URI, método, origem) e <code class="i">$_GET</code> traz a query string (ex: <code class="i">$_GET['id']</code>).</p>
+
+                <div class="callout info"><span class="ct">Quer o código-fonte completo?</span> Todos os arquivos PHP estão no módulo <a data-goto="rodar">Rodar</a>, prontos para copiar.</div>
+            </div>
+        </section>
+        <!-- ══════════ MÓDULO 4 — FETCH VS AXIOS ══════════ -->
+        <section class="module" id="mod-axios">
+            <div class="wrap">
+                <div class="eyebrow">Módulo 4</div>
+                <h1 class="title">Fetch API vs Axios</h1>
+                <p class="lead">Há duas formas principais de fazer requisições HTTP no JavaScript: a <strong>Fetch API</strong> (nativa, não instala nada) e o <strong>Axios</strong> (biblioteca externa, mais amigável). Ambas fazem a mesma coisa — a diferença está na ergonomia e no tratamento de erros.</p>
+
+                <h2 class="sec">Comparação rápida</h2>
+                <div class="table-wrap">
+                    <table class="tbl">
+                        <thead><tr><th>Aspecto</th><th>Fetch (nativo)</th><th>Axios (biblioteca)</th></tr></thead>
+                        <tbody>
+                            <tr><td>Instalação</td><td>Nenhuma</td><td><code>npm install axios</code></td></tr>
+                            <tr><td>Resposta JSON</td><td>Precisa de <code>.json()</code> manual</td><td>Automático (<code>response.data</code>)</td></tr>
+                            <tr><td>Erros HTTP (4xx/5xx)</td><td>NÃO lança erro</td><td>Lança erro automaticamente</td></tr>
+                            <tr><td>Envio de body</td><td><code>JSON.stringify()</code> manual</td><td>Objeto direto, serializa sozinho</td></tr>
+                            <tr><td>Content-Type</td><td>Definir manualmente</td><td><code>application/json</code> automático</td></tr>
+                            <tr><td>Interceptors</td><td>Não possui</td><td>Sim (request e response)</td></tr>
+                            <tr><td>Suporte</td><td>Navegadores + Node 18+</td><td>Navegadores + qualquer Node</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="callout tip"><span class="ct">💡 Resumo</span> O Fetch é mais “cru” — controle total, mais código. O Axios é mais “pronto” — cuida de vários detalhes por você.</div>
+
+                <h2 class="sec">O mesmo GET, dos dois jeitos</h2>
+                <div class="grid2">
+                    <div>
+                        <h3 class="sub" style="margin-top:0">Com Fetch (nativo)</h3>
+                        <div class="code-wrap"><span class="lang">read.js</span><pre class="code">export async function getUsers(apiUrl) {
+  const response = await fetch(apiUrl);
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || 'Failed to fetch users');
+  }
+  return data.users;
+}</pre></div>
+                        <p class="txt" style="font-size:.8rem">O fetch <strong>não</strong> lança erro em 400/404/500 — só em falha de rede. Por isso verificamos <code class="i">response.ok</code> e lançamos o erro nós mesmos.</p>
+                    </div>
+                    <div>
+                        <h3 class="sub" style="margin-top:0">Com Axios</h3>
+                        <div class="code-wrap"><span class="lang">read.js</span><pre class="code">import axios from 'axios';
+
+export async function getUsers(apiUrl) {
+  try {
+    const response = await axios.get(apiUrl);
+    return response.data.users;
+  } catch (error) {
+    const message = error.response?.data?.error
+      || 'Failed to fetch users';
+    throw new Error(message);
+  }
+}</pre></div>
+                        <p class="txt" style="font-size:.8rem">Sem <code class="i">.json()</code> (o <code class="i">response.data</code> já vem parseado) e erros HTTP caem direto no <code class="i">catch</code>.</p>
+                    </div>
+                </div>
+
+                <h2 class="sec">PUT e PATCH com Axios</h2>
+                <p class="txt">Enviamos o body como um objeto JS direto — o Axios serializa para JSON automaticamente.</p>
+                <div class="code-wrap"><span class="lang">update.js</span><pre class="code">import axios from 'axios';
+
+<span class="cm">// PUT — atualização completa</span>
+export async function putUser(apiUrl, id, user) {
+  try {
+    const response = await axios.put(`${apiUrl}?id=${id}`, {
+      name: user.name,
+      age: Number(user.age),
+      email: user.email,
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.error || 'Failed to update user');
+  }
+}
+
+<span class="cm">// PATCH — atualização parcial</span>
+export async function patchUser(apiUrl, id, fields) {
+  if (fields.age !== undefined) fields.age = Number(fields.age);
+  try {
+    const response = await axios.patch(`${apiUrl}?id=${id}`, fields);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.error || 'Failed to patch user');
+  }
+}</pre></div>
+
+                <h2 class="sec">Instalando o Node.js (via NVM)</h2>
+                <p class="txt">Para usar o Axios (ou qualquer pacote npm), você precisa do Node.js. A forma recomendada é o <strong>NVM</strong> (Node Version Manager).</p>
+                <ol class="list">
+                    <li>Baixar e instalar o NVM:</li>
+                </ol>
+                <div class="code-wrap"><span class="lang">terminal</span><pre class="code">curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash</pre></div>
+                <ol class="list" start="2">
+                    <li>Ativar o NVM na sessão atual (sem reiniciar o terminal):</li>
+                </ol>
+                <div class="code-wrap"><span class="lang">terminal</span><pre class="code">\. "$HOME/.nvm/nvm.sh"</pre></div>
+                <ol class="list" start="3">
+                    <li>Instalar o Node (versão LTS 22) e verificar:</li>
+                </ol>
+                <div class="code-wrap"><span class="lang">terminal</span><pre class="code">nvm install 22
+node -v   <span class="cm"># v22.x</span>
+npm -v    <span class="cm"># 10.x</span></pre></div>
+                <div class="callout warn"><span class="ct">⚠ Versões mudam!</span> Os comandos acima vêm do site oficial <a href="https://nodejs.org/en/download">nodejs.org/en/download</a> e são atualizados periodicamente. Sempre consulte o site oficial.</div>
+
+                <h2 class="sec">Instalando o Axios no projeto</h2>
+                <div class="code-wrap"><span class="lang">terminal</span><pre class="code">npm init -y          <span class="cm"># cria o package.json</span>
+npm install axios    <span class="cm"># adiciona o axios como dependência</span></pre></div>
+                <div class="table-wrap">
+                    <table class="tbl">
+                        <thead><tr><th>Arquivo / Pasta</th><th>O que é</th></tr></thead>
+                        <tbody>
+                            <tr><td class="mono">package.json</td><td>Lista as dependências e informações do projeto</td></tr>
+                            <tr><td class="mono">package-lock.json</td><td>Registra as versões exatas de cada pacote</td></tr>
+                            <tr><td class="mono">node_modules/</td><td>Código-fonte de todos os pacotes baixados</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2 class="sec">Usando o Axios: duas opções</h2>
+                <p class="txt">O <code class="i">import axios from 'axios'</code> usa <strong>ES Modules</strong> — não funciona se você abrir o HTML direto no navegador (<code class="i">file://</code>). Escolha uma das opções:</p>
+
+                <h3 class="sub">Opção A — Com Vite (recomendado)</h3>
+                <p class="txt">O Vite é um servidor de desenvolvimento que entende <code class="i">import/export</code> nativamente e faz <em>hot reload</em>.</p>
+                <div class="code-wrap"><span class="lang">terminal</span><pre class="code">npm install --save-dev vite</pre></div>
+                <div class="code-wrap"><span class="lang">package.json</span><pre class="code">"scripts": {
+  "dev": "vite",
+  "build": "vite build",
+  "preview": "vite preview"
+}</pre></div>
+                <p class="txt">No HTML, aponte o script com <code class="i">type="module"</code>; no JS, use o <code class="i">import</code> normalmente:</p>
+                <div class="code-wrap"><span class="lang">html</span><pre class="code">&lt;script type="module" src="./main.js"&gt;&lt;/script&gt;</pre></div>
+                <div class="code-wrap"><span class="lang">terminal</span><pre class="code">npm run dev   <span class="cm"># abre o projeto com hot reload</span></pre></div>
+
+                <h3 class="sub">Opção B — Via CDN (sem bundler)</h3>
+                <p class="txt">Carregue o Axios direto com uma tag <code class="i">&lt;script&gt;</code>. Ele fica disponível como variável <strong>global</strong> — sem <code class="i">import</code>.</p>
+                <div class="code-wrap"><span class="lang">html</span><pre class="code">&lt;!DOCTYPE html&gt;
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;ul id="lista"&gt;&lt;/ul&gt;
+  &lt;script src="app.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre></div>
+                <div class="code-wrap"><span class="lang">app.js</span><pre class="code"><span class="cm">// NÃO use import — o axios já está global via CDN</span>
+async function getUsers() {
+  const response = await axios.get('https://api.exemplo.com/users');
+  response.data.forEach(user =&gt; {
+    const li = document.createElement('li');
+    li.textContent = user.name;
+    document.getElementById('lista').appendChild(li);
+  });
+}
+getUsers();</pre></div>
+                <div class="callout danger"><span class="ct">⚠ Não misture as abordagens!</span> Se escolheu CDN, não use <code>import</code> — use a global <code>axios</code>. Se escolheu Vite, não precisa da tag <code>&lt;script&gt;</code> do CDN — use o <code>import</code>.</div>
+
+                <h2 class="sec">node_modules, .gitignore e GitHub</h2>
+                <div class="callout danger"><span class="ct">🚫 NUNCA envie node_modules para o GitHub!</span> Essa pasta pode ter centenas de MB. Enviá-la deixa o clone lento e é desnecessário — qualquer um a recria com <code>npm install</code>.</div>
+                <div class="grid2">
+                    <div class="panel"><h3 class="sub" style="margin-top:0">✅ Vai para o GitHub</h3><ul class="list"><li><strong>package.json</strong> — declara os pacotes</li><li><strong>package-lock.json</strong> — versões exatas</li></ul></div>
+                    <div class="panel"><h3 class="sub" style="margin-top:0">🚫 NÃO vai</h3><ul class="list"><li><strong>node_modules/</strong> — recriada com <code class="i">npm install</code></li><li><strong>dist/</strong> — build gerado</li></ul></div>
+                </div>
+                <p class="txt">Crie um arquivo <code class="i">.gitignore</code> na raiz do projeto com:</p>
+                <div class="code-wrap"><span class="lang">.gitignore</span><pre class="code">node_modules/
+dist/</pre></div>
+
+                <div class="callout tip"><span class="ct">🎯 Na prática</span> Para projetos reais e frameworks (Vue, React), o Axios costuma ser a escolha mais popular pela praticidade. Mas entender o Fetch é fundamental — ele é a base de como as requisições funcionam no JavaScript. <strong>Neste curso, o build guiado (módulo 5) usa Fetch; o repositório de referência (módulo 6) usa Axios.</strong></div>
+            </div>
+        </section>
+        <!-- ══════════ MÓDULO 5 — CONSTRUIR O FRONTEND ══════════ -->
+        <section class="module" id="mod-frontend">
+            <div class="wrap">
+                <div class="eyebrow">Módulo 5</div>
+                <h1 class="title">Construindo o Frontend, passo a passo</h1>
+                <p class="lead">Agora a parte prática: do zero até a interface completa consumindo a API PHP. São <strong>7 etapas</strong> em ordem — Setup, HTML, CSS e então as quatro operações do CRUD (Listar, Criar, Deletar, Editar). Esta versão guiada usa a <strong>Fetch API</strong> (sem instalar nada). O módulo <a data-goto="rodar">Rodar</a> traz a versão equivalente com <strong>Axios</strong>, igual à do repositório de referência.</p>
+                <div class="callout warn"><span class="ct">⚠ Pré-requisito</span> A API PHP precisa estar rodando em <code>http://localhost:8000</code>. Suba-a antes de testar (veja o módulo <a data-goto="rodar">Rodar</a>), senão as requisições vão falhar.</div>
+
+                <h2 class="sec">Etapa 1 — Setup do projeto</h2>
+                <p class="txt">Antes de escrever qualquer código, vamos organizar o projeto e entender a arquitetura. Vamos construir uma interface web que consome a <strong>API REST em PHP</strong> usando <strong>JavaScript puro</strong> (Vanilla JS) com <strong>ES Modules</strong> e <strong>Bootstrap 5</strong> para a estilização.</p>
+
+                <h3 class="sub">Crie a estrutura de pastas</h3>
+                <p class="txt">Dentro da pasta do frontend, crie esta árvore. Cada pasta tem uma responsabilidade clara: <code class="i">api/</code> conversa com o servidor, <code class="i">dom/</code> mexe na tela e <code class="i">app.js</code> orquestra tudo.</p>
+                <div class="code-wrap"><span class="lang">estrutura</span><pre class="code">frontend/
+└── src/
+    ├── index.html          <span class="cm">← página principal</span>
+    ├── app.js              <span class="cm">← orquestrador (imports + lógica)</span>
+    ├── styles/
+    │   ├── reset.css       <span class="cm">← CSS reset moderno</span>
+    │   └── style.css       <span class="cm">← estilos personalizados</span>
+    └── scripts/
+        ├── api/
+        │   ├── read.js     <span class="cm">← GET (listar)</span>
+        │   ├── create.js   <span class="cm">← POST (criar)</span>
+        │   ├── update.js   <span class="cm">← PUT + PATCH (editar)</span>
+        │   └── delete.js   <span class="cm">← DELETE (deletar)</span>
+        └── dom/
+            └── render.js   <span class="cm">← renderização dos cards</span></pre></div>
+
+                <h3 class="sub">Entenda a arquitetura em camadas</h3>
+                <p class="txt">Separamos o código em <strong>camadas</strong>, assim como fizemos na API. Os arquivos em <code class="i">scripts/api/</code> só fazem <code class="i">fetch</code> (falam com o servidor). O <code class="i">scripts/dom/render.js</code> só manipula o DOM (o visual). O <code class="i">app.js</code> conecta os dois e cuida dos eventos.</p>
+                <div class="callout tip"><span class="ct">💡 Por que separar?</span> Cada arquivo tem uma única responsabilidade. Se a API mudar, você altera só a pasta <code>api/</code>. Se o layout mudar, altera só o <code>render.js</code>. É o princípio da <strong>Separação de Responsabilidades</strong> — o mesmo que organiza o backend.</div>
+
+                <h3 class="sub">ES Modules: import e export</h3>
+                <p class="txt">Vamos usar <code class="i">&lt;script type="module"&gt;</code> no HTML. Isso ativa o sistema de módulos nativo do navegador: cada arquivo pode <code class="i">export</code>ar funções, e outro pode <code class="i">import</code>á-las.</p>
+                <div class="code-wrap"><span class="lang">js</span><pre class="code"><span class="cm">// create.js exporta uma função:</span>
+export async function createUser(apiUrl, data) { ... }
+
+<span class="cm">// app.js importa ela:</span>
+import { createUser } from './scripts/api/create.js';</pre></div>
+                <div class="callout tip"><span class="ct">💡 Sem bundler</span> Com ES Modules, o próprio navegador resolve os <code>import</code>s — sem precisar de Webpack ou Vite para o build guiado. (No repositório de referência, que usa Axios via npm, o Vite entra em cena; veja o módulo <a data-goto="axios">Fetch vs Axios</a>.)</div>
+
+                <h2 class="sec">Etapa 2 — O HTML (<code class="i">index.html</code>)</h2>
+                <p class="txt">Vamos montar a estrutura visual com Bootstrap 5. Construímos por partes; ao final, todas juntas formam o arquivo completo.</p>
+
+                <h3 class="sub">Esqueleto e as 3 folhas de estilo</h3>
+                <p class="txt">Comece com a estrutura básica e os links de CSS. Usamos <strong>três folhas de estilo em ordem específica</strong>.</p>
+                <div class="code-wrap"><span class="lang">index.html</span><pre class="code">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;CRUD JS Project&lt;/title&gt;
+
+    <span class="cm">&lt;!-- 1. Nosso reset primeiro --&gt;</span>
+    &lt;link rel="stylesheet" href="styles/reset.css"&gt;
+
+    <span class="cm">&lt;!-- 2. Bootstrap via CDN --&gt;</span>
+    &lt;link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"&gt;
+
+    <span class="cm">&lt;!-- 3. Nosso CSS por último (sobrescreve) --&gt;</span>
+    &lt;link rel="stylesheet" href="styles/style.css"&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+    <span class="cm">&lt;!-- conteúdo aqui --&gt;</span>
+&lt;/body&gt;
+
+&lt;/html&gt;</pre></div>
+                <div class="callout tip"><span class="ct">💡 A ordem importa!</span> O <code>reset.css</code> normaliza o comportamento padrão, o Bootstrap adiciona os componentes, e o <code>style.css</code> vem por último para você sobrescrever o que precisar.</div>
+
+                <h3 class="sub">Header da página</h3>
+                <p class="txt">Um cabeçalho escuro com o título do projeto, usando classes utilitárias do Bootstrap. Todo o conteúdo vai dentro de um <code class="i">&lt;main class="container"&gt;</code>.</p>
+                <div class="code-wrap"><span class="lang">index.html</span><pre class="code">&lt;body&gt;
+    &lt;header class="bg-dark text-white py-4 mb-4"&gt;
+        &lt;h1 class="text-center m-0"&gt;PHP/JS CRUD Project&lt;/h1&gt;
+    &lt;/header&gt;
+
+    &lt;main class="container"&gt;
+        <span class="cm">&lt;!-- seções aqui --&gt;</span>
+    &lt;/main&gt;
+&lt;/body&gt;</pre></div>
+
+                <h3 class="sub">Seção de usuários (os cards)</h3>
+                <p class="txt">Uma <code class="i">&lt;div id="users"&gt;</code> vazia dentro de um card. É aqui que o JavaScript vai inserir os cards de cada usuário dinamicamente.</p>
+                <div class="code-wrap"><span class="lang">index.html</span><pre class="code">&lt;main class="container"&gt;
+    &lt;section class="card p-4 mb-4"&gt;
+        &lt;h2 class="mb-3"&gt;Users&lt;/h2&gt;
+        &lt;div class="row g-3" id="users"&gt;&lt;/div&gt;
+    &lt;/section&gt;
+
+    <span class="cm">&lt;!-- o formulário vem aqui --&gt;</span>
+&lt;/main&gt;</pre></div>
+                <div class="callout tip"><span class="ct">💡 id="users" é essencial</span> O JavaScript usa esse <code>id</code> para saber onde inserir os cards. A classe <code>row g-3</code> cria um grid responsivo do Bootstrap.</div>
+
+                <h3 class="sub">Formulário de criação</h3>
+                <p class="txt">Um formulário com 3 campos (<code class="i">name</code>, <code class="i">age</code>, <code class="i">email</code>), um botão de submit e um botão Cancel (escondido por padrão, usado só na edição). Também um <code class="i">div</code> de erro escondido.</p>
+                <div class="code-wrap"><span class="lang">index.html</span><pre class="code">&lt;section class="card p-4"&gt;
+    &lt;h2 class="mb-3" id="form-title"&gt;Create User&lt;/h2&gt;
+
+    <span class="cm">&lt;!-- Alerta de erro (escondido por padrão) --&gt;</span>
+    &lt;div id="form-error" class="alert alert-danger d-none" role="alert"&gt;&lt;/div&gt;
+
+    &lt;form id="create-user-form" class="row g-3 align-items-end"&gt;
+        &lt;div class="col-md-4"&gt;
+            &lt;label for="name" class="form-label"&gt;Name&lt;/label&gt;
+            &lt;input type="text" class="form-control" id="name" name="name" required&gt;
+        &lt;/div&gt;
+
+        &lt;div class="col-md-3"&gt;
+            &lt;label for="age" class="form-label"&gt;Age&lt;/label&gt;
+            &lt;input type="number" class="form-control" id="age" name="age" required&gt;
+        &lt;/div&gt;
+
+        &lt;div class="col-md-3"&gt;
+            &lt;label for="email" class="form-label"&gt;Email&lt;/label&gt;
+            &lt;input type="email" class="form-control" id="email" name="email" required&gt;
+        &lt;/div&gt;
+
+        &lt;div class="col-md-2 d-flex gap-2"&gt;
+            &lt;button type="submit" class="btn btn-dark flex-fill"&gt;Create&lt;/button&gt;
+            &lt;button type="button" id="cancel-edit" class="btn btn-outline-secondary" style="display:none;"&gt;Cancel&lt;/button&gt;
+        &lt;/div&gt;
+    &lt;/form&gt;
+&lt;/section&gt;</pre></div>
+                <div class="callout tip"><span class="ct">💡 IDs importantes</span> <code>form-title</code> muda de "Create" para "Edit". <code>form-error</code> mostra erros vindos da API. <code>cancel-edit</code> fica escondido até entrarmos no modo de edição.</div>
+
+                <h3 class="sub">Carregue o app.js como módulo</h3>
+                <p class="txt">Antes de fechar o <code class="i">&lt;/body&gt;</code>, adicione o script principal. O <code class="i">type="module"</code> ativa os ES Modules.</p>
+                <div class="code-wrap"><span class="lang">index.html</span><pre class="code">    &lt;script type="module" src="app.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+
+&lt;/html&gt;</pre></div>
+                <div class="callout tip"><span class="ct">💡 module já é defer</span> Scripts <code>type="module"</code> executam automaticamente <strong>após</strong> o HTML ser parseado. Mesmo assim, usamos <code>DOMContentLoaded</code> para disparar a primeira renderização — é uma garantia explícita e clara.</div>
+                <details class="file"><summary><span class="fpath">src/index.html</span> — arquivo completo</summary><div class="code-wrap"><pre class="code">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;CRUD JS Project&lt;/title&gt;
+    &lt;link rel="stylesheet" href="styles/reset.css"&gt;
+    &lt;link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"&gt;
+    &lt;link rel="stylesheet" href="styles/style.css"&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+    &lt;header class="bg-dark text-white py-4 mb-4"&gt;
+        &lt;h1 class="text-center m-0"&gt;PHP/JS CRUD Project&lt;/h1&gt;
+    &lt;/header&gt;
+    &lt;main class="container"&gt;
+        &lt;section class="card p-4 mb-4"&gt;
+            &lt;h2 class="mb-3"&gt;Users&lt;/h2&gt;
+            &lt;div class="row g-3" id="users"&gt;&lt;/div&gt;
+        &lt;/section&gt;
+        &lt;section class="card p-4"&gt;
+            &lt;h2 class="mb-3" id="form-title"&gt;Create User&lt;/h2&gt;
+            &lt;div id="form-error" class="alert alert-danger d-none" role="alert"&gt;&lt;/div&gt;
+            &lt;form id="create-user-form" class="row g-3 align-items-end"&gt;
+                &lt;div class="col-md-4"&gt;
+                    &lt;label for="name" class="form-label"&gt;Name&lt;/label&gt;
+                    &lt;input type="text" class="form-control" id="name" name="name" required&gt;
+                &lt;/div&gt;
+                &lt;div class="col-md-3"&gt;
+                    &lt;label for="age" class="form-label"&gt;Age&lt;/label&gt;
+                    &lt;input type="number" class="form-control" id="age" name="age" required&gt;
+                &lt;/div&gt;
+                &lt;div class="col-md-3"&gt;
+                    &lt;label for="email" class="form-label"&gt;Email&lt;/label&gt;
+                    &lt;input type="email" class="form-control" id="email" name="email" required&gt;
+                &lt;/div&gt;
+                &lt;div class="col-md-2 d-flex gap-2"&gt;
+                    &lt;button type="submit" class="btn btn-dark flex-fill"&gt;Create&lt;/button&gt;
+                    &lt;button type="button" id="cancel-edit" class="btn btn-outline-secondary" style="display:none;"&gt;Cancel&lt;/button&gt;
+                &lt;/div&gt;
+            &lt;/form&gt;
+        &lt;/section&gt;
+    &lt;/main&gt;
+    &lt;script type="module" src="app.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+
+&lt;/html&gt;</pre></div></details>
+
+                <h2 class="sec">Etapa 3 — O CSS</h2>
+                <p class="txt">Dois arquivos pequenos, mas importantes: um <strong>reset moderno</strong> e os <strong>estilos customizados</strong>. Cada navegador tem estilos padrão diferentes (margens, fontes); o reset normaliza tudo para que seu CSS funcione de forma consistente.</p>
+
+                <h3 class="sub">reset.css</h3>
+                <p class="txt">Um reset moderno e completo. Cada regra resolve um problema específico de inconsistência entre navegadores.</p>
+                <div class="code-wrap"><span class="lang">styles/reset.css</span><pre class="code"><span class="cm">/* 1. Box-sizing intuitivo */</span>
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+<span class="cm">/* 2. Remove margens padrão */</span>
+*:not(dialog) {
+    margin: 0;
+}
+
+<span class="cm">/* 3. Animações respeitam a preferência do SO */</span>
+@media (prefers-reduced-motion: no-preference) {
+    html {
+        interpolate-size: allow-keywords;
+    }
+}
+
+body {
+    <span class="cm">/* 4. Line-height acessível */</span>
+    line-height: 1.5;
+    <span class="cm">/* 5. Texto mais nítido */</span>
+    -webkit-font-smoothing: antialiased;
+}
+
+<span class="cm">/* 6. Mídias responsivas por padrão */</span>
+img, picture, video, canvas, svg {
+    display: block;
+    max-width: 100%;
+}
+
+<span class="cm">/* 7. Inputs herdam a fonte do pai */</span>
+input, button, textarea, select {
+    font: inherit;
+}
+
+<span class="cm">/* 8. Textos não vazam do container */</span>
+p, h1, h2, h3, h4, h5, h6 {
+    overflow-wrap: break-word;
+}
+
+<span class="cm">/* 9. Quebra de linha inteligente */</span>
+p { text-wrap: pretty; }
+h1, h2, h3, h4, h5, h6 { text-wrap: balance; }
+
+<span class="cm">/* 10. Contexto de stacking na raiz */</span>
+#root, #__next { isolation: isolate; }
+
+ul { list-style: none; margin: 0; padding: 0; }</pre></div>
+                <div class="callout tip"><span class="ct">💡 De onde vem</span> Esse reset é baseado no "Modern CSS Reset" de Josh Comeau — uma referência popular na comunidade frontend.</div>
+
+                <h3 class="sub">style.css</h3>
+                <p class="txt">Apenas duas propriedades! Como o Bootstrap cuida de quase tudo, só garantimos que o <code class="i">body</code> ocupe a tela inteira e tenha um fundo cinza clarinho.</p>
+                <div class="code-wrap"><span class="lang">styles/style.css</span><pre class="code">body {
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}</pre></div>
+                <div class="callout tip"><span class="ct">💡 Menos é mais</span> Como usamos Bootstrap, o CSS customizado é mínimo. O <code>#f8f9fa</code> é o mesmo cinza claro do <code>bg-light</code> do Bootstrap.</div>
+
+                <h2 class="sec">Etapa 4 — Listar usuários (GET)</h2>
+                <p class="txt">A primeira funcionalidade: buscar os usuários na API e exibi-los como cards. Precisamos de 3 coisas: <strong>(1)</strong> uma função que faça <code class="i">GET</code> na API, <strong>(2)</strong> uma função que transforme os dados em cards, e <strong>(3)</strong> um gatilho que chame tudo quando a página carregar.</p>
+
+                <h3 class="sub">read.js — buscar os dados</h3>
+                <p class="txt">O arquivo mais simples da camada de API. Faz um <code class="i">fetch</code> GET (o método padrão), converte para JSON e retorna a lista de usuários.</p>
+                <div class="code-wrap"><span class="lang">scripts/api/read.js</span><pre class="code">export async function getUsers(apiUrl) {
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch users');
+    }
+
+    return data.users;
+}</pre></div>
+                <div class="callout tip"><span class="ct">💡 Os pilares</span> <code>export</code> torna a função disponível para outros arquivos. <code>async/await</code> deixa o código assíncrono legível. <code>response.ok</code> é <code>true</code> quando o status HTTP está entre 200 e 299 — lembre que o <code>fetch</code> não lança erro sozinho em 4xx/5xx.</div>
+
+                <h3 class="sub">render.js — exibir os cards</h3>
+                <p class="txt">Este arquivo cuida do visual. Importa o <code class="i">getUsers</code>, busca os dados e cria um card Bootstrap para cada usuário. Também mantém um <strong>cache</strong> da última lista, usado depois na edição e na deleção.</p>
+                <div class="code-wrap"><span class="lang">scripts/dom/render.js</span><pre class="code">import { getUsers } from '../api/read.js';
+
+let usersCache = [];
+
+export function findUserById(id) {
+    return usersCache.find((user) => user.id === id);
+}
+
+export async function renderUsers(apiUrl) {
+    const users = await getUsers(apiUrl);
+    usersCache = users;
+    const usersSection = document.getElementById('users');
+
+    if (users.length === 0) {
+        usersSection.innerHTML = '&lt;p class="text-muted"&gt;No users found.&lt;/p&gt;';
+        return;
+    }
+
+    usersSection.innerHTML = '';
+
+    users.forEach((user) =&gt; {
+        const userDiv = document.createElement('div');
+        userDiv.classList.add('col-md-3');
+
+        userDiv.innerHTML = `
+            &lt;div class="card user-card h-100" id="${user.id}"&gt;
+                &lt;div class="card-body"&gt;
+                    &lt;h5 class="card-title"&gt;${user.name}&lt;/h5&gt;
+                    &lt;p class="card-text mb-1"&gt;&lt;strong&gt;Age:&lt;/strong&gt; ${user.age}&lt;/p&gt;
+                    &lt;p class="card-text"&gt;&lt;strong&gt;Email:&lt;/strong&gt; ${user.email}&lt;/p&gt;
+                &lt;/div&gt;
+                &lt;div class="card-footer d-flex gap-2"&gt;
+                    &lt;button class="btn btn-sm btn-outline-dark flex-fill" data-action="edit"&gt;Edit&lt;/button&gt;
+                    &lt;button class="btn btn-sm btn-outline-danger flex-fill" data-action="delete"&gt;Delete&lt;/button&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        `;
+
+        usersSection.appendChild(userDiv);
+    });
+}</pre></div>
+                <div class="callout tip"><span class="ct">💡 usersCache e data-action</span> O <code>usersCache</code> guarda a última lista buscada; <code>findUserById()</code> faz o lookup local, sem chamar a API de novo. Os atributos <code>data-action="edit"</code> e <code>data-action="delete"</code> nos botões serão usados mais tarde para a <strong>delegação de eventos</strong>.</div>
+
+                <h3 class="sub">app.js — primeira parte</h3>
+                <p class="txt">Agora conectamos tudo. Por enquanto, o <code class="i">app.js</code> só importa o <code class="i">renderUsers</code> e o chama quando a página carrega. <strong>Vamos adicionar o resto aos poucos</strong> nas próximas etapas.</p>
+                <div class="code-wrap"><span class="lang">app.js</span><pre class="code">import { renderUsers } from './scripts/dom/render.js';
+
+const apiUrl = 'http://localhost:8000/api/users';
+
+<span class="cm">// Quando o DOM estiver pronto, renderiza a lista</span>
+document.addEventListener('DOMContentLoaded', () =&gt; renderUsers(apiUrl));</pre></div>
+                <div class="callout tip"><span class="ct">💡 DOMContentLoaded</span> Dispara quando o HTML foi parseado (sem esperar imagens/CSS). É o momento seguro para manipular o DOM.</div>
+                <div class="code-wrap"><span class="lang">resultado no navegador</span><pre class="code">┌─────────────┐  ┌─────────────┐
+│  João        │  │  Ana         │
+│  Age: 25     │  │  Age: 30     │
+│  joao@...    │  │  ana@...     │
+│ [Edit][Del]  │  │ [Edit][Del]  │
+└─────────────┘  └─────────────┘
+
+Abra o DevTools &gt; Network e veja a requisição GET.
+(os botões ainda não funcionam)</pre></div>
+
+                <h2 class="sec">Etapa 5 — Criar usuários (POST)</h2>
+                <p class="txt">Vamos fazer o formulário criar usuários. Envolve capturar o <em>submit</em>, enviar um POST para a API e atualizar a lista.</p>
+
+                <h3 class="sub">create.js — enviar os dados</h3>
+                <p class="txt">Parecido com o <code class="i">read.js</code>, mas agora com o método <code class="i">POST</code> e um corpo JSON. Note a conversão de <code class="i">age</code> para <code class="i">Number</code>.</p>
+                <div class="code-wrap"><span class="lang">scripts/api/create.js</span><pre class="code">export async function createUser(apiUrl, { name, age, email }) {
+    const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, age: Number(age), email }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.error || 'Failed to create user');
+    }
+
+    return data;
+}</pre></div>
+                <div class="callout tip"><span class="ct">💡 Por que Number(age)?</span> Os inputs HTML sempre retornam <em>strings</em>. A API espera um número para <code>age</code>, então convertemos antes de enviar.</div>
+
+                <h3 class="sub">O padrão de tratamento de erro</h3>
+                <p class="txt">Todos os arquivos da camada API seguem o mesmo padrão: se <code class="i">response.ok</code> for <code class="i">false</code>, disparam <code class="i">throw new Error()</code>. Isso permite que o <code class="i">app.js</code> use <code class="i">try/catch</code> para exibir a mensagem ao usuário. A API PHP retorna <code class="i">{ "error": "mensagem" }</code>, e o <code class="i">data.error</code> extrai esse texto.</p>
+
+                <h3 class="sub">Funções de erro no app.js</h3>
+                <p class="txt">Adicione duas funções auxiliares para mostrar/esconder o alerta de erro do Bootstrap que criamos no HTML.</p>
+                <div class="code-wrap"><span class="lang">app.js</span><pre class="code"><span class="cm">// Adicione ao app.js:</span>
+const form = document.getElementById('create-user-form');
+const formError = document.getElementById('form-error');
+
+function showError(message) {
+    formError.textContent = message;
+    formError.classList.remove('d-none');
+}
+
+function hideError() {
+    formError.classList.add('d-none');
+    formError.textContent = '';
+}</pre></div>
+                <div class="callout tip"><span class="ct">💡 d-none</span> A classe <code>d-none</code> do Bootstrap é <code>display: none</code>. Removê-la mostra o elemento; adicioná-la esconde.</div>
+
+                <h3 class="sub">Handler do formulário</h3>
+                <p class="txt">Importe o <code class="i">createUser</code> e adicione o listener de <em>submit</em>. Por enquanto, só tratamos a criação — a edição vem na Etapa 7.</p>
+                <div class="code-wrap"><span class="lang">app.js</span><pre class="code"><span class="cm">// No topo do app.js:</span>
+import { createUser } from './scripts/api/create.js';
+
+<span class="cm">// Listener de submit:</span>
+form.addEventListener('submit', async (event) =&gt; {
+    event.preventDefault();
+
+    const name = document.getElementById('name').value;
+    const age = document.getElementById('age').value;
+    const email = document.getElementById('email').value;
+
+    hideError();
+
+    try {
+        <span class="cm">// Por enquanto, só criação:</span>
+        await createUser(apiUrl, { name, age, email });
+
+        form.reset();
+        renderUsers(apiUrl);
+    } catch (error) {
+        showError(error.message);
+    }
+});</pre></div>
+                <div class="callout tip"><span class="ct">💡 preventDefault e reset</span> <code>event.preventDefault()</code> impede o comportamento padrão do form (recarregar a página). <code>form.reset()</code> limpa os inputs após o sucesso.</div>
+                <div class="code-wrap"><span class="lang">resultado no navegador</span><pre class="code">Formulário: Ana, 30, ana@mail.com
+→ POST /api/users (201 Created)
+→ form.reset() limpa os campos
+→ renderUsers() atualiza a lista
+→ o novo card aparece!
+
+Envie dados inválidos e veja o alerta de erro.</pre></div>
+
+                <h2 class="sec">Etapa 6 — Deletar (DELETE)</h2>
+                <p class="txt">Antes da edição (que é mais complexa), vamos implementar o Delete — e de quebra aprender <strong>delegação de eventos</strong>.</p>
+
+                <h3 class="sub">O que é delegação de eventos?</h3>
+                <p class="txt">Os cards são criados <strong>dinamicamente</strong> pelo JS. Se colocarmos listeners direto nos botões, eles se perdem toda vez que a lista é re-renderizada. A solução: escutar no <strong>pai fixo</strong> (<code class="i">#users</code>) e descobrir qual filho foi clicado.</p>
+                <div class="callout tip"><span class="ct">💡 Bubbling</span> Quando você clica num botão dentro de <code>#users</code>, o evento "borbulha" (bubble) até o pai. Usamos <code>event.target.dataset.action</code> para saber se foi o botão Edit ou Delete.</div>
+
+                <h3 class="sub">delete.js</h3>
+                <p class="txt">Envia <code class="i">DELETE</code> com o <code class="i">id</code> na query string. Note que <strong>não há body</strong> — o id vai na URL.</p>
+                <div class="code-wrap"><span class="lang">scripts/api/delete.js</span><pre class="code">export async function deleteUser(apiUrl, id) {
+    const response = await fetch(`${apiUrl}?id=${id}`, {
+        method: 'DELETE',
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.error || 'Failed to delete user');
+    }
+
+    return data;
+}</pre></div>
+
+                <h3 class="sub">Função auxiliar: getUserFromCard</h3>
+                <p class="txt">Dado o botão clicado, esta função encontra o card pai e retorna os dados do usuário via cache.</p>
+                <div class="code-wrap"><span class="lang">app.js</span><pre class="code"><span class="cm">// Atualize o import do render.js e importe o delete.js:</span>
+import { renderUsers, findUserById } from './scripts/dom/render.js';
+import { deleteUser } from './scripts/api/delete.js';
+
+<span class="cm">// Função auxiliar:</span>
+function getUserFromCard(button) {
+    const card = button.closest('.user-card');
+    return findUserById(Number(card.id));
+}</pre></div>
+                <div class="callout tip"><span class="ct">💡 .closest()</span> Sobe na árvore do DOM até achar o ancestral que bate com o seletor. Aqui, encontra o <code>.user-card</code> que contém o botão clicado. O <code>id</code> do card é o id do usuário.</div>
+
+                <h3 class="sub">Listener com delegação</h3>
+                <p class="txt">Adicione o listener no container <code class="i">#users</code>. Quando detectar <code class="i">data-action="delete"</code>, pede confirmação e chama a API.</p>
+                <div class="code-wrap"><span class="lang">app.js</span><pre class="code">const usersSection = document.getElementById('users');
+
+usersSection.addEventListener('click', async (event) =&gt; {
+    const { target } = event;
+
+    if (target.dataset.action === 'delete') {
+        const user = getUserFromCard(target);
+
+        if (!confirm('Are you sure you want to delete this user?')) return;
+
+        try {
+            await deleteUser(apiUrl, user.id);
+            renderUsers(apiUrl);
+        } catch (error) {
+            showError(error.message);
+        }
+    }
+});</pre></div>
+                <div class="callout tip"><span class="ct">💡 confirm()</span> Abre um diálogo nativo do navegador. Retorna <code>true</code> no OK e <code>false</code> no Cancelar. Simples e eficaz para evitar deleções acidentais.</div>
+                <div class="code-wrap"><span class="lang">resultado no navegador</span><pre class="code">Clique em "Delete" no card do João
+→ confirm("Are you sure...?")
+→ DELETE /api/users?id=1
+→ renderUsers() reconstrói a lista
+→ o card do João sumiu!</pre></div>
+
+                <h2 class="sec">Etapa 7 — Editar (PUT / PATCH)</h2>
+                <p class="txt">A funcionalidade mais completa. Envolve um <strong>modo de edição</strong>, detecção de mudanças e a escolha inteligente entre <strong>PUT</strong> e <strong>PATCH</strong>.</p>
+
+                <h3 class="sub">PUT vs PATCH — a decisão</h3>
+                <p class="txt"><strong>PUT</strong> substitui o recurso inteiro (envia todos os campos). <strong>PATCH</strong> atualiza parcialmente (envia só o que mudou). Nosso frontend será esperto: detecta o que mudou e escolhe o método certo.</p>
+                <div class="callout tip"><span class="ct">💡 Eficiência</span> Se o usuário mudou só o e-mail, não faz sentido reenviar nome e idade. O PATCH é mais enxuto e semântico nesse caso.</div>
+
+                <h3 class="sub">update.js — duas funções</h3>
+                <p class="txt">Este arquivo exporta <code class="i">updateUser</code> (PUT, todos os campos) e <code class="i">patchUser</code> (PATCH, campos parciais).</p>
+                <div class="code-wrap"><span class="lang">scripts/api/update.js</span><pre class="code"><span class="cm">// PUT — substituição completa</span>
+export async function updateUser(apiUrl, id, { name, age, email }) {
+    const response = await fetch(`${apiUrl}?id=${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, age: Number(age), email }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.error || 'Failed to update user');
+    }
+
+    return data;
+}
+
+<span class="cm">// PATCH — atualização parcial</span>
+export async function patchUser(apiUrl, id, fields) {
+    if (fields.age !== undefined) {
+        fields.age = Number(fields.age);
+    }
+
+    const response = await fetch(`${apiUrl}?id=${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(fields),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.error || 'Failed to patch user');
+    }
+
+    return data;
+}</pre></div>
+                <div class="callout tip"><span class="ct">💡 fields genérico</span> O <code>patchUser</code> recebe um objeto <code>fields</code> que pode ter 1, 2 ou 3 campos. A conversão de <code>age</code> só acontece se ele estiver presente.</div>
+
+                <h3 class="sub">Estado de edição no app.js</h3>
+                <p class="txt">Importe as funções de update e adicione as referências do DOM e as variáveis de estado. O <code class="i">editingId</code> diz se estamos criando ou editando; o <code class="i">originalUser</code> guarda o estado antes da edição para comparação.</p>
+                <div class="code-wrap"><span class="lang">app.js</span><pre class="code"><span class="cm">// No topo do app.js:</span>
+import { updateUser, patchUser } from './scripts/api/update.js';
+
+<span class="cm">// Referências do DOM:</span>
+const formTitle = document.getElementById('form-title');
+const submitBtn = form.querySelector('button[type="submit"]');
+const cancelBtn = document.getElementById('cancel-edit');
+
+<span class="cm">// Estado de edição:</span>
+let editingId = null;
+let originalUser = null;</pre></div>
+
+                <h3 class="sub">enterEditMode() — entrar na edição</h3>
+                <p class="txt">Ao clicar "Edit", preenchemos o formulário com os dados atuais, trocamos o título e o texto do botão, e mostramos o botão "Cancel".</p>
+                <div class="code-wrap"><span class="lang">app.js</span><pre class="code">function enterEditMode(user) {
+    editingId = user.id;
+    originalUser = { ...user };
+
+    document.getElementById('name').value = user.name;
+    document.getElementById('age').value = user.age;
+    document.getElementById('email').value = user.email;
+
+    formTitle.textContent = 'Edit User';
+    submitBtn.textContent = 'Update';
+    cancelBtn.style.display = '';
+
+    document.getElementById('name').focus();
+}</pre></div>
+                <div class="callout tip"><span class="ct">💡 { ...user }</span> Cria uma <strong>cópia</strong> do objeto. Sem isso, mexer no form alteraria o objeto original e não conseguiríamos comparar o que mudou.</div>
+
+                <h3 class="sub">exitEditMode() — sair da edição</h3>
+                <p class="txt">Reseta tudo: limpa o estado, volta o título para "Create User", esconde o Cancel e limpa o formulário. Já conectamos o botão Cancel a ela.</p>
+                <div class="code-wrap"><span class="lang">app.js</span><pre class="code">function exitEditMode() {
+    editingId = null;
+    originalUser = null;
+    formTitle.textContent = 'Create User';
+    submitBtn.textContent = 'Create';
+    cancelBtn.style.display = 'none';
+    form.reset();
+}
+
+cancelBtn.addEventListener('click', exitEditMode);</pre></div>
+
+                <h3 class="sub">Conecte o botão Edit via delegação</h3>
+                <p class="txt">Adicione a detecção de <code class="i">data-action="edit"</code> no mesmo listener do <code class="i">#users</code> que criamos na Etapa 6 (antes do bloco de delete).</p>
+                <div class="code-wrap"><span class="lang">app.js</span><pre class="code">usersSection.addEventListener('click', async (event) =&gt; {
+    const { target } = event;
+
+    <span class="cm">// ← Adicione isto:</span>
+    if (target.dataset.action === 'edit') {
+        enterEditMode(getUserFromCard(target));
+    }
+
+    if (target.dataset.action === 'delete') {
+        <span class="cm">// ... o código de delete que já existe</span>
+    }
+});</pre></div>
+
+                <h3 class="sub">Lógica inteligente no submit</h3>
+                <p class="txt">Agora o handler de submit precisa <strong>detectar se estamos editando</strong>. Se sim, compara campo a campo com o original e decide entre PUT e PATCH. Substitua o conteúdo do <code class="i">try</code>:</p>
+                <div class="code-wrap"><span class="lang">app.js</span><pre class="code">try {
+    if (editingId !== null) {
+        <span class="cm">// === MODO EDIÇÃO ===</span>
+        const changed = {};
+        if (name !== originalUser.name) changed.name = name;
+        if (Number(age) !== originalUser.age) changed.age = age;
+        if (email !== originalUser.email) changed.email = email;
+
+        <span class="cm">// Nada mudou? Sai da edição.</span>
+        if (Object.keys(changed).length === 0) {
+            exitEditMode();
+            return;
+        }
+
+        <span class="cm">// Todos mudaram → PUT; alguns → PATCH</span>
+        const allChanged = Object.keys(changed).length === 3;
+
+        if (allChanged) {
+            await updateUser(apiUrl, editingId, { name, age, email });
+        } else {
+            await patchUser(apiUrl, editingId, changed);
+        }
+    } else {
+        <span class="cm">// === MODO CRIAÇÃO ===</span>
+        await createUser(apiUrl, { name, age, email });
+    }
+
+    exitEditMode();
+    renderUsers(apiUrl);
+} catch (error) {
+    showError(error.message);
+}</pre></div>
+                <div class="callout tip"><span class="ct">💡 A lógica em uma frase</span> 0 campos mudaram → fecha a edição. 1–2 campos → PATCH. 3 campos → PUT. Simples e eficiente.</div>
+
+                <h3 class="sub">Detalhe: limpar a edição ao deletar</h3>
+                <p class="txt">Um caso de borda: se você está <strong>editando</strong> o João e clica <strong>Delete</strong> no card dele, precisamos sair do modo edição. Adicione a verificação no bloco de delete.</p>
+                <div class="code-wrap"><span class="lang">app.js</span><pre class="code"><span class="cm">// Dentro do bloco de delete:</span>
+try {
+    await deleteUser(apiUrl, user.id);
+
+    <span class="cm">// ← Adicione esta verificação:</span>
+    if (editingId === user.id) exitEditMode();
+
+    renderUsers(apiUrl);
+} catch (error) {
+    showError(error.message);
+}</pre></div>
+                <div class="callout tip"><span class="ct">✅ Frontend completo!</span> Teste tudo: <strong>(1)</strong> edite só o e-mail e veja o <code>PATCH</code> no DevTools; <strong>(2)</strong> edite os três campos e veja o <code>PUT</code>; <strong>(3)</strong> clique Edit e depois Cancel; <strong>(4)</strong> delete um usuário que está sendo editado.</div>
+                <div class="code-wrap"><span class="lang">resultado final</span><pre class="code">Funcionalidades implementadas:
+
+✓ Listar usuários (GET)
+✓ Criar usuário (POST)
+✓ Deletar com confirmação (DELETE)
+✓ Editar com PUT ou PATCH inteligente
+✓ Tratamento de erros
+✓ Modo edição com Cancel
+
+Arquivos criados:
+  src/index.html
+  src/app.js
+  src/styles/reset.css
+  src/styles/style.css
+  src/scripts/api/read.js
+  src/scripts/api/create.js
+  src/scripts/api/update.js
+  src/scripts/api/delete.js
+  src/scripts/dom/render.js</pre></div>
+
+                <h2 class="sec">O <code class="i">app.js</code> completo (versão Fetch)</h2>
+                <p class="txt">Construímos o <code class="i">app.js</code> aos poucos ao longo das etapas. Aqui está ele inteiro, já montado — confira o seu contra este arquivo.</p>
+                <details class="file"><summary><span class="fpath">src/app.js</span> — versão completa (Fetch)</summary><div class="code-wrap"><pre class="code">import { renderUsers, findUserById } from './scripts/dom/render.js';
+import { createUser } from './scripts/api/create.js';
+import { deleteUser } from './scripts/api/delete.js';
+import { updateUser, patchUser } from './scripts/api/update.js';
+
+const apiUrl = 'http://localhost:8000/api/users';
+
+<span class="cm">// Referências do DOM</span>
+const form = document.getElementById('create-user-form');
+const formError = document.getElementById('form-error');
+const formTitle = document.getElementById('form-title');
+const submitBtn = form.querySelector('button[type="submit"]');
+const cancelBtn = document.getElementById('cancel-edit');
+const usersSection = document.getElementById('users');
+
+<span class="cm">// Estado de edição</span>
+let editingId = null;
+let originalUser = null;
+
+<span class="cm">// --- Helpers de erro ---</span>
+function showError(message) {
+    formError.textContent = message;
+    formError.classList.remove('d-none');
+}
+
+function hideError() {
+    formError.classList.add('d-none');
+    formError.textContent = '';
+}
+
+<span class="cm">// --- Helpers de edição ---</span>
+function getUserFromCard(button) {
+    const card = button.closest('.user-card');
+    return findUserById(Number(card.id));
+}
+
+function enterEditMode(user) {
+    editingId = user.id;
+    originalUser = { ...user };
+    document.getElementById('name').value = user.name;
+    document.getElementById('age').value = user.age;
+    document.getElementById('email').value = user.email;
+    formTitle.textContent = 'Edit User';
+    submitBtn.textContent = 'Update';
+    cancelBtn.style.display = '';
+    document.getElementById('name').focus();
+}
+
+function exitEditMode() {
+    editingId = null;
+    originalUser = null;
+    formTitle.textContent = 'Create User';
+    submitBtn.textContent = 'Create';
+    cancelBtn.style.display = 'none';
+    form.reset();
+}
+
+cancelBtn.addEventListener('click', exitEditMode);
+
+<span class="cm">// --- Delegação de eventos nos cards ---</span>
+usersSection.addEventListener('click', async (event) =&gt; {
+    const { target } = event;
+
+    if (target.dataset.action === 'edit') {
+        enterEditMode(getUserFromCard(target));
+    }
+
+    if (target.dataset.action === 'delete') {
+        const user = getUserFromCard(target);
+        if (!confirm('Are you sure you want to delete this user?')) return;
+
+        try {
+            await deleteUser(apiUrl, user.id);
+            if (editingId === user.id) exitEditMode();
+            renderUsers(apiUrl);
+        } catch (error) {
+            showError(error.message);
+        }
+    }
+});
+
+<span class="cm">// --- Submit: cria ou edita ---</span>
+form.addEventListener('submit', async (event) =&gt; {
+    event.preventDefault();
+
+    const name = document.getElementById('name').value;
+    const age = document.getElementById('age').value;
+    const email = document.getElementById('email').value;
+
+    hideError();
+
+    try {
+        if (editingId !== null) {
+            <span class="cm">// MODO EDIÇÃO — descobre o que mudou</span>
+            const changed = {};
+            if (name !== originalUser.name) changed.name = name;
+            if (Number(age) !== originalUser.age) changed.age = age;
+            if (email !== originalUser.email) changed.email = email;
+
+            if (Object.keys(changed).length === 0) {
+                exitEditMode();
+                return;
+            }
+
+            const allChanged = Object.keys(changed).length === 3;
+            if (allChanged) {
+                await updateUser(apiUrl, editingId, { name, age, email });
+            } else {
+                await patchUser(apiUrl, editingId, changed);
+            }
+        } else {
+            <span class="cm">// MODO CRIAÇÃO</span>
+            await createUser(apiUrl, { name, age, email });
+        }
+
+        exitEditMode();
+        renderUsers(apiUrl);
+    } catch (error) {
+        showError(error.message);
+    }
+});
+
+<span class="cm">// --- Primeira renderização ---</span>
+document.addEventListener('DOMContentLoaded', () =&gt; renderUsers(apiUrl));</pre></div></details>
+                <div class="callout info"><span class="ct">🟨 E a versão com Axios?</span> A mesma aplicação, escrita com Axios (como no repositório de referência), está no módulo <a data-goto="rodar">Rodar</a>. Lá, a camada de API muda um pouco (o Axios trata JSON e erros automaticamente) e a lógica de edição fica dentro de um <code>updateUser()</code> esperto em <code>update.js</code> — mas o <code>render.js</code> e o HTML são idênticos.</div>
+            </div>
+        </section>
+        <!-- ══════════ MÓDULO 6 — RODAR TUDO ══════════ -->
+        <section class="module" id="mod-rodar">
+            <div class="wrap">
+                <div class="eyebrow">Módulo 6</div>
+                <h1 class="title">Rodar tudo &amp; código de referência</h1>
+                <p class="lead">O projeto tem duas partes independentes, cada uma <strong>dockerizada</strong>: a API PHP e o frontend JS. Você pode subir com <strong>Docker</strong> ou rodar <strong>manualmente</strong>. No fim deste módulo está o código-fonte completo de referência.</p>
+
+                <h2 class="sec">Estrutura de pastas</h2>
+                <div class="grid2">
+                    <div>
+                        <h3 class="sub" style="margin-top:0">Backend — <code class="i">crud-api/</code></h3>
+                        <div class="code-wrap"><span class="lang">php</span><pre class="code">crud-api/
+├── Dockerfile
+├── compose.yaml
+├── data/
+│   └── data.json          <span class="cm"># "banco" em JSON</span>
+└── src/
+    ├── config/config.php   <span class="cm"># $dataFile, CORS</span>
+    ├── public/index.php    <span class="cm"># entry point + rotas</span>
+    └── src/
+        ├── api.php         <span class="cm"># dispatch por método</span>
+        ├── controllers.php
+        ├── services.php
+        ├── validation.php
+        └── data.php        <span class="cm"># lê/grava o JSON</span></pre></div>
+                    </div>
+                    <div>
+                        <h3 class="sub" style="margin-top:0">Frontend — <code class="i">crud-frontend-axios/</code></h3>
+                        <div class="code-wrap"><span class="lang">js</span><pre class="code">crud-frontend-axios/
+├── Dockerfile
+├── compose.yaml
+├── package.json
+├── vite.config.js
+└── src/
+    ├── index.html
+    ├── app.js              <span class="cm"># orquestrador</span>
+    ├── styles/
+    │   ├── reset.css
+    │   └── style.css
+    └── scripts/
+        ├── api/            <span class="cm"># read/create/update/delete</span>
+        └── dom/            <span class="cm"># render.js, form.js</span></pre></div>
+                    </div>
+                </div>
+
+                <h2 class="sec">Opção 1 — Docker (recomendado)</h2>
+                <p class="txt">Cada pasta tem seu <code class="i">compose.yaml</code>. Suba cada uma:</p>
+                <div class="grid2">
+                    <div class="code-wrap"><span class="lang">crud-api</span><pre class="code">cd crud-api
+docker compose up --build
+<span class="cm"># API em http://localhost:8000</span></pre></div>
+                    <div class="code-wrap"><span class="lang">crud-frontend</span><pre class="code">cd crud-frontend-axios
+npm install &amp;&amp; npm run build
+docker compose up --build
+<span class="cm"># front em http://localhost:8080</span></pre></div>
+                </div>
+                <div class="callout warn"><span class="ct">Ordem importa</span> O container do frontend serve a pasta <code>dist/</code> (Apache). Rode <code>npm run build</code> <strong>antes</strong> do <code>docker compose up</code>, senão não há o que servir.</div>
+
+                <h2 class="sec">Opção 2 — Manual (desenvolvimento)</h2>
+                <div class="grid2">
+                    <div class="code-wrap"><span class="lang">api (php)</span><pre class="code">cd crud-api/src
+php -S localhost:8000 -t public public/index.php</pre></div>
+                    <div class="code-wrap"><span class="lang">frontend (vite)</span><pre class="code">cd crud-frontend-axios
+npm install
+npm run dev
+<span class="cm"># Vite em http://localhost:8080</span></pre></div>
+                </div>
+
+                <h2 class="sec">Portas e CORS</h2>
+                <div class="table-wrap">
+                    <table class="tbl">
+                        <thead><tr><th>Serviço</th><th>Porta</th><th>URL</th></tr></thead>
+                        <tbody>
+                            <tr><td>API PHP</td><td>8000</td><td class="mono">http://localhost:8000/api/users</td></tr>
+                            <tr><td>Frontend</td><td>8080</td><td class="mono">http://localhost:8080</td></tr>
+                            <tr><td>Docs (OpenAPI)</td><td>8000</td><td class="mono">http://localhost:8000/docs</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="callout info"><span class="ct">Por que CORS?</span> Front (<code>:8080</code>) e API (<code>:8000</code>) são origens diferentes. A API só aceita origens listadas em <code>config.php</code> (<code>$allowedOrigins</code>) — que já inclui <code>localhost:8080</code> e <code>localhost:5500</code>. Se usar outra porta no front, adicione-a lá.</div>
+
+                <h2 class="sec">Contrato da API (o que sua API deve fazer)</h2>
+                <p class="txt">Se quiser recriar o backend do zero (em qualquer linguagem), ele precisa respeitar este contrato para o frontend funcionar:</p>
+                <div class="table-wrap">
+                    <table class="tbl">
+                        <thead><tr><th>Método</th><th>Rota</th><th>Sucesso</th><th>Corpo</th></tr></thead>
+                        <tbody>
+                            <tr><td class="mono">GET</td><td class="mono">/api/users</td><td>200</td><td>—</td></tr>
+                            <tr><td class="mono">POST</td><td class="mono">/api/users</td><td>201</td><td>name, age, email</td></tr>
+                            <tr><td class="mono">PUT</td><td class="mono">/api/users?id=1</td><td>200</td><td>todos os campos</td></tr>
+                            <tr><td class="mono">PATCH</td><td class="mono">/api/users?id=1</td><td>200</td><td>campos parciais</td></tr>
+                            <tr><td class="mono">DELETE</td><td class="mono">/api/users?id=1</td><td>200</td><td>—</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <ul class="list">
+                    <li><strong>GET</strong> retorna <code class="i">{ "users": [...] }</code> (lista vazia se não houver).</li>
+                    <li><strong>id</strong> vai como <em>query param</em> (<code class="i">?id=1</code>), nunca no corpo.</li>
+                    <li><strong>age</strong> é armazenado como <strong>número</strong>, não string.</li>
+                    <li>Erros retornam <code class="i">{ "error": "mensagem" }</code> com status HTTP adequado.</li>
+                    <li>Headers CORS liberando <code class="i">localhost:8080</code>.</li>
+                </ul>
+
+                <h3 class="sub">Testando pela linha de comando</h3>
+                <div class="code-wrap"><span class="lang">curl</span><pre class="code"><span class="cm"># criar</span>
+curl -X POST http://localhost:8000/api/users \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Maria","age":22,"email":"maria@email.com"}'
+
+<span class="cm"># listar / atualizar parcial / deletar</span>
+curl http://localhost:8000/api/users
+curl -X PATCH "http://localhost:8000/api/users?id=1" -H "Content-Type: application/json" -d '{"age":24}'
+curl -X DELETE "http://localhost:8000/api/users?id=1"</pre></div>
+
+                <h2 class="sec">O formato do data.json</h2>
+                <div class="code-wrap"><span class="lang">data/data.json</span><pre class="code">{
+  "nextId": 2,
+  "users": [
+    { "name": "João", "age": 25, "email": "joao@email.com", "id": 1 }
+  ]
+}</pre></div>
+                <p class="txt" style="font-size:.8rem"><code class="i">nextId</code> é o próximo id a ser gerado (auto-incremento simples). Cada usuário fica no array <code class="i">users</code>.</p>
+
+                <hr class="rule">
+                <h2 class="sec">Código-fonte completo</h2>
+
+                <h3 class="sub">🐘 Backend (PHP)</h3>
+                <div id="php-sources"></div>
+
+                <h3 class="sub">🟨 Frontend (Axios) — camada de API</h3>
+                <details class="file"><summary><span class="fpath">src/scripts/api/read.js</span></summary><div class="code-wrap"><pre class="code">import axios from 'axios';
+
+export async function getUsers(apiUrl) {
+
+    try {
+        const response = await axios.get(apiUrl);
+        return response.data.users;
+    } catch (error) {
+        const message = error.response?.data?.error || 'Failed to fetch users';
+        console.error('Error reading users:', message);
+        throw new Error(message);
+    }
+
+}</pre></div></details>
+                <details class="file"><summary><span class="fpath">src/scripts/api/create.js</span></summary><div class="code-wrap"><pre class="code">import axios from 'axios';
+
+export async function createUser(apiUrl, user) {
+    try {
+        const response = await axios.post(apiUrl, {
+            name: user.name,
+            age: Number(user.age),
+            email: user.email
+        });
+
+        return response.data;
+
+    } catch (error) {
+        const message = error.response?.data?.error || 'Failed to create user';
+        console.error('Error creating user:', message);
+        throw new Error(message);
+    }
+}</pre></div></details>
+                <details class="file"><summary><span class="fpath">src/scripts/api/update.js</span> — PUT + PATCH inteligente</summary><div class="code-wrap"><pre class="code">import axios from 'axios';
+
+export async function putUser(apiUrl, id, user) {
+    try {
+        const response = await axios.put(`${apiUrl}?id=${id}`, {
+            name: user.name,
+            age: Number(user.age),
+            email: user.email,
+        });
+        return response.data;
+    } catch (error) {
+        const message = error.response?.data?.error || 'Failed to update user';
+        throw new Error(message);
+    }
+}
+
+export async function patchUser(apiUrl, id, fields) {
+    try {
+        const response = await axios.patch(`${apiUrl}?id=${id}`, fields);
+        return response.data;
+    } catch (error) {
+        const message = error.response?.data?.error || 'Failed to patch user';
+        throw new Error(message);
+    }
+}
+
+export async function updateUser(apiUrl, id, user, originalUser) {
+    const changedFields = {};
+    if (user.name !== originalUser.name) changedFields.name = user.name;
+    if (Number(user.age) !== originalUser.age) changedFields.age = Number(user.age);
+    if (user.email !== originalUser.email) changedFields.email = user.email;
+
+    if (Object.keys(changedFields).length === 0) return null;
+
+    const allChanged = Object.keys(changedFields).length === 3;
+    if (allChanged) {
+        return putUser(apiUrl, id, user);
+    } else {
+        return patchUser(apiUrl, id, changedFields);
+    }
+}</pre></div></details>
+                <details class="file"><summary><span class="fpath">src/scripts/api/delete.js</span></summary><div class="code-wrap"><pre class="code">import axios from 'axios';
+
+export async function deleteUser(apiUrl, id) {
+    try {
+        const response = await axios.delete(`${apiUrl}?id=${id}`);
+        return response.data;
+    } catch (error) {
+        const message = error.response?.data?.error || 'Failed to delete user';
+        throw new Error(message);
+    }
+}</pre></div></details>
+
+                <h3 class="sub">🟨 Frontend (Axios) — camada de DOM &amp; orquestração</h3>
+                <details class="file"><summary><span class="fpath">src/scripts/dom/form.js</span> — estado de edição</summary><div class="code-wrap"><pre class="code">import { findUserById } from './render.js';
+
+const form = document.getElementById('create-user-form');
+const formTitle = document.getElementById('form-title');
+const submitBtn = form.querySelector('button[type="submit"]');
+const cancelBtn = document.getElementById('cancel-edit');
+const formError = document.getElementById('form-error');
+
+let editingId = null;
+let originalUser = null;
+
+export function getEditingId() { return editingId; }
+export function getOriginalUser() { return originalUser; }
+
+export function showError(message) {
+    formError.textContent = message;
+    formError.classList.remove('d-none');
+}
+
+export function hideError() {
+    formError.classList.add('d-none');
+    formError.textContent = '';
+}
+
+export function enterEditMode(user) {
+    editingId = user.id;
+    originalUser = { ...user };
+    document.getElementById('name').value = user.name;
+    document.getElementById('age').value = user.age;
+    document.getElementById('email').value = user.email;
+    formTitle.textContent = 'Edit User';
+    submitBtn.textContent = 'Update';
+    cancelBtn.style.display = '';
+    document.getElementById('name').focus();
+}
+
+export function exitEditMode() {
+    editingId = null;
+    originalUser = null;
+    formTitle.textContent = 'Create User';
+    submitBtn.textContent = 'Create';
+    cancelBtn.style.display = 'none';
+    form.reset();
+}
+
+export function getUserFromCard(button) {
+    const card = button.closest('.user-card');
+    return findUserById(Number(card.id));
+}</pre></div></details>
+                <details class="file"><summary><span class="fpath">src/app.js</span> — orquestrador</summary><div class="code-wrap"><pre class="code">import { renderUsers } from './scripts/dom/render.js';
+import {
+    enterEditMode, exitEditMode, getEditingId, getOriginalUser,
+    getUserFromCard, showError, hideError,
+} from './scripts/dom/form.js';
+import { createUser } from './scripts/api/create.js';
+import { updateUser } from './scripts/api/update.js';
+import { deleteUser } from './scripts/api/delete.js';
+
+const apiUrl = 'http://localhost:8000/api/users';
+
+const form = document.getElementById('create-user-form');
+const cancelBtn = document.getElementById('cancel-edit');
+const usersSection = document.getElementById('users');
+
+usersSection.addEventListener('click', async (event) => {
+    const target = event.target;
+
+    if (target.dataset.action === 'edit') {
+        enterEditMode(getUserFromCard(target));
+    }
+
+    if (target.dataset.action === 'delete') {
+        const user = getUserFromCard(target);
+        if (!confirm('Are you sure you want to delete this user?')) return;
+
+        try {
+            await deleteUser(apiUrl, user.id);
+            if (getEditingId() === user.id) exitEditMode();
+            renderUsers(apiUrl);
+        } catch (error) {
+            showError(error.message);
+        }
+    }
+});
+
+document.addEventListener('DOMContentLoaded', () => renderUsers(apiUrl));
+cancelBtn.addEventListener('click', exitEditMode);
+
+form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const name = document.getElementById('name').value;
+    const age = document.getElementById('age').value;
+    const email = document.getElementById('email').value;
+
+    hideError();
+
+    try {
+        const editingId = getEditingId();
+        const user = { name, age, email };
+
+        if (editingId !== null) {
+            const result = await updateUser(apiUrl, editingId, user, getOriginalUser());
+            if (result === null) { exitEditMode(); return; }
+        } else {
+            await createUser(apiUrl, user);
+        }
+
+        exitEditMode();
+        renderUsers(apiUrl);
+    } catch (error) {
+        showError(error.message);
+    }
+});</pre></div></details>
+                <div class="callout info"><span class="ct">render.js, index.html e reset.css</span> São idênticos aos construídos no módulo <a data-goto="frontend">Frontend</a> (etapas Listar, HTML e CSS). O <code>render.js</code> não muda entre Fetch e Axios — ele importa <code>getUsers()</code> da camada de API.</div>
+
+                <h2 class="sec">Próximos passos &amp; desafios</h2>
+                <ul class="list">
+                    <li>Troque o recurso: refaça o CRUD para <strong>produtos</strong> (nome, preço, estoque) em vez de usuários.</li>
+                    <li>Adicione um campo novo (ex: <code class="i">phone</code>) — veja tudo que precisa mudar: HTML, validação PHP, render.</li>
+                    <li>Substitua o <code class="i">data.json</code> por um banco real (SQLite/MySQL) mantendo o mesmo contrato.</li>
+                    <li>Adicione busca/filtro na listagem usando query string (<code class="i">?name=...</code>).</li>
+                    <li>Troque o <code class="i">confirm()</code> por um modal do Bootstrap.</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="navsteps">
+            <button id="prevMod">← Anterior</button>
+            <button id="nextMod">Próximo →</button>
+        </div>
+        Curso CRUD — API PHP + Frontend JS · material interativo para estudo e recriação do projeto.
+    </footer>
+
+    <script>
+        const phpSources = {
+'src/public/index.php': `<?php
+
+require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/openapi.php';
+
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+
+in_array($origin, $allowedOrigins) ?
+    header("Access-Control-Allow-Origin: $origin") : null;
+header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
+    exit;
+}
+
+$uri = strtok($_SERVER['REQUEST_URI'], '?');
+
+match ($uri) {
+    '/api/users' => require __DIR__ . '/../src/api.php',
+    '/docs' => serveView(__DIR__ . '/../views/docs.html'),
+    '/openapi.json' => serveJson(__DIR__ . '/../openapi.json'),
+    default => notFound(),
+};
+
+function notFound(): void
+{
+    http_response_code(404);
+    echo json_encode(['error' => 'Not found']);
+}`,
+
+'src/config/config.php': `<?php
+
+$dataFile = __DIR__ . '/../../data/data.json';
+
+$allowedOrigins = [
+    'http://0.0.0.0:8080', 'http://localhost:8080', 'http://127.0.0.1:8080',
+    'http://0.0.0.0:5500', 'http://localhost:5500', 'http://127.0.0.1:5500',
+];`,
+
+'src/src/api.php': `<?php
+
+require_once __DIR__ . '/controllers.php';
+
+$method = $_SERVER['REQUEST_METHOD'];
+
+match ($method) {
+    'GET' => handleGet($dataFile),
+    'POST' => handlePost($dataFile),
+    'PUT' => handlePut($dataFile),
+    'PATCH' => handlePatch($dataFile),
+    'DELETE' => handleDelete($dataFile),
+    default => handleMethodNotAllowed(),
+};`,
+
+'src/src/controllers.php': `<?php
+
+require_once __DIR__ . '/services.php';
+
+function respond(array $result): void
+{
+    http_response_code($result['status']);
+
+    if (isset($result['error'])) {
+        echo json_encode(['error' => $result['error']]);
+    } else {
+        echo json_encode($result['data']);
+    }
+}
+
+function handleGet(string $dataFile): void
+{
+    try {
+        echo json_encode(getAllUsers($dataFile));
+    } catch (\\Throwable $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Internal server error']);
+    }
+}
+
+function handlePost(string $dataFile): void
+{
+    try {
+        $input = json_decode(file_get_contents('php://input'), true);
+        respond(createUser($dataFile, $input));
+    } catch (\\Throwable $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Internal server error']);
+    }
+}
+
+function handlePut(string $dataFile): void
+{
+    try {
+        $input = json_decode(file_get_contents('php://input'), true);
+        $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
+        respond(editUser($dataFile, $id, $input));
+    } catch (\\Throwable $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Internal server error']);
+    }
+}
+
+function handlePatch(string $dataFile): void
+{
+    try {
+        $input = json_decode(file_get_contents('php://input'), true);
+        $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
+        respond(editUser($dataFile, $id, $input, partial: true));
+    } catch (\\Throwable $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Internal server error']);
+    }
+}
+
+function handleDelete(string $dataFile): void
+{
+    try {
+        $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
+        respond(removeUser($dataFile, $id));
+    } catch (\\Throwable $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Internal server error']);
+    }
+}
+
+function handleMethodNotAllowed(): void
+{
+    http_response_code(405);
+    echo json_encode(['error' => 'Method not allowed']);
+}`,
+
+'src/src/services.php': `<?php
+
+require_once __DIR__ . '/validation.php';
+require_once __DIR__ . '/data.php';
+
+function getAllUsers(string $dataFile): array
+{
+    $data = loadData($dataFile);
+    return ['users' => $data['users']];
+}
+
+function createUser(string $dataFile, ?array $input): array
+{
+    if (!is_array($input)) {
+        return ['error' => 'Invalid JSON body', 'status' => 400];
+    }
+
+    $error = validateRequiredFields($input, ['name', 'age', 'email']);
+    if ($error) {
+        return ['error' => $error, 'status' => 400];
+    }
+
+    $error = validateUserFields($input);
+    if ($error) {
+        return ['error' => $error, 'status' => 400];
+    }
+
+    $user = insertUser($dataFile, [
+        'name' => trim($input['name']),
+        'age' => (int) $input['age'],
+        'email' => $input['email'],
+    ]);
+
+    return ['data' => $user, 'status' => 201];
+}
+
+function editUser(string $dataFile, ?int $id, ?array $input, bool $partial = false): array
+{
+    if ($id === null) {
+        return ['error' => 'User id is required', 'status' => 400];
+    }
+
+    if (!is_array($input)) {
+        return ['error' => 'Invalid JSON body', 'status' => 400];
+    }
+
+    if (!$partial) {
+        $error = validateRequiredFields($input, ['name', 'age', 'email']);
+        if ($error) {
+            return ['error' => $error, 'status' => 400];
+        }
+    }
+
+    $error = validateUserFields($input);
+    if ($error) {
+        return ['error' => $error, 'status' => 400];
+    }
+
+    $allowed = ['name', 'age', 'email'];
+    $fields = array_intersect_key($input, array_flip($allowed));
+
+    if (isset($fields['name'])) {
+        $fields['name'] = trim($fields['name']);
+    }
+
+    if (isset($fields['age'])) {
+        $fields['age'] = (int) $fields['age'];
+    }
+
+    $user = updateUser($dataFile, $id, $fields);
+
+    if ($user === null) {
+        return ['error' => 'User not found', 'status' => 404];
+    }
+
+    return ['data' => $user, 'status' => 200];
+}
+
+function removeUser(string $dataFile, ?int $id): array
+{
+    if ($id === null) {
+        return ['error' => 'User id is required', 'status' => 400];
+    }
+
+    $user = deleteUser($dataFile, $id);
+
+    if ($user === null) {
+        return ['error' => 'User not found', 'status' => 404];
+    }
+
+    return ['data' => ['deleted' => $user], 'status' => 200];
+}`,
+
+'src/src/validation.php': `<?php
+
+function validateRequiredFields(array $input, array $fields): ?string
+{
+    $missing = [];
+
+    foreach ($fields as $field) {
+        if (!isset($input[$field])) {
+            $missing[] = $field;
+        }
+    }
+
+    if (!empty($missing)) {
+        return implode(', ', $missing) . ' are required';
+    }
+
+    return null;
+}
+
+function validateUserFields(array $input): ?string
+{
+    if (isset($input['name'])) {
+        $name = trim($input['name']);
+
+        if ($name === '') {
+            return 'Name cannot be empty';
+        }
+
+        if (strlen($name) > 100) {
+            return 'Name must be at most 100 characters';
+        }
+    }
+
+    if (isset($input['age'])) {
+        if (!is_numeric($input['age'])) {
+            return 'Age must be a number';
+        }
+
+        $age = (int) $input['age'];
+
+        if ($age < 1 || $age > 150) {
+            return 'Age must be between 1 and 150';
+        }
+    }
+
+    if (isset($input['email'])) {
+        if (!filter_var($input['email'], FILTER_VALIDATE_EMAIL)) {
+            return 'Invalid email format';
+        }
+    }
+
+    return null;
+}`,
+
+'src/src/data.php': `<?php
+
+function loadData(string $dataFile): array
+{
+    return json_decode(file_get_contents($dataFile), true);
+}
+
+function saveData(string $dataFile, array $data): void
+{
+    file_put_contents($dataFile, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+}
+
+function findUserById(string $dataFile, int $id): ?array
+{
+    $data = loadData($dataFile);
+
+    foreach ($data['users'] as $user) {
+        if ($user['id'] === $id) {
+            return $user;
+        }
+    }
+
+    return null;
+}
+
+function insertUser(string $dataFile, array $user): array
+{
+    $data = loadData($dataFile);
+
+    $id = $data['nextId'] ?? 1;
+    $data['nextId'] = $id + 1;
+
+    $user['id'] = $id;
+    $data['users'][] = $user;
+
+    saveData($dataFile, $data);
+
+    return $user;
+}
+
+function updateUser(string $dataFile, int $id, array $fields): ?array
+{
+    $data = loadData($dataFile);
+
+    foreach ($data['users'] as $index => $user) {
+        if ($user['id'] === $id) {
+            $data['users'][$index] = array_merge($user, $fields);
+            saveData($dataFile, $data);
+            return $data['users'][$index];
+        }
+    }
+
+    return null;
+}
+
+function deleteUser(string $dataFile, int $id): ?array
+{
+    $data = loadData($dataFile);
+
+    foreach ($data['users'] as $index => $user) {
+        if ($user['id'] === $id) {
+            array_splice($data['users'], $index, 1);
+            saveData($dataFile, $data);
+            return $user;
+        }
+    }
+
+    return null;
+}`,
+        };
+
+        function escHtml(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+        function renderPhpSources() {
+            const wrap = document.getElementById('php-sources');
+            if (!wrap) return;
+            Object.keys(phpSources).forEach(path => {
+                const d = document.createElement('details'); d.className = 'file';
+                d.innerHTML = '<summary><span class="fpath">' + path + '</span></summary>'
+                    + '<div class="code-wrap"><pre class="code">' + escHtml(phpSources[path]) + '</pre></div>';
+                wrap.appendChild(d);
+            });
+        }
+
+        function mkCopy(getText) {
+            const b = document.createElement('button'); b.className = 'copy-btn'; b.type = 'button'; b.textContent = 'copiar';
+            b.addEventListener('click', e => {
+                e.stopPropagation();
+                const t = getText();
+                if (navigator.clipboard) navigator.clipboard.writeText(t).then(() => { b.textContent = 'copiado!'; setTimeout(() => b.textContent = 'copiar', 1200); }).catch(() => { });
+            });
+            return b;
+        }
+        function addCopyButtons() {
+            document.querySelectorAll('.code-wrap').forEach(w => {
+                if (w.querySelector('.copy-btn')) return;
+                const pre = w.querySelector('pre'); if (!pre) return;
+                w.appendChild(mkCopy(() => pre.innerText));
+            });
+            document.querySelectorAll('.step-detail').forEach(d => {
+                if (d.querySelector('.copy-btn')) return;
+                const span = d.querySelector('span');
+                d.appendChild(mkCopy(() => span ? span.innerText : d.innerText));
+            });
+        }
+
+        const modules = ['inicio', 'http', 'api', 'axios', 'frontend', 'rodar'];
+        let currentMod = 'inicio';
+        function showModule(id) {
+            if (modules.indexOf(id) === -1) id = 'inicio';
+            currentMod = id;
+            document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
+            const sec = document.getElementById('mod-' + id); sec.classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.mod === id));
+            const idx = modules.indexOf(id);
+            document.getElementById('prevMod').disabled = idx === 0;
+            document.getElementById('nextMod').disabled = idx === modules.length - 1;
+            try { history.replaceState(null, '', '#' + id); } catch (e) { }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        document.getElementById('nav').addEventListener('click', e => { const b = e.target.closest('.nav-item'); if (b) showModule(b.dataset.mod); });
+        document.addEventListener('click', e => { const g = e.target.closest('[data-goto]'); if (g) { e.preventDefault(); showModule(g.dataset.goto); } });
+        document.getElementById('prevMod').addEventListener('click', () => { const i = modules.indexOf(currentMod); if (i > 0) showModule(modules[i - 1]); });
+        document.getElementById('nextMod').addEventListener('click', () => { const i = modules.indexOf(currentMod); if (i < modules.length - 1) showModule(modules[i + 1]); });
+
+        const pf = document.getElementById('phpFilter');
+        if (pf) pf.addEventListener('input', () => {
+            const q = pf.value.toLowerCase().trim();
+            document.querySelectorAll('#phpFns .fn').forEach(fn => {
+                const s = (fn.dataset.search + ' ' + fn.textContent).toLowerCase();
+                fn.classList.toggle('hide', q.length > 0 && s.indexOf(q) === -1);
+            });
+        });
+
+        renderPhpSources();
+        addCopyButtons();
+
+        const hash = (location.hash || '').replace('#', '');
+        showModule(modules.indexOf(hash) !== -1 ? hash : 'inicio');
+    </script>
+</body>
+
+</html>
