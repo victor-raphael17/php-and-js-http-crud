@@ -1151,6 +1151,15 @@ npm install axios    <span class="cm"># adiciona o axios como dependência</span
   "build": "vite build",
   "preview": "vite preview"
 }</pre></div>
+                <p class="txt">O <code class="i">npm install vite</code> apenas baixa o pacote — ele <strong>não cria</strong> o <code class="i">vite.config.js</code> automaticamente. Crie o arquivo na raiz do projeto (ao lado do <code class="i">package.json</code>) para fixar a porta em <code class="i">8080</code>, que é a liberada no CORS da API (por padrão o Vite usaria <code class="i">5173</code>):</p>
+                <div class="code-wrap"><span class="lang">vite.config.js</span><pre class="code">import { defineConfig } from 'vite';
+
+export default defineConfig({
+  server: {
+    port: 8080,        <span class="cm">// mesma porta liberada no CORS da API</span>
+    strictPort: true,  <span class="cm">// falha se 8080 estiver ocupada, em vez de trocar sozinho</span>
+  },
+});</pre></div>
                 <p class="txt">No HTML, aponte o script com <code class="i">type="module"</code>; no JS, use o <code class="i">import</code> normalmente:</p>
                 <div class="code-wrap"><span class="lang">html</span><pre class="code">&lt;script type="module" src="./main.js"&gt;&lt;/script&gt;</pre></div>
                 <div class="code-wrap"><span class="lang">terminal</span><pre class="code">npm run dev   <span class="cm"># abre o projeto com hot reload</span></pre></div>
@@ -2011,6 +2020,23 @@ document.addEventListener('DOMContentLoaded', () =&gt; renderUsers(apiUrl));</pr
         └── dom/            <span class="cm"># render.js, form.js</span></pre></div>
                     </div>
                 </div>
+
+                <h2 class="sec">O arquivo vite.config.js</h2>
+                <p class="txt">O <code class="i">vite.config.js</code> da árvore acima <strong>não é gerado</strong> pelo <code class="i">npm install</code> — crie-o você mesmo na raiz do <code class="i">crud-frontend-axios/</code>. Como o <code class="i">index.html</code> fica dentro de <code class="i">src/</code>, o config aponta o <code class="i">root</code> para lá, fixa a porta em <code class="i">8080</code> (a mesma do CORS) e manda o build para <code class="i">dist/</code>:</p>
+                <div class="code-wrap"><span class="lang">vite.config.js</span><pre class="code">import { defineConfig } from 'vite';
+
+export default defineConfig({
+  root: 'src',            <span class="cm">// index.html fica em src/</span>
+  server: {
+    port: 8080,           <span class="cm">// bate com o $allowedOrigins da API</span>
+    strictPort: true,     <span class="cm">// não troca de porta se 8080 estiver ocupada</span>
+  },
+  build: {
+    outDir: '../dist',    <span class="cm">// gera o build na raiz, fora de src/</span>
+    emptyOutDir: true,    <span class="cm">// limpa dist/ antes de cada build</span>
+  },
+});</pre></div>
+                <div class="callout info"><span class="ct">Por que essas opções?</span> <code>root: 'src'</code> diz ao Vite onde está o <code>index.html</code>; <code>port: 8080</code> faz o <code>npm run dev</code> subir na porta certa (senão seria a <code>5173</code>, bloqueada pelo CORS); <code>outDir: '../dist'</code> gera o build na pasta que o Apache serve no Docker.</div>
 
                 <h2 class="sec">Opção 1 — Docker (recomendado)</h2>
                 <p class="txt">Cada pasta tem seu <code class="i">compose.yaml</code>. Suba cada uma:</p>
