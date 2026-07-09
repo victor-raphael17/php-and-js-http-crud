@@ -2137,9 +2137,138 @@ curl -X DELETE "http://localhost:8000/api/users?id=1"</pre></div>
 
                 <hr class="rule">
                 <h2 class="sec">Código-fonte completo</h2>
+                <p class="txt">Arquivo por arquivo, os <strong>dois projetos inteiros</strong> — do backend PHP ao frontend, incluindo dados, configuração e Docker. Tudo pronto para copiar.</p>
 
                 <h3 class="sub">🐘 Backend (PHP)</h3>
                 <div id="php-sources"></div>
+
+                <h3 class="sub">🐘 Backend — dados &amp; Docker</h3>
+                <details class="file"><summary><span class="fpath">data/data.json</span> — estado inicial de exemplo</summary><div class="code-wrap"><pre class="code">{
+  "nextId": 2,
+  "users": [
+    { "name": "João", "age": 25, "email": "joao@email.com", "id": 1 }
+  ]
+}</pre></div></details>
+                <details class="file"><summary><span class="fpath">Dockerfile</span></summary><div class="code-wrap"><pre class="code">FROM php:8.3-cli
+
+WORKDIR /app
+
+COPY src/ src/
+COPY data/ data/
+
+RUN chmod -R 777 data/
+
+EXPOSE 80
+
+CMD ["php", "-S", "0.0.0.0:80", "-t", "src/public", "src/public/index.php"]</pre></div></details>
+                <details class="file"><summary><span class="fpath">compose.yaml</span></summary><div class="code-wrap"><pre class="code">services:
+  php-server:
+    build: .
+    ports:
+      - "8000:80"</pre></div></details>
+                <div class="callout info"><span class="ct">Portas no Docker</span> Dentro do container a API roda na porta <code>80</code>; o <code>compose.yaml</code> mapeia para a <code>8000</code> do seu computador — por isso <code>http://localhost:8000</code>.</div>
+
+                <h3 class="sub">🟨 Frontend (Axios) — HTML &amp; CSS</h3>
+                <details class="file"><summary><span class="fpath">src/index.html</span></summary><div class="code-wrap"><pre class="code">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;CRUD JS Project&lt;/title&gt;
+    &lt;link rel="stylesheet" href="styles/reset.css"&gt;
+    &lt;link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"&gt;
+    &lt;link rel="stylesheet" href="styles/style.css"&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+    &lt;header class="bg-dark text-white py-4 mb-4"&gt;
+        &lt;h1 class="text-center m-0"&gt;PHP/JS CRUD Project&lt;/h1&gt;
+    &lt;/header&gt;
+    &lt;main class="container"&gt;
+        &lt;section class="card p-4 mb-4"&gt;
+            &lt;h2 class="mb-3"&gt;Users&lt;/h2&gt;
+            &lt;div class="row g-3" id="users"&gt;&lt;/div&gt;
+        &lt;/section&gt;
+        &lt;section class="card p-4"&gt;
+            &lt;h2 class="mb-3" id="form-title"&gt;Create User&lt;/h2&gt;
+            &lt;div id="form-error" class="alert alert-danger d-none" role="alert"&gt;&lt;/div&gt;
+            &lt;form id="create-user-form" class="row g-3 align-items-end"&gt;
+                &lt;div class="col-md-4"&gt;
+                    &lt;label for="name" class="form-label"&gt;Name&lt;/label&gt;
+                    &lt;input type="text" class="form-control" id="name" name="name" required&gt;
+                &lt;/div&gt;
+                &lt;div class="col-md-3"&gt;
+                    &lt;label for="age" class="form-label"&gt;Age&lt;/label&gt;
+                    &lt;input type="number" class="form-control" id="age" name="age" required&gt;
+                &lt;/div&gt;
+                &lt;div class="col-md-3"&gt;
+                    &lt;label for="email" class="form-label"&gt;Email&lt;/label&gt;
+                    &lt;input type="email" class="form-control" id="email" name="email" required&gt;
+                &lt;/div&gt;
+                &lt;div class="col-md-2 d-flex gap-2"&gt;
+                    &lt;button type="submit" class="btn btn-dark flex-fill"&gt;Create&lt;/button&gt;
+                    &lt;button type="button" id="cancel-edit" class="btn btn-outline-secondary" style="display:none;"&gt;Cancel&lt;/button&gt;
+                &lt;/div&gt;
+            &lt;/form&gt;
+        &lt;/section&gt;
+    &lt;/main&gt;
+    &lt;script type="module" src="app.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+
+&lt;/html&gt;</pre></div></details>
+                <details class="file"><summary><span class="fpath">src/styles/reset.css</span></summary><div class="code-wrap"><pre class="code"><span class="cm">/* 1. Box-sizing intuitivo */</span>
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+<span class="cm">/* 2. Remove margens padrão */</span>
+*:not(dialog) {
+    margin: 0;
+}
+
+<span class="cm">/* 3. Animações respeitam a preferência do SO */</span>
+@media (prefers-reduced-motion: no-preference) {
+    html {
+        interpolate-size: allow-keywords;
+    }
+}
+
+body {
+    <span class="cm">/* 4. Line-height acessível */</span>
+    line-height: 1.5;
+    <span class="cm">/* 5. Texto mais nítido */</span>
+    -webkit-font-smoothing: antialiased;
+}
+
+<span class="cm">/* 6. Mídias responsivas por padrão */</span>
+img, picture, video, canvas, svg {
+    display: block;
+    max-width: 100%;
+}
+
+<span class="cm">/* 7. Inputs herdam a fonte do pai */</span>
+input, button, textarea, select {
+    font: inherit;
+}
+
+<span class="cm">/* 8. Textos não vazam do container */</span>
+p, h1, h2, h3, h4, h5, h6 {
+    overflow-wrap: break-word;
+}
+
+<span class="cm">/* 9. Quebra de linha inteligente */</span>
+p { text-wrap: pretty; }
+h1, h2, h3, h4, h5, h6 { text-wrap: balance; }
+
+<span class="cm">/* 10. Contexto de stacking na raiz */</span>
+#root, #__next { isolation: isolate; }
+
+ul { list-style: none; margin: 0; padding: 0; }</pre></div></details>
+                <details class="file"><summary><span class="fpath">src/styles/style.css</span></summary><div class="code-wrap"><pre class="code">body {
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}</pre></div></details>
 
                 <h3 class="sub">🟨 Frontend (Axios) — camada de API</h3>
                 <details class="file"><summary><span class="fpath">src/scripts/api/read.js</span></summary><div class="code-wrap"><pre class="code">import axios from 'axios';
@@ -2212,6 +2341,47 @@ export async function deleteUser(apiUrl, id) {
 }</pre></div></details>
 
                 <h3 class="sub">🟨 Frontend (Axios) — camada de DOM &amp; orquestração</h3>
+                <details class="file"><summary><span class="fpath">src/scripts/dom/render.js</span> — renderização dos cards</summary><div class="code-wrap"><pre class="code">import { getUsers } from '../api/read.js';
+
+let usersCache = [];
+
+export function findUserById(id) {
+    return usersCache.find((user) => user.id === id);
+}
+
+export async function renderUsers(apiUrl) {
+    const users = await getUsers(apiUrl);
+    usersCache = users;
+    const usersSection = document.getElementById('users');
+
+    if (users.length === 0) {
+        usersSection.innerHTML = '&lt;p class="text-muted"&gt;No users found.&lt;/p&gt;';
+        return;
+    }
+
+    usersSection.innerHTML = '';
+
+    users.forEach((user) =&gt; {
+        const userDiv = document.createElement('div');
+        userDiv.classList.add('col-md-3');
+
+        userDiv.innerHTML = `
+            &lt;div class="card user-card h-100" id="${user.id}"&gt;
+                &lt;div class="card-body"&gt;
+                    &lt;h5 class="card-title"&gt;${user.name}&lt;/h5&gt;
+                    &lt;p class="card-text mb-1"&gt;&lt;strong&gt;Age:&lt;/strong&gt; ${user.age}&lt;/p&gt;
+                    &lt;p class="card-text"&gt;&lt;strong&gt;Email:&lt;/strong&gt; ${user.email}&lt;/p&gt;
+                &lt;/div&gt;
+                &lt;div class="card-footer d-flex gap-2"&gt;
+                    &lt;button class="btn btn-sm btn-outline-dark flex-fill" data-action="edit"&gt;Edit&lt;/button&gt;
+                    &lt;button class="btn btn-sm btn-outline-danger flex-fill" data-action="delete"&gt;Delete&lt;/button&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        `;
+
+        usersSection.appendChild(userDiv);
+    });
+}</pre></div></details>
                 <details class="file"><summary><span class="fpath">src/app.js</span> — orquestrador</summary><div class="code-wrap"><pre class="code">import { renderUsers, findUserById } from './scripts/dom/render.js';
 import { createUser } from './scripts/api/create.js';
 import { deleteUser } from './scripts/api/delete.js';
@@ -2336,7 +2506,46 @@ form.addEventListener('submit', async (event) =&gt; {
 
 <span class="cm">// --- Primeira renderização ---</span>
 document.addEventListener('DOMContentLoaded', () =&gt; renderUsers(apiUrl));</pre></div></details>
-                <div class="callout info"><span class="ct">render.js, index.html e os CSS</span> Não os repetimos aqui: são idênticos aos construídos no módulo <a data-goto="frontend">Frontend</a> (etapas Listar, HTML e CSS). Aliás, <strong>todos</strong> os arquivos do frontend acima são exatamente os que você construiu naquele módulo — o que você montou lá é o código de referência final.</div>
+                <div class="callout info"><span class="ct">Tudo igual ao que você construiu</span> <strong>Todos</strong> os arquivos do frontend acima (HTML, CSS, camada de API, render.js e app.js) são exatamente os que você construiu no módulo <a data-goto="frontend">Frontend</a> — o que você montou lá é o código de referência final.</div>
+
+                <h3 class="sub">🟨 Frontend (Axios) — configuração &amp; Docker</h3>
+                <details class="file"><summary><span class="fpath">package.json</span> — scripts e dependências</summary><div class="code-wrap"><pre class="code">{
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "axios": "^1.13.6"
+  },
+  "devDependencies": {
+    "vite": "^8.0.1"
+  }
+}</pre></div></details>
+                <details class="file"><summary><span class="fpath">vite.config.js</span></summary><div class="code-wrap"><pre class="code">import { defineConfig } from 'vite';
+
+export default defineConfig({
+  root: 'src',
+  server: {
+    port: 8080,
+    strictPort: true,
+  },
+  build: {
+    outDir: '../dist',
+    emptyOutDir: true,
+  },
+});</pre></div></details>
+                <details class="file"><summary><span class="fpath">.gitignore</span></summary><div class="code-wrap"><pre class="code">node_modules/
+dist/</pre></div></details>
+                <details class="file"><summary><span class="fpath">Dockerfile</span></summary><div class="code-wrap"><pre class="code">FROM httpd:alpine
+
+COPY dist/ /usr/local/apache2/htdocs/</pre></div></details>
+                <details class="file"><summary><span class="fpath">compose.yaml</span></summary><div class="code-wrap"><pre class="code">services:
+  frontend:
+    build: .
+    ports:
+      - "8080:80"</pre></div></details>
+                <div class="callout info"><span class="ct">Sobre esses arquivos</span> O seu <code>package.json</code> terá também campos como <code>name</code> e <code>version</code> gerados pelo <code>npm init -y</code> — pode mantê-los; as versões dos pacotes podem variar. O <code>Dockerfile</code> serve a pasta <code>dist/</code> (gerada pelo <code>npm run build</code>) com Apache na porta <code>80</code>, mapeada pelo <code>compose.yaml</code> para a <code>8080</code>.</div>
 
                 <h2 class="sec">Próximos passos &amp; desafios</h2>
                 <ul class="list">
