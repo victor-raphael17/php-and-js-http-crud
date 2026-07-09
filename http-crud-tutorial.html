@@ -255,7 +255,7 @@
                     <div class="hcard" style="--c:var(--green)">
                         <span class="tag">Frontend</span>
                         <h4>🟨 Interface em JavaScript</h4>
-                        <p>JavaScript vanilla com <strong>ES Modules</strong> e <strong>Bootstrap 5</strong>. Lista usuários em cards e permite criar, editar e deletar. Comunicação via <strong>Fetch</strong> ou <strong>Axios</strong>. Roda em <code class="i">localhost:8080</code>.</p>
+                        <p>JavaScript vanilla com <strong>ES Modules</strong> e <strong>Bootstrap 5</strong>. Lista usuários em cards e permite criar, editar e deletar. Comunicação via <strong>Axios</strong>. Roda em <code class="i">localhost:8080</code>.</p>
                     </div>
                 </div>
 
@@ -269,7 +269,7 @@
   │  scripts/api/*.js       │   GET  /api/users      │  controllers.php         │
   │  scripts/dom/render.js  │   POST /api/users      │  services.php            │
   │                         │   PUT/PATCH/DELETE     │  validation.php          │
-  │  Fetch API  ou  Axios   │                        │  data.php  ──▶ data.json │
+  │          Axios          │                        │  data.php  ──▶ data.json │
   └─────────────────────────┘                        └──────────────────────────┘
          :8080                                                  :8000</pre></div>
 
@@ -289,7 +289,7 @@
 
                 <h2 class="sec">A trilha de aprendizado</h2>
                 <div class="pathline">
-                    <div class="pstep"><div class="pnum">2</div><div class="pbody"><h4>Fundamentos HTTP</h4><p>O que é HTTP, REST e JSON. Os métodos GET, POST, PUT, PATCH, DELETE e como o <code class="i">fetch()</code> funciona. <a data-goto="http">Ir para o módulo →</a></p></div></div>
+                    <div class="pstep"><div class="pnum">2</div><div class="pbody"><h4>Fundamentos HTTP</h4><p>O que é HTTP, REST e JSON. Os métodos GET, POST, PUT, PATCH, DELETE e como fazer requisições com o Axios. <a data-goto="http">Ir para o módulo →</a></p></div></div>
                     <div class="pstep"><div class="pnum">3</div><div class="pbody"><h4>A API PHP por dentro</h4><p>O caminho de uma requisição pela API, camada por camada, e as funções nativas do PHP usadas. <a data-goto="api">Ir para o módulo →</a></p></div></div>
                     <div class="pstep"><div class="pnum">4</div><div class="pbody"><h4>Fetch vs Axios</h4><p>Duas formas de fazer requisições no JavaScript, instalação do Node/Axios e uso com Vite ou CDN. <a data-goto="axios">Ir para o módulo →</a></p></div></div>
                     <div class="pstep"><div class="pnum">5</div><div class="pbody"><h4>Construir o Frontend</h4><p>Passo a passo, do setup até o CRUD completo consumindo a API. <a data-goto="frontend">Ir para o módulo →</a></p></div></div>
@@ -380,77 +380,74 @@
                         <div class="code-wrap"><span class="lang">js</span><pre class="code">const user = { name: "Victor", age: 24 };
 JSON.stringify(user);
 <span class="cm">// '{"name":"Victor","age":24}'  ← STRING</span></pre></div>
-                        <p class="txt">O <code class="i">fetch()</code> só aceita <em>strings</em> no body — por isso o <code class="i">stringify</code>.</p>
+                        <p class="txt">O HTTP transporta <em>texto</em> — o <code class="i">stringify</code> converte o objeto para JSON antes do envio.</p>
                     </div>
                     <div>
                         <h3 class="sub">JSON.parse() — string → objeto</h3>
                         <div class="code-wrap"><span class="lang">js</span><pre class="code">const json = '{"name":"Victor","age":24}';
 JSON.parse(json);
 <span class="cm">// { name: "Victor", age: 24 }  ← OBJETO</span></pre></div>
-                        <p class="txt"><code class="i">response.json()</code> já faz o <code class="i">JSON.parse</code> automaticamente.</p>
+                        <p class="txt">O Axios faz os dois passos por você: envia serializado e entrega o <code class="i">response.data</code> já como objeto.</p>
                     </div>
                 </div>
 
-                <h2 class="sec">fetch() e async/await</h2>
-                <p class="txt">O <code class="i">fetch()</code> é a função nativa do JavaScript para requisições HTTP. Ela retorna uma <strong>Promise</strong> — o resultado não vem na hora, porque a requisição precisa ir até o servidor e voltar. Por isso usamos <code class="i">await</code>, que “pausa” a execução até a resposta chegar. E <code class="i">await</code> só funciona dentro de uma função <code class="i">async</code>.</p>
-                <div class="code-wrap"><span class="lang">js</span><pre class="code">async function loadUsers() {
-  const response = await fetch("http://localhost:8000/api/users");
-  const data = await response.json();
-  console.log(data);
+                <h2 class="sec">Axios e async/await</h2>
+                <p class="txt">Para fazer requisições HTTP no JavaScript usamos o <strong>Axios</strong>, a biblioteca adotada neste curso. Toda chamada dele retorna uma <strong>Promise</strong> — o resultado não vem na hora, porque a requisição precisa ir até o servidor e voltar. Por isso usamos <code class="i">await</code>, que “pausa” a execução até a resposta chegar. E <code class="i">await</code> só funciona dentro de uma função <code class="i">async</code>.</p>
+                <div class="code-wrap"><span class="lang">js</span><pre class="code">import axios from 'axios';
+
+async function loadUsers() {
+  const response = await axios.get("http://localhost:8000/api/users");
+  console.log(response.data);
 }</pre></div>
                 <div class="panel">
-                    <h3 class="sub" style="margin-top:0">O fluxo de toda requisição fetch</h3>
+                    <h3 class="sub" style="margin-top:0">O fluxo de toda requisição</h3>
                     <ol class="list">
-                        <li><code class="i">fetch(url, opções)</code> → envia a requisição</li>
+                        <li><code class="i">axios.get(url)</code> → envia a requisição</li>
                         <li><code class="i">await</code> → espera a resposta chegar</li>
-                        <li><code class="i">response</code> → objeto Response (status, headers, body como stream)</li>
-                        <li><code class="i">await response.json()</code> → lê o stream e converte para objeto JS</li>
-                        <li><code class="i">data</code> → o objeto/array que o servidor retornou</li>
+                        <li><code class="i">response</code> → objeto de resposta (status, headers, data)</li>
+                        <li><code class="i">response.data</code> → o objeto/array que o servidor retornou, com o JSON já convertido</li>
                     </ol>
                 </div>
+                <div class="callout tip"><span class="ct">💡 E o fetch()?</span> O JavaScript também tem o <code>fetch()</code> nativo, que faz requisições sem instalar nada — mas o Axios converte o JSON e trata erros por você. A comparação entre os dois (e a instalação do Axios) está no módulo <a data-goto="axios">Fetch vs Axios</a>.</div>
 
                 <h2 class="sec">Cada método na prática</h2>
 
                 <h3 class="sub">GET — buscar dados</h3>
-                <p class="txt">Lê/lista recursos. Não envia body. Sem o segundo argumento, o <code class="i">fetch</code> assume <code class="i">GET</code>. Filtros vão na URL como <em>query string</em>.</p>
-                <div class="code-wrap"><span class="lang">js</span><pre class="code">const response = await fetch("http://localhost:8000/api/users");
-const data = await response.json();
+                <p class="txt">Lê/lista recursos. Não envia body. Filtros vão na URL como <em>query string</em>.</p>
+                <div class="code-wrap"><span class="lang">js</span><pre class="code">const response = await axios.get("http://localhost:8000/api/users");
+const data = response.data;
 
 <span class="cm">// filtrando pela URL:</span>
-fetch("http://localhost:8000/api/users?id=1");
-fetch("http://localhost:8000/api/users?age=25&name=Victor");</pre></div>
+axios.get("http://localhost:8000/api/users?id=1");
+axios.get("http://localhost:8000/api/users?age=25&name=Victor");</pre></div>
 
                 <h3 class="sub">POST — criar dados</h3>
-                <p class="txt">Cria um novo recurso. Envia os dados no <code class="i">body</code>. O header <code class="i">Content-Type: application/json</code> é <strong>obrigatório</strong> — sem ele o servidor não sabe o formato do body.</p>
-                <div class="code-wrap"><span class="lang">js</span><pre class="code">const response = await fetch("http://localhost:8000/api/users", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ name: "João", age: 25, email: "joao@email.com" }),
+                <p class="txt">Cria um novo recurso. Os dados vão no <code class="i">body</code>: passe o objeto JS <strong>direto</strong> como segundo argumento — o Axios serializa para JSON e define o header <code class="i">Content-Type: application/json</code> por você.</p>
+                <div class="code-wrap"><span class="lang">js</span><pre class="code">const response = await axios.post("http://localhost:8000/api/users", {
+  name: "João",
+  age: 25,
+  email: "joao@email.com",
 });
-const created = await response.json();</pre></div>
+const created = response.data;</pre></div>
 
                 <h3 class="sub">PUT — substituição completa</h3>
                 <p class="txt">Substitui o recurso inteiro. Você envia <strong>todos</strong> os campos, mesmo os que não mudaram — se omitir um, ele some. A URL (<code class="i">?id=1</code>) diz <em>qual</em> recurso; o body diz <em>o que</em> colocar no lugar.</p>
-                <div class="code-wrap"><span class="lang">js</span><pre class="code">const response = await fetch("http://localhost:8000/api/users?id=1", {
-  method: "PUT",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ name: "Victor", age: 25, email: "novo@email.com" }),
+                <div class="code-wrap"><span class="lang">js</span><pre class="code">const response = await axios.put("http://localhost:8000/api/users?id=1", {
+  name: "Victor",
+  age: 25,
+  email: "novo@email.com",
 });</pre></div>
 
                 <h3 class="sub">PATCH — atualização parcial</h3>
                 <p class="txt">Atualiza apenas alguns campos, sem enviar tudo. O resto permanece como estava.</p>
-                <div class="code-wrap"><span class="lang">js</span><pre class="code">const response = await fetch("http://localhost:8000/api/users?id=1", {
-  method: "PATCH",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ age: 30 }),
+                <div class="code-wrap"><span class="lang">js</span><pre class="code">const response = await axios.patch("http://localhost:8000/api/users?id=1", {
+  age: 30,
 });</pre></div>
                 <div class="callout tip"><span class="ct">💡 PUT vs PATCH</span> PUT é como reescrever a folha inteira. PATCH é como usar corretivo só onde precisa.</div>
 
                 <h3 class="sub">DELETE — remover</h3>
                 <p class="txt">Exclui um recurso. Geralmente sem body — o <code class="i">?id=1</code> na URL já diz qual apagar.</p>
-                <div class="code-wrap"><span class="lang">js</span><pre class="code">const response = await fetch("http://localhost:8000/api/users?id=1", {
-  method: "DELETE",
-});</pre></div>
+                <div class="code-wrap"><span class="lang">js</span><pre class="code">const response = await axios.delete("http://localhost:8000/api/users?id=1");</pre></div>
 
                 <h3 class="sub">OPTIONS — o preflight do CORS</h3>
                 <p class="txt">Quando o frontend (<code class="i">:8080</code>) chama a API (<code class="i">:8000</code>), são <strong>origens diferentes</strong>. Por segurança, o navegador faz antes uma requisição <code class="i">OPTIONS</code> perguntando “posso te fazer requisições?”. Isso é o <strong>CORS</strong> (Cross-Origin Resource Sharing).</p>
@@ -458,51 +455,48 @@ const created = await response.json();</pre></div>
 2. Servidor → navegador:  204 + headers CORS   "sim, pode"
 3. Navegador → servidor:  POST /api/users      (a requisição real)
 4. Servidor → navegador:  201 Created          (a resposta real)</pre></div>
-                <div class="callout warn"><span class="ct">⚠ Você NÃO escreve código para OPTIONS</span> O navegador faz isso sozinho, automaticamente. Você nunca vai ver um <code>fetch</code> com <code>method: 'OPTIONS'</code>. O preflight dispara para métodos “não-simples” (PUT, PATCH, DELETE) ou quando há header como <code>Content-Type: application/json</code> — então até o seu POST dispara.</div>
+                <div class="callout warn"><span class="ct">⚠ Você NÃO escreve código para OPTIONS</span> O navegador faz isso sozinho, automaticamente. Você nunca vai escrever um <code>axios.options(...)</code>. O preflight dispara para métodos “não-simples” (PUT, PATCH, DELETE) ou quando há header como <code>Content-Type: application/json</code> — então até o seu POST dispara.</div>
 
                 <h2 class="sec">Tratamento de erros</h2>
-                <p class="txt">Detalhe crucial: o <code class="i">fetch()</code> <strong>não lança erro</strong> quando o servidor retorna 400, 404, 500… Ele só lança quando a requisição nem chega ao servidor (sem internet, servidor caiu, URL inválida). Por isso você precisa verificar <code class="i">response.ok</code> manualmente.</p>
+                <p class="txt">O Axios <strong>lança erro</strong> tanto quando o servidor responde 400, 404, 500… quanto quando a requisição nem chega ao servidor (sem internet, servidor caiu, URL inválida). Tudo cai no <code class="i">catch</code> — e o <code class="i">error.response</code> diz qual dos dois casos aconteceu: se ele existe, o servidor respondeu com erro; se não existe, foi erro de rede.</p>
                 <div class="code-wrap"><span class="lang">js</span><pre class="code">try {
-  const response = await fetch("http://localhost:8000/api/users");
-
-  if (!response.ok) {
-    <span class="cm">// servidor respondeu com erro (400, 404, 500...)</span>
-    const error = await response.json();
-    console.error("Erro do servidor:", error.error);
-    return;
-  }
-
-  const data = await response.json();
-  console.log(data);
+  const response = await axios.get("http://localhost:8000/api/users");
+  console.log(response.data);
 } catch (error) {
-  <span class="cm">// o fetch nem conseguiu conectar (erro de rede)</span>
-  console.error("Erro de rede:", error.message);
+  if (error.response) {
+    <span class="cm">// servidor respondeu com erro (400, 404, 500...)</span>
+    console.error("Erro do servidor:", error.response.data.error);
+  } else {
+    <span class="cm">// a requisição nem chegou ao servidor</span>
+    console.error("Erro de rede:", error.message);
+  }
 }</pre></div>
                 <div class="grid2">
                     <div class="panel">
-                        <h3 class="sub" style="margin-top:0">try/catch pega</h3>
+                        <h3 class="sub" style="margin-top:0">Sem <code class="i">error.response</code> (rede)</h3>
                         <ul class="list"><li>Sem internet</li><li>Servidor offline</li><li>URL inválida</li><li>Timeout / erro de CORS</li></ul>
                     </div>
                     <div class="panel">
-                        <h3 class="sub" style="margin-top:0">response.ok pega</h3>
+                        <h3 class="sub" style="margin-top:0">Com <code class="i">error.response</code> (servidor)</h3>
                         <ul class="list"><li>400 Bad Request</li><li>404 Not Found</li><li>405 Method Not Allowed</li><li>500 Internal Server Error</li></ul>
                     </div>
                 </div>
 
                 <h2 class="sec">Tabelas de referência</h2>
-                <h3 class="sub">O que cada método precisa no fetch()</h3>
+                <h3 class="sub">Como fazer cada método no Axios</h3>
                 <div class="table-wrap">
                     <table class="tbl">
-                        <thead><tr><th>Método</th><th>method:</th><th>headers:</th><th>body:</th></tr></thead>
+                        <thead><tr><th>Método</th><th>Chamada</th><th>Body</th></tr></thead>
                         <tbody>
-                            <tr><td class="mono">GET</td><td>não precisa</td><td>não precisa</td><td>não tem</td></tr>
-                            <tr><td class="mono">POST</td><td>"POST"</td><td>Content-Type: JSON</td><td>JSON.stringify(&#123;...&#125;)</td></tr>
-                            <tr><td class="mono">PUT</td><td>"PUT"</td><td>Content-Type: JSON</td><td>JSON.stringify(&#123;...&#125;)</td></tr>
-                            <tr><td class="mono">PATCH</td><td>"PATCH"</td><td>Content-Type: JSON</td><td>JSON.stringify(&#123;...&#125;)</td></tr>
-                            <tr><td class="mono">DELETE</td><td>"DELETE"</td><td>não precisa</td><td>não tem</td></tr>
+                            <tr><td class="mono">GET</td><td class="mono">axios.get(url)</td><td>não tem</td></tr>
+                            <tr><td class="mono">POST</td><td class="mono">axios.post(url, dados)</td><td>objeto JS direto</td></tr>
+                            <tr><td class="mono">PUT</td><td class="mono">axios.put(url, dados)</td><td>objeto JS direto</td></tr>
+                            <tr><td class="mono">PATCH</td><td class="mono">axios.patch(url, dados)</td><td>objeto JS direto</td></tr>
+                            <tr><td class="mono">DELETE</td><td class="mono">axios.delete(url)</td><td>não tem</td></tr>
                         </tbody>
                     </table>
                 </div>
+                <p class="txt" style="font-size:.8rem">Quando há body, o Axios envia o header <code class="i">Content-Type: application/json</code> e serializa o objeto automaticamente.</p>
                 <h3 class="sub">Códigos de status HTTP</h3>
                 <div class="table-wrap">
                     <table class="tbl">
@@ -1161,7 +1155,7 @@ export default defineConfig({
   },
 });</pre></div>
                 <p class="txt">No HTML, aponte o script com <code class="i">type="module"</code>; no JS, use o <code class="i">import</code> normalmente:</p>
-                <div class="code-wrap"><span class="lang">html</span><pre class="code">&lt;script type="module" src="./main.js"&gt;&lt;/script&gt;</pre></div>
+                <div class="code-wrap"><span class="lang">html</span><pre class="code">&lt;script type="module" src="./app.js"&gt;&lt;/script&gt;</pre></div>
                 <div class="code-wrap"><span class="lang">terminal</span><pre class="code">npm run dev   <span class="cm"># abre o projeto com hot reload</span></pre></div>
 
                 <h3 class="sub">Opção B — Via CDN (sem bundler)</h3>
@@ -1199,7 +1193,7 @@ getUsers();</pre></div>
                 <div class="code-wrap"><span class="lang">.gitignore</span><pre class="code">node_modules/
 dist/</pre></div>
 
-                <div class="callout tip"><span class="ct">🎯 Na prática</span> Para projetos reais e frameworks (Vue, React), o Axios costuma ser a escolha mais popular pela praticidade. Mas entender o Fetch é fundamental — ele é a base de como as requisições funcionam no JavaScript. <strong>Neste curso, o build guiado (módulo 5) usa Fetch; o repositório de referência (módulo 6) usa Axios.</strong></div>
+                <div class="callout tip"><span class="ct">🎯 Na prática</span> Para projetos reais e frameworks (Vue, React), o Axios costuma ser a escolha mais popular pela praticidade. Mas entender o Fetch é fundamental — ele é a base de como as requisições funcionam no JavaScript. <strong>Neste curso, tanto o build guiado (módulo 5) quanto o repositório de referência (módulo 6) usam Axios.</strong></div>
             </div>
         </section>
         <!-- ══════════ MÓDULO 5 — CONSTRUIR O FRONTEND ══════════ -->
@@ -1207,15 +1201,17 @@ dist/</pre></div>
             <div class="wrap">
                 <div class="eyebrow">Módulo 5</div>
                 <h1 class="title">Construindo o Frontend, passo a passo</h1>
-                <p class="lead">Agora a parte prática: do zero até a interface completa consumindo a API PHP. São <strong>7 etapas</strong> em ordem — Setup, HTML, CSS e então as quatro operações do CRUD (Listar, Criar, Deletar, Editar). Esta versão guiada usa a <strong>Fetch API</strong> (sem instalar nada). O módulo <a data-goto="rodar">Rodar</a> traz a versão equivalente com <strong>Axios</strong>, igual à do repositório de referência.</p>
-                <div class="callout warn"><span class="ct">⚠ Pré-requisito</span> A API PHP precisa estar rodando em <code>http://localhost:8000</code>. Suba-a antes de testar (veja o módulo <a data-goto="rodar">Rodar</a>), senão as requisições vão falhar.</div>
+                <p class="lead">Agora a parte prática: do zero até a interface completa consumindo a API PHP. São <strong>7 etapas</strong> em ordem — Setup, HTML, CSS e então as quatro operações do CRUD (Listar, Criar, Deletar, Editar). Toda a comunicação com a API usa o <strong>Axios</strong>, como no repositório de referência. (Existe também o <code class="i">fetch()</code> nativo do JavaScript, que dispensa instalação — mas o Axios trata JSON e erros por você; veja a comparação no módulo <a data-goto="axios">Fetch vs Axios</a>.)</p>
+                <div class="callout warn"><span class="ct">⚠ Pré-requisitos</span> A API PHP precisa estar rodando em <code>http://localhost:8000</code> (veja o módulo <a data-goto="rodar">Rodar</a>), senão as requisições vão falhar. E você precisa do <strong>Node.js</strong> instalado para o Axios e o Vite — o passo a passo está no módulo <a data-goto="axios">Fetch vs Axios</a>.</div>
 
                 <h2 class="sec">Etapa 1 — Setup do projeto</h2>
-                <p class="txt">Antes de escrever qualquer código, vamos organizar o projeto e entender a arquitetura. Vamos construir uma interface web que consome a <strong>API REST em PHP</strong> usando <strong>JavaScript puro</strong> (Vanilla JS) com <strong>ES Modules</strong> e <strong>Bootstrap 5</strong> para a estilização.</p>
+                <p class="txt">Antes de escrever qualquer código, vamos organizar o projeto e entender a arquitetura. Vamos construir uma interface web que consome a <strong>API REST em PHP</strong> usando <strong>JavaScript puro</strong> (Vanilla JS) com <strong>ES Modules</strong>, o <strong>Axios</strong> para as requisições HTTP e <strong>Bootstrap 5</strong> para a estilização.</p>
 
                 <h3 class="sub">Crie a estrutura de pastas</h3>
                 <p class="txt">Dentro da pasta do frontend, crie esta árvore. Cada pasta tem uma responsabilidade clara: <code class="i">api/</code> conversa com o servidor, <code class="i">dom/</code> mexe na tela e <code class="i">app.js</code> orquestra tudo.</p>
                 <div class="code-wrap"><span class="lang">estrutura</span><pre class="code">frontend/
+├── package.json            <span class="cm">← dependências (axios, vite)</span>
+├── vite.config.js          <span class="cm">← porta 8080 + root em src/</span>
 └── src/
     ├── index.html          <span class="cm">← página principal</span>
     ├── app.js              <span class="cm">← orquestrador (imports + lógica)</span>
@@ -1231,8 +1227,36 @@ dist/</pre></div>
         └── dom/
             └── render.js   <span class="cm">← renderização dos cards</span></pre></div>
 
+                <h3 class="sub">Instale o Axios e o Vite</h3>
+                <p class="txt">Na raiz do <code class="i">frontend/</code>, crie o <code class="i">package.json</code> e instale o <strong>Axios</strong> (as requisições) e o <strong>Vite</strong> (servidor de desenvolvimento que resolve os imports e recarrega a página sozinho).</p>
+                <div class="code-wrap"><span class="lang">terminal</span><pre class="code">npm init -y                  <span class="cm"># cria o package.json</span>
+npm install axios            <span class="cm"># dependência do projeto</span>
+npm install --save-dev vite  <span class="cm"># só para desenvolvimento</span></pre></div>
+                <p class="txt">Adicione os scripts no <code class="i">package.json</code> e crie o <code class="i">vite.config.js</code> na raiz. Como o <code class="i">index.html</code> fica dentro de <code class="i">src/</code>, apontamos o <code class="i">root</code> para lá — e fixamos a porta <code class="i">8080</code>, que é a liberada no CORS da API:</p>
+                <div class="grid2">
+                    <div class="code-wrap"><span class="lang">package.json</span><pre class="code">"scripts": {
+  "dev": "vite",
+  "build": "vite build",
+  "preview": "vite preview"
+}</pre></div>
+                    <div class="code-wrap"><span class="lang">vite.config.js</span><pre class="code">import { defineConfig } from 'vite';
+
+export default defineConfig({
+  root: 'src',
+  server: {
+    port: 8080,
+    strictPort: true,
+  },
+  build: {
+    outDir: '../dist',
+    emptyOutDir: true,
+  },
+});</pre></div>
+                </div>
+                <div class="callout tip"><span class="ct">💡 Para ver a página</span> Rode <code>npm run dev</code> e abra <code>http://localhost:8080</code>. É assim que você vai testar cada etapa deste módulo.</div>
+
                 <h3 class="sub">Entenda a arquitetura em camadas</h3>
-                <p class="txt">Separamos o código em <strong>camadas</strong>, assim como fizemos na API. Os arquivos em <code class="i">scripts/api/</code> só fazem <code class="i">fetch</code> (falam com o servidor). O <code class="i">scripts/dom/render.js</code> só manipula o DOM (o visual). O <code class="i">app.js</code> conecta os dois e cuida dos eventos.</p>
+                <p class="txt">Separamos o código em <strong>camadas</strong>, assim como fizemos na API. Os arquivos em <code class="i">scripts/api/</code> só falam com o servidor (requisições via Axios). O <code class="i">scripts/dom/render.js</code> só manipula o DOM (o visual). O <code class="i">app.js</code> conecta os dois e cuida dos eventos.</p>
                 <div class="callout tip"><span class="ct">💡 Por que separar?</span> Cada arquivo tem uma única responsabilidade. Se a API mudar, você altera só a pasta <code>api/</code>. Se o layout mudar, altera só o <code>render.js</code>. É o princípio da <strong>Separação de Responsabilidades</strong> — o mesmo que organiza o backend.</div>
 
                 <h3 class="sub">ES Modules: import e export</h3>
@@ -1242,7 +1266,7 @@ export async function createUser(apiUrl, data) { ... }
 
 <span class="cm">// app.js importa ela:</span>
 import { createUser } from './scripts/api/create.js';</pre></div>
-                <div class="callout tip"><span class="ct">💡 Sem bundler</span> Com ES Modules, o próprio navegador resolve os <code>import</code>s — sem precisar de Webpack ou Vite para o build guiado. (No repositório de referência, que usa Axios via npm, o Vite entra em cena; veja o módulo <a data-goto="axios">Fetch vs Axios</a>.)</div>
+                <div class="callout tip"><span class="ct">💡 Por que o Vite?</span> Imports relativos (<code>./scripts/...</code>) o navegador resolve sozinho. Mas <code>import axios from 'axios'</code> é um import "de pacote" — o código está no <code>node_modules/</code>, e é o Vite quem faz essa ponte durante o <code>npm run dev</code>. (A alternativa via CDN, sem bundler, está no módulo <a data-goto="axios">Fetch vs Axios</a>.)</div>
 
                 <h2 class="sec">Etapa 2 — O HTML (<code class="i">index.html</code>)</h2>
                 <p class="txt">Vamos montar a estrutura visual com Bootstrap 5. Construímos por partes; ao final, todas juntas formam o arquivo completo.</p>
@@ -1453,18 +1477,19 @@ ul { list-style: none; margin: 0; padding: 0; }</pre></div>
                 <p class="txt">A primeira funcionalidade: buscar os usuários na API e exibi-los como cards. Precisamos de 3 coisas: <strong>(1)</strong> uma função que faça <code class="i">GET</code> na API, <strong>(2)</strong> uma função que transforme os dados em cards, e <strong>(3)</strong> um gatilho que chame tudo quando a página carregar.</p>
 
                 <h3 class="sub">read.js — buscar os dados</h3>
-                <p class="txt">O arquivo mais simples da camada de API. Faz um <code class="i">fetch</code> GET (o método padrão), converte para JSON e retorna a lista de usuários.</p>
-                <div class="code-wrap"><span class="lang">scripts/api/read.js</span><pre class="code">export async function getUsers(apiUrl) {
-    const response = await fetch(apiUrl);
-    const data = await response.json();
+                <p class="txt">O arquivo mais simples da camada de API. Faz um GET com <code class="i">axios.get</code> e retorna a lista de usuários — o <code class="i">response.data</code> já vem convertido de JSON, sem passo manual.</p>
+                <div class="code-wrap"><span class="lang">scripts/api/read.js</span><pre class="code">import axios from 'axios';
 
-    if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch users');
+export async function getUsers(apiUrl) {
+    try {
+        const response = await axios.get(apiUrl);
+        return response.data.users;
+    } catch (error) {
+        const message = error.response?.data?.error || 'Failed to load users';
+        throw new Error(message);
     }
-
-    return data.users;
 }</pre></div>
-                <div class="callout tip"><span class="ct">💡 Os pilares</span> <code>export</code> torna a função disponível para outros arquivos. <code>async/await</code> deixa o código assíncrono legível. <code>response.ok</code> é <code>true</code> quando o status HTTP está entre 200 e 299 — lembre que o <code>fetch</code> não lança erro sozinho em 4xx/5xx.</div>
+                <div class="callout tip"><span class="ct">💡 Os pilares</span> <code>export</code> torna a função disponível para outros arquivos. <code>async/await</code> deixa o código assíncrono legível. E o Axios <strong>lança erro sozinho</strong> quando a resposta é 4xx/5xx — por isso o <code>try/catch</code>: extraímos a mensagem que a API enviou (<code>error.response?.data?.error</code>) e relançamos um <code>Error</code> limpo.</div>
 
                 <h3 class="sub">render.js — exibir os cards</h3>
                 <p class="txt">Este arquivo cuida do visual. Importa o <code class="i">getUsers</code>, busca os dados e cria um card Bootstrap para cada usuário. Também mantém um <strong>cache</strong> da última lista, usado depois na edição e na deleção.</p>
@@ -1534,26 +1559,26 @@ Abra o DevTools &gt; Network e veja a requisição GET.
                 <p class="txt">Vamos fazer o formulário criar usuários. Envolve capturar o <em>submit</em>, enviar um POST para a API e atualizar a lista.</p>
 
                 <h3 class="sub">create.js — enviar os dados</h3>
-                <p class="txt">Parecido com o <code class="i">read.js</code>, mas agora com o método <code class="i">POST</code> e um corpo JSON. Note a conversão de <code class="i">age</code> para <code class="i">Number</code>.</p>
-                <div class="code-wrap"><span class="lang">scripts/api/create.js</span><pre class="code">export async function createUser(apiUrl, { name, age, email }) {
-    const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, age: Number(age), email }),
-    });
+                <p class="txt">Parecido com o <code class="i">read.js</code>, mas agora com <code class="i">axios.post</code> e um corpo. O objeto JS vai <strong>direto</strong> como segundo argumento — o Axios serializa para JSON e define o <code class="i">Content-Type</code> sozinho. Note a conversão de <code class="i">age</code> para <code class="i">Number</code>.</p>
+                <div class="code-wrap"><span class="lang">scripts/api/create.js</span><pre class="code">import axios from 'axios';
 
-    const data = await response.json();
-
-    if (!response.ok) {
-        throw new Error(data.error || 'Failed to create user');
+export async function createUser(apiUrl, { name, age, email }) {
+    try {
+        const response = await axios.post(apiUrl, {
+            name,
+            age: Number(age),
+            email,
+        });
+        return response.data;
+    } catch (error) {
+        const message = error.response?.data?.error || 'Failed to create user';
+        throw new Error(message);
     }
-
-    return data;
 }</pre></div>
                 <div class="callout tip"><span class="ct">💡 Por que Number(age)?</span> Os inputs HTML sempre retornam <em>strings</em>. A API espera um número para <code>age</code>, então convertemos antes de enviar.</div>
 
                 <h3 class="sub">O padrão de tratamento de erro</h3>
-                <p class="txt">Todos os arquivos da camada API seguem o mesmo padrão: se <code class="i">response.ok</code> for <code class="i">false</code>, disparam <code class="i">throw new Error()</code>. Isso permite que o <code class="i">app.js</code> use <code class="i">try/catch</code> para exibir a mensagem ao usuário. A API PHP retorna <code class="i">{ "error": "mensagem" }</code>, e o <code class="i">data.error</code> extrai esse texto.</p>
+                <p class="txt">Todos os arquivos da camada API seguem o mesmo padrão: <code class="i">try/catch</code> em volta da chamada do Axios. Quando a API responde 4xx/5xx, o Axios lança um erro que carrega a resposta em <code class="i">error.response</code>. Como a API PHP retorna <code class="i">{ "error": "mensagem" }</code>, o <code class="i">error.response?.data?.error</code> extrai esse texto — e relançamos um <code class="i">new Error(message)</code> simples, que o <code class="i">app.js</code> captura para exibir ao usuário.</p>
 
                 <h3 class="sub">Funções de erro no app.js</h3>
                 <p class="txt">Adicione duas funções auxiliares para mostrar/esconder o alerta de erro do Bootstrap que criamos no HTML.</p>
@@ -1615,18 +1640,16 @@ Envie dados inválidos e veja o alerta de erro.</pre></div>
 
                 <h3 class="sub">delete.js</h3>
                 <p class="txt">Envia <code class="i">DELETE</code> com o <code class="i">id</code> na query string. Note que <strong>não há body</strong> — o id vai na URL.</p>
-                <div class="code-wrap"><span class="lang">scripts/api/delete.js</span><pre class="code">export async function deleteUser(apiUrl, id) {
-    const response = await fetch(`${apiUrl}?id=${id}`, {
-        method: 'DELETE',
-    });
+                <div class="code-wrap"><span class="lang">scripts/api/delete.js</span><pre class="code">import axios from 'axios';
 
-    const data = await response.json();
-
-    if (!response.ok) {
-        throw new Error(data.error || 'Failed to delete user');
+export async function deleteUser(apiUrl, id) {
+    try {
+        const response = await axios.delete(`${apiUrl}?id=${id}`);
+        return response.data;
+    } catch (error) {
+        const message = error.response?.data?.error || 'Failed to delete user';
+        throw new Error(message);
     }
-
-    return data;
 }</pre></div>
 
                 <h3 class="sub">Função auxiliar: getUserFromCard</h3>
@@ -1677,22 +1700,22 @@ usersSection.addEventListener('click', async (event) =&gt; {
                 <div class="callout tip"><span class="ct">💡 Eficiência</span> Se o usuário mudou só o e-mail, não faz sentido reenviar nome e idade. O PATCH é mais enxuto e semântico nesse caso.</div>
 
                 <h3 class="sub">update.js — duas funções</h3>
-                <p class="txt">Este arquivo exporta <code class="i">updateUser</code> (PUT, todos os campos) e <code class="i">patchUser</code> (PATCH, campos parciais).</p>
-                <div class="code-wrap"><span class="lang">scripts/api/update.js</span><pre class="code"><span class="cm">// PUT — substituição completa</span>
+                <p class="txt">Este arquivo exporta <code class="i">updateUser</code> (PUT, todos os campos) e <code class="i">patchUser</code> (PATCH, campos parciais). Em ambos, o body vai como objeto JS direto — o Axios serializa.</p>
+                <div class="code-wrap"><span class="lang">scripts/api/update.js</span><pre class="code">import axios from 'axios';
+
+<span class="cm">// PUT — substituição completa</span>
 export async function updateUser(apiUrl, id, { name, age, email }) {
-    const response = await fetch(`${apiUrl}?id=${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, age: Number(age), email }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-        throw new Error(data.error || 'Failed to update user');
+    try {
+        const response = await axios.put(`${apiUrl}?id=${id}`, {
+            name,
+            age: Number(age),
+            email,
+        });
+        return response.data;
+    } catch (error) {
+        const message = error.response?.data?.error || 'Failed to update user';
+        throw new Error(message);
     }
-
-    return data;
 }
 
 <span class="cm">// PATCH — atualização parcial</span>
@@ -1701,19 +1724,13 @@ export async function patchUser(apiUrl, id, fields) {
         fields.age = Number(fields.age);
     }
 
-    const response = await fetch(`${apiUrl}?id=${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(fields),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-        throw new Error(data.error || 'Failed to patch user');
+    try {
+        const response = await axios.patch(`${apiUrl}?id=${id}`, fields);
+        return response.data;
+    } catch (error) {
+        const message = error.response?.data?.error || 'Failed to patch user';
+        throw new Error(message);
     }
-
-    return data;
 }</pre></div>
                 <div class="callout tip"><span class="ct">💡 fields genérico</span> O <code>patchUser</code> recebe um objeto <code>fields</code> que pode ter 1, 2 ou 3 campos. A conversão de <code>age</code> só acontece se ele estiver presente.</div>
 
@@ -1837,6 +1854,8 @@ try {
 ✓ Modo edição com Cancel
 
 Arquivos criados:
+  package.json
+  vite.config.js
   src/index.html
   src/app.js
   src/styles/reset.css
@@ -1847,9 +1866,9 @@ Arquivos criados:
   src/scripts/api/delete.js
   src/scripts/dom/render.js</pre></div>
 
-                <h2 class="sec">O <code class="i">app.js</code> completo (versão Fetch)</h2>
+                <h2 class="sec">O <code class="i">app.js</code> completo</h2>
                 <p class="txt">Construímos o <code class="i">app.js</code> aos poucos ao longo das etapas. Aqui está ele inteiro, já montado — confira o seu contra este arquivo.</p>
-                <details class="file"><summary><span class="fpath">src/app.js</span> — versão completa (Fetch)</summary><div class="code-wrap"><pre class="code">import { renderUsers, findUserById } from './scripts/dom/render.js';
+                <details class="file"><summary><span class="fpath">src/app.js</span> — versão completa</summary><div class="code-wrap"><pre class="code">import { renderUsers, findUserById } from './scripts/dom/render.js';
 import { createUser } from './scripts/api/create.js';
 import { deleteUser } from './scripts/api/delete.js';
 import { updateUser, patchUser } from './scripts/api/update.js';
@@ -1973,7 +1992,7 @@ form.addEventListener('submit', async (event) =&gt; {
 
 <span class="cm">// --- Primeira renderização ---</span>
 document.addEventListener('DOMContentLoaded', () =&gt; renderUsers(apiUrl));</pre></div></details>
-                <div class="callout info"><span class="ct">🟨 E a versão com Axios?</span> A mesma aplicação, escrita com Axios (como no repositório de referência), está no módulo <a data-goto="rodar">Rodar</a>. Lá, a camada de API muda um pouco (o Axios trata JSON e erros automaticamente) e a lógica de edição fica dentro de um <code>updateUser()</code> esperto em <code>update.js</code> — mas o <code>render.js</code> e o HTML são idênticos.</div>
+                <div class="callout info"><span class="ct">🟨 E o repositório de referência?</span> A mesma aplicação está no módulo <a data-goto="rodar">Rodar</a>, com uma organização um pouco diferente: o estado de edição vive num <code>form.js</code> separado e a escolha entre PUT e PATCH fica dentro de um <code>updateUser()</code> esperto no <code>update.js</code> — mas a camada de API com Axios, o <code>render.js</code> e o HTML são essencialmente os mesmos que você acabou de construir.</div>
             </div>
         </section>
         <!-- ══════════ MÓDULO 6 — RODAR TUDO ══════════ -->
@@ -2131,7 +2150,7 @@ export async function getUsers(apiUrl) {
         const response = await axios.get(apiUrl);
         return response.data.users;
     } catch (error) {
-        const message = error.response?.data?.error || 'Failed to fetch users';
+        const message = error.response?.data?.error || 'Failed to load users';
         console.error('Error reading users:', message);
         throw new Error(message);
     }
@@ -2323,7 +2342,7 @@ form.addEventListener('submit', async (event) => {
         showError(error.message);
     }
 });</pre></div></details>
-                <div class="callout info"><span class="ct">render.js, index.html e reset.css</span> São idênticos aos construídos no módulo <a data-goto="frontend">Frontend</a> (etapas Listar, HTML e CSS). O <code>render.js</code> não muda entre Fetch e Axios — ele importa <code>getUsers()</code> da camada de API.</div>
+                <div class="callout info"><span class="ct">render.js, index.html e reset.css</span> São idênticos aos construídos no módulo <a data-goto="frontend">Frontend</a> (etapas Listar, HTML e CSS). O <code>render.js</code> não depende de como a camada de API é organizada — ele só importa <code>getUsers()</code>.</div>
 
                 <h2 class="sec">Próximos passos &amp; desafios</h2>
                 <ul class="list">
