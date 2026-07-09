@@ -1045,13 +1045,13 @@ exit; // encerra após o preflight</code></div>
                     <div>
                         <h3 class="sub" style="margin-top:0">Com Fetch (nativo)</h3>
                         <div class="code-wrap"><span class="lang">read.js</span><pre class="code">export async function getUsers(apiUrl) {
-  const response = await fetch(apiUrl);
-  const data = await response.json();
+    const response = await fetch(apiUrl);
+    const data = await response.json();
 
-  if (!response.ok) {
-    throw new Error(data.error || 'Failed to fetch users');
-  }
-  return data.users;
+    if (!response.ok) {
+        throw new Error(data.error || 'Failed to load users');
+    }
+    return data.users;
 }</pre></div>
                         <p class="txt" style="font-size:.8rem">O fetch <strong>não</strong> lança erro em 400/404/500 — só em falha de rede. Por isso verificamos <code class="i">response.ok</code> e lançamos o erro nós mesmos.</p>
                     </div>
@@ -1060,46 +1060,50 @@ exit; // encerra após o preflight</code></div>
                         <div class="code-wrap"><span class="lang">read.js</span><pre class="code">import axios from 'axios';
 
 export async function getUsers(apiUrl) {
-  try {
-    const response = await axios.get(apiUrl);
-    return response.data.users;
-  } catch (error) {
-    const message = error.response?.data?.error
-      || 'Failed to fetch users';
-    throw new Error(message);
-  }
+    try {
+        const response = await axios.get(apiUrl);
+        return response.data.users;
+    } catch (error) {
+        const message = error.response?.data?.error || 'Failed to load users';
+        throw new Error(message);
+    }
 }</pre></div>
-                        <p class="txt" style="font-size:.8rem">Sem <code class="i">.json()</code> (o <code class="i">response.data</code> já vem parseado) e erros HTTP caem direto no <code class="i">catch</code>.</p>
+                        <p class="txt" style="font-size:.8rem">Sem <code class="i">.json()</code> (o <code class="i">response.data</code> já vem parseado) e erros HTTP caem direto no <code class="i">catch</code>. Este é exatamente o <code class="i">read.js</code> que você vai criar no módulo <a data-goto="frontend">Frontend</a>.</p>
                     </div>
                 </div>
 
                 <h2 class="sec">PUT e PATCH com Axios</h2>
-                <p class="txt">Enviamos o body como um objeto JS direto — o Axios serializa para JSON automaticamente.</p>
+                <p class="txt">Enviamos o body como um objeto JS direto — o Axios serializa para JSON automaticamente. Este é exatamente o <code class="i">update.js</code> que você vai criar no módulo <a data-goto="frontend">Frontend</a>:</p>
                 <div class="code-wrap"><span class="lang">update.js</span><pre class="code">import axios from 'axios';
 
-<span class="cm">// PUT — atualização completa</span>
-export async function putUser(apiUrl, id, user) {
-  try {
-    const response = await axios.put(`${apiUrl}?id=${id}`, {
-      name: user.name,
-      age: Number(user.age),
-      email: user.email,
-    });
-    return response.data;
-  } catch (error) {
-    throw new Error(error.response?.data?.error || 'Failed to update user');
-  }
+<span class="cm">// PUT — substituição completa</span>
+export async function updateUser(apiUrl, id, { name, age, email }) {
+    try {
+        const response = await axios.put(`${apiUrl}?id=${id}`, {
+            name,
+            age: Number(age),
+            email,
+        });
+        return response.data;
+    } catch (error) {
+        const message = error.response?.data?.error || 'Failed to update user';
+        throw new Error(message);
+    }
 }
 
 <span class="cm">// PATCH — atualização parcial</span>
 export async function patchUser(apiUrl, id, fields) {
-  if (fields.age !== undefined) fields.age = Number(fields.age);
-  try {
-    const response = await axios.patch(`${apiUrl}?id=${id}`, fields);
-    return response.data;
-  } catch (error) {
-    throw new Error(error.response?.data?.error || 'Failed to patch user');
-  }
+    if (fields.age !== undefined) {
+        fields.age = Number(fields.age);
+    }
+
+    try {
+        const response = await axios.patch(`${apiUrl}?id=${id}`, fields);
+        return response.data;
+    } catch (error) {
+        const message = error.response?.data?.error || 'Failed to patch user';
+        throw new Error(message);
+    }
 }</pre></div>
 
                 <h2 class="sec">Instalando o Node.js (via NVM)</h2>
@@ -1154,6 +1158,7 @@ export default defineConfig({
     strictPort: true,  <span class="cm">// falha se 8080 estiver ocupada, em vez de trocar sozinho</span>
   },
 });</pre></div>
+                <p class="txt" style="font-size:.8rem">Esta é a versão mínima, para um projeto com o <code class="i">index.html</code> na raiz. No projeto do curso, o <code class="i">index.html</code> fica dentro de <code class="i">src/</code> — por isso o <code class="i">vite.config.js</code> que você vai criar no módulo <a data-goto="frontend">Frontend</a> ganha ainda <code class="i">root: 'src'</code> e a seção <code class="i">build</code>.</p>
                 <p class="txt">No HTML, aponte o script com <code class="i">type="module"</code>; no JS, use o <code class="i">import</code> normalmente:</p>
                 <div class="code-wrap"><span class="lang">html</span><pre class="code">&lt;script type="module" src="./app.js"&gt;&lt;/script&gt;</pre></div>
                 <div class="code-wrap"><span class="lang">terminal</span><pre class="code">npm run dev   <span class="cm"># abre o projeto com hot reload</span></pre></div>
@@ -1992,7 +1997,7 @@ form.addEventListener('submit', async (event) =&gt; {
 
 <span class="cm">// --- Primeira renderização ---</span>
 document.addEventListener('DOMContentLoaded', () =&gt; renderUsers(apiUrl));</pre></div></details>
-                <div class="callout info"><span class="ct">🟨 E o repositório de referência?</span> A mesma aplicação está no módulo <a data-goto="rodar">Rodar</a>, com uma organização um pouco diferente: o estado de edição vive num <code>form.js</code> separado e a escolha entre PUT e PATCH fica dentro de um <code>updateUser()</code> esperto no <code>update.js</code> — mas a camada de API com Axios, o <code>render.js</code> e o HTML são essencialmente os mesmos que você acabou de construir.</div>
+                <div class="callout info"><span class="ct">🟨 E o código de referência?</span> Está no módulo <a data-goto="rodar">Rodar</a> — arquivo por arquivo, é exatamente o código que você acabou de construir aqui, pronto para copiar e conferir com o seu.</div>
             </div>
         </section>
         <!-- ══════════ MÓDULO 6 — RODAR TUDO ══════════ -->
@@ -2036,7 +2041,7 @@ document.addEventListener('DOMContentLoaded', () =&gt; renderUsers(apiUrl));</pr
     │   └── style.css
     └── scripts/
         ├── api/            <span class="cm"># read/create/update/delete</span>
-        └── dom/            <span class="cm"># render.js, form.js</span></pre></div>
+        └── dom/            <span class="cm"># render.js</span></pre></div>
                     </div>
                 </div>
 
@@ -2045,14 +2050,14 @@ document.addEventListener('DOMContentLoaded', () =&gt; renderUsers(apiUrl));</pr
                 <div class="code-wrap"><span class="lang">vite.config.js</span><pre class="code">import { defineConfig } from 'vite';
 
 export default defineConfig({
-  root: 'src',            <span class="cm">// index.html fica em src/</span>
+  root: 'src',
   server: {
-    port: 8080,           <span class="cm">// bate com o $allowedOrigins da API</span>
-    strictPort: true,     <span class="cm">// não troca de porta se 8080 estiver ocupada</span>
+    port: 8080,
+    strictPort: true,
   },
   build: {
-    outDir: '../dist',    <span class="cm">// gera o build na raiz, fora de src/</span>
-    emptyOutDir: true,    <span class="cm">// limpa dist/ antes de cada build</span>
+    outDir: '../dist',
+    emptyOutDir: true,
   },
 });</pre></div>
                 <div class="callout info"><span class="ct">Por que essas opções?</span> <code>root: 'src'</code> diz ao Vite onde está o <code>index.html</code>; <code>port: 8080</code> faz o <code>npm run dev</code> subir na porta certa (senão seria a <code>5173</code>, bloqueada pelo CORS); <code>outDir: '../dist'</code> gera o build na pasta que o Apache serve no Docker.</div>
@@ -2145,43 +2150,38 @@ curl -X DELETE "http://localhost:8000/api/users?id=1"</pre></div>
                 <details class="file"><summary><span class="fpath">src/scripts/api/read.js</span></summary><div class="code-wrap"><pre class="code">import axios from 'axios';
 
 export async function getUsers(apiUrl) {
-
     try {
         const response = await axios.get(apiUrl);
         return response.data.users;
     } catch (error) {
         const message = error.response?.data?.error || 'Failed to load users';
-        console.error('Error reading users:', message);
         throw new Error(message);
     }
-
 }</pre></div></details>
                 <details class="file"><summary><span class="fpath">src/scripts/api/create.js</span></summary><div class="code-wrap"><pre class="code">import axios from 'axios';
 
-export async function createUser(apiUrl, user) {
+export async function createUser(apiUrl, { name, age, email }) {
     try {
         const response = await axios.post(apiUrl, {
-            name: user.name,
-            age: Number(user.age),
-            email: user.email
+            name,
+            age: Number(age),
+            email,
         });
-
         return response.data;
-
     } catch (error) {
         const message = error.response?.data?.error || 'Failed to create user';
-        console.error('Error creating user:', message);
         throw new Error(message);
     }
 }</pre></div></details>
-                <details class="file"><summary><span class="fpath">src/scripts/api/update.js</span> — PUT + PATCH inteligente</summary><div class="code-wrap"><pre class="code">import axios from 'axios';
+                <details class="file"><summary><span class="fpath">src/scripts/api/update.js</span> — PUT + PATCH</summary><div class="code-wrap"><pre class="code">import axios from 'axios';
 
-export async function putUser(apiUrl, id, user) {
+<span class="cm">// PUT — substituição completa</span>
+export async function updateUser(apiUrl, id, { name, age, email }) {
     try {
         const response = await axios.put(`${apiUrl}?id=${id}`, {
-            name: user.name,
-            age: Number(user.age),
-            email: user.email,
+            name,
+            age: Number(age),
+            email,
         });
         return response.data;
     } catch (error) {
@@ -2190,29 +2190,18 @@ export async function putUser(apiUrl, id, user) {
     }
 }
 
+<span class="cm">// PATCH — atualização parcial</span>
 export async function patchUser(apiUrl, id, fields) {
+    if (fields.age !== undefined) {
+        fields.age = Number(fields.age);
+    }
+
     try {
         const response = await axios.patch(`${apiUrl}?id=${id}`, fields);
         return response.data;
     } catch (error) {
         const message = error.response?.data?.error || 'Failed to patch user';
         throw new Error(message);
-    }
-}
-
-export async function updateUser(apiUrl, id, user, originalUser) {
-    const changedFields = {};
-    if (user.name !== originalUser.name) changedFields.name = user.name;
-    if (Number(user.age) !== originalUser.age) changedFields.age = Number(user.age);
-    if (user.email !== originalUser.email) changedFields.email = user.email;
-
-    if (Object.keys(changedFields).length === 0) return null;
-
-    const allChanged = Object.keys(changedFields).length === 3;
-    if (allChanged) {
-        return putUser(apiUrl, id, user);
-    } else {
-        return patchUser(apiUrl, id, changedFields);
     }
 }</pre></div></details>
                 <details class="file"><summary><span class="fpath">src/scripts/api/delete.js</span></summary><div class="code-wrap"><pre class="code">import axios from 'axios';
@@ -2228,31 +2217,43 @@ export async function deleteUser(apiUrl, id) {
 }</pre></div></details>
 
                 <h3 class="sub">🟨 Frontend (Axios) — camada de DOM &amp; orquestração</h3>
-                <details class="file"><summary><span class="fpath">src/scripts/dom/form.js</span> — estado de edição</summary><div class="code-wrap"><pre class="code">import { findUserById } from './render.js';
+                <details class="file"><summary><span class="fpath">src/app.js</span> — orquestrador</summary><div class="code-wrap"><pre class="code">import { renderUsers, findUserById } from './scripts/dom/render.js';
+import { createUser } from './scripts/api/create.js';
+import { deleteUser } from './scripts/api/delete.js';
+import { updateUser, patchUser } from './scripts/api/update.js';
 
+const apiUrl = 'http://localhost:8000/api/users';
+
+<span class="cm">// Referências do DOM</span>
 const form = document.getElementById('create-user-form');
+const formError = document.getElementById('form-error');
 const formTitle = document.getElementById('form-title');
 const submitBtn = form.querySelector('button[type="submit"]');
 const cancelBtn = document.getElementById('cancel-edit');
-const formError = document.getElementById('form-error');
+const usersSection = document.getElementById('users');
 
+<span class="cm">// Estado de edição</span>
 let editingId = null;
 let originalUser = null;
 
-export function getEditingId() { return editingId; }
-export function getOriginalUser() { return originalUser; }
-
-export function showError(message) {
+<span class="cm">// --- Helpers de erro ---</span>
+function showError(message) {
     formError.textContent = message;
     formError.classList.remove('d-none');
 }
 
-export function hideError() {
+function hideError() {
     formError.classList.add('d-none');
     formError.textContent = '';
 }
 
-export function enterEditMode(user) {
+<span class="cm">// --- Helpers de edição ---</span>
+function getUserFromCard(button) {
+    const card = button.closest('.user-card');
+    return findUserById(Number(card.id));
+}
+
+function enterEditMode(user) {
     editingId = user.id;
     originalUser = { ...user };
     document.getElementById('name').value = user.name;
@@ -2264,7 +2265,7 @@ export function enterEditMode(user) {
     document.getElementById('name').focus();
 }
 
-export function exitEditMode() {
+function exitEditMode() {
     editingId = null;
     originalUser = null;
     formTitle.textContent = 'Create User';
@@ -2273,27 +2274,11 @@ export function exitEditMode() {
     form.reset();
 }
 
-export function getUserFromCard(button) {
-    const card = button.closest('.user-card');
-    return findUserById(Number(card.id));
-}</pre></div></details>
-                <details class="file"><summary><span class="fpath">src/app.js</span> — orquestrador</summary><div class="code-wrap"><pre class="code">import { renderUsers } from './scripts/dom/render.js';
-import {
-    enterEditMode, exitEditMode, getEditingId, getOriginalUser,
-    getUserFromCard, showError, hideError,
-} from './scripts/dom/form.js';
-import { createUser } from './scripts/api/create.js';
-import { updateUser } from './scripts/api/update.js';
-import { deleteUser } from './scripts/api/delete.js';
+cancelBtn.addEventListener('click', exitEditMode);
 
-const apiUrl = 'http://localhost:8000/api/users';
-
-const form = document.getElementById('create-user-form');
-const cancelBtn = document.getElementById('cancel-edit');
-const usersSection = document.getElementById('users');
-
-usersSection.addEventListener('click', async (event) => {
-    const target = event.target;
+<span class="cm">// --- Delegação de eventos nos cards ---</span>
+usersSection.addEventListener('click', async (event) =&gt; {
+    const { target } = event;
 
     if (target.dataset.action === 'edit') {
         enterEditMode(getUserFromCard(target));
@@ -2305,7 +2290,7 @@ usersSection.addEventListener('click', async (event) => {
 
         try {
             await deleteUser(apiUrl, user.id);
-            if (getEditingId() === user.id) exitEditMode();
+            if (editingId === user.id) exitEditMode();
             renderUsers(apiUrl);
         } catch (error) {
             showError(error.message);
@@ -2313,10 +2298,8 @@ usersSection.addEventListener('click', async (event) => {
     }
 });
 
-document.addEventListener('DOMContentLoaded', () => renderUsers(apiUrl));
-cancelBtn.addEventListener('click', exitEditMode);
-
-form.addEventListener('submit', async (event) => {
+<span class="cm">// --- Submit: cria ou edita ---</span>
+form.addEventListener('submit', async (event) =&gt; {
     event.preventDefault();
 
     const name = document.getElementById('name').value;
@@ -2326,14 +2309,27 @@ form.addEventListener('submit', async (event) => {
     hideError();
 
     try {
-        const editingId = getEditingId();
-        const user = { name, age, email };
-
         if (editingId !== null) {
-            const result = await updateUser(apiUrl, editingId, user, getOriginalUser());
-            if (result === null) { exitEditMode(); return; }
+            <span class="cm">// MODO EDIÇÃO — descobre o que mudou</span>
+            const changed = {};
+            if (name !== originalUser.name) changed.name = name;
+            if (Number(age) !== originalUser.age) changed.age = age;
+            if (email !== originalUser.email) changed.email = email;
+
+            if (Object.keys(changed).length === 0) {
+                exitEditMode();
+                return;
+            }
+
+            const allChanged = Object.keys(changed).length === 3;
+            if (allChanged) {
+                await updateUser(apiUrl, editingId, { name, age, email });
+            } else {
+                await patchUser(apiUrl, editingId, changed);
+            }
         } else {
-            await createUser(apiUrl, user);
+            <span class="cm">// MODO CRIAÇÃO</span>
+            await createUser(apiUrl, { name, age, email });
         }
 
         exitEditMode();
@@ -2341,8 +2337,11 @@ form.addEventListener('submit', async (event) => {
     } catch (error) {
         showError(error.message);
     }
-});</pre></div></details>
-                <div class="callout info"><span class="ct">render.js, index.html e reset.css</span> São idênticos aos construídos no módulo <a data-goto="frontend">Frontend</a> (etapas Listar, HTML e CSS). O <code>render.js</code> não depende de como a camada de API é organizada — ele só importa <code>getUsers()</code>.</div>
+});
+
+<span class="cm">// --- Primeira renderização ---</span>
+document.addEventListener('DOMContentLoaded', () =&gt; renderUsers(apiUrl));</pre></div></details>
+                <div class="callout info"><span class="ct">render.js, index.html e os CSS</span> Não os repetimos aqui: são idênticos aos construídos no módulo <a data-goto="frontend">Frontend</a> (etapas Listar, HTML e CSS). Aliás, <strong>todos</strong> os arquivos do frontend acima são exatamente os que você construiu naquele módulo — o que você montou lá é o código de referência final.</div>
 
                 <h2 class="sec">Próximos passos &amp; desafios</h2>
                 <ul class="list">
