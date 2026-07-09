@@ -250,7 +250,7 @@
                     <div class="hcard" style="--c:var(--purple)">
                         <span class="tag">Backend</span>
                         <h4>🐘 API REST em PHP</h4>
-                        <p>PHP 8.3 puro, arquitetura em camadas (roteamento → controller → serviço → validação → dados), persistência em <code class="i">data.json</code>, CORS e documentação OpenAPI. Roda em <code class="i">localhost:8000</code>.</p>
+                        <p>PHP 8.3 puro, arquitetura em camadas (roteamento → controller → serviço → validação → dados), persistência em <code class="i">data.json</code> e CORS. Roda em <code class="i">localhost:8000</code>.</p>
                     </div>
                     <div class="hcard" style="--c:var(--green)">
                         <span class="tag">Frontend</span>
@@ -593,7 +593,6 @@ $allowedOrigins = [
                 <div class="code-wrap"><span class="lang">public/index.php</span><pre class="code">&lt;?php
 
 require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/openapi.php';
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
@@ -611,8 +610,6 @@ $uri = strtok($_SERVER['REQUEST_URI'], '?');
 
 match ($uri) {
     '/api/users' =&gt; require __DIR__ . '/../src/api.php',
-    '/docs' =&gt; serveView(__DIR__ . '/../views/docs.html'),
-    '/openapi.json' =&gt; serveJson(__DIR__ . '/../openapi.json'),
     default =&gt; notFound(),
 };
 
@@ -626,7 +623,6 @@ function notFound(): void
                     <li><strong>Preflight:</strong> se o método é <code class="i">OPTIONS</code>, responde <code class="i">204 No Content</code> e encerra com <code class="i">exit</code> — o navegador só queria checar permissão, não há o que processar.</li>
                     <li><strong>Roteamento:</strong> <code class="i">strtok($uri, '?')</code> corta a query string (<code class="i">/api/users?id=1</code> vira <code class="i">/api/users</code>) e o <code class="i">match</code> direciona para o <code class="i">api.php</code> ou responde <code class="i">404</code>.</li>
                 </ul>
-                <div class="callout info"><span class="ct">E o openapi.php?</span> O projeto de referência também serve uma documentação em <code>/docs</code> (funções <code>serveView</code>/<code>serveJson</code>). É opcional — para o CRUD funcionar, só a rota <code>/api/users</code> importa. Se não quiser as docs, remova essas duas linhas do <code>match</code> e o <code>require</code> do <code>openapi.php</code>.</div>
 
                 <h2 class="sec">3. Dispatch por método — <code class="i">src/api.php</code></h2>
                 <p class="txt">A URL já foi resolvida; agora precisamos saber <em>o que fazer</em>. Este arquivo olha o método HTTP e chama o handler correspondente. Métodos não suportados caem no <code class="i">405</code>.</p>
@@ -2092,7 +2088,6 @@ npm run dev
                         <tbody>
                             <tr><td>API PHP</td><td>8000</td><td class="mono">http://localhost:8000/api/users</td></tr>
                             <tr><td>Frontend</td><td>8080</td><td class="mono">http://localhost:8080</td></tr>
-                            <tr><td>Docs (OpenAPI)</td><td>8000</td><td class="mono">http://localhost:8000/docs</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -2368,7 +2363,6 @@ document.addEventListener('DOMContentLoaded', () =&gt; renderUsers(apiUrl));</pr
 'src/public/index.php': `<?php
 
 require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/openapi.php';
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
@@ -2386,8 +2380,6 @@ $uri = strtok($_SERVER['REQUEST_URI'], '?');
 
 match ($uri) {
     '/api/users' => require __DIR__ . '/../src/api.php',
-    '/docs' => serveView(__DIR__ . '/../views/docs.html'),
-    '/openapi.json' => serveJson(__DIR__ . '/../openapi.json'),
     default => notFound(),
 };
 
