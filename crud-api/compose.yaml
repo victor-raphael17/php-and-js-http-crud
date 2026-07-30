@@ -1,0 +1,6 @@
+services:
+  php-server:
+    container_name: api
+    build: .
+    ports:
+      - "8000:80"

@@ -919,12 +919,13 @@ function saveData(string $dataFile, array $data): void
 function updateUser(string $dataFile, int $id, array $fields): ?array
 {
     $data = loadData($dataFile);
+    $users = $data['users'];
 
-    foreach ($data['users'] as $index =&gt; $user) {
-        if ($user['id'] === $id) {
-            $data['users'][$index] = array_merge($user, $fields);
+    for ($i = 0; $i &lt; count($users); $i++) {
+        if ($users[$i]['id'] === $id) {
+            $data['users'][$i] = array_merge($users[$i], $fields);
             saveData($dataFile, $data);
-            return $data['users'][$index];
+            return $data['users'][$i];
         }
     }
 
@@ -934,10 +935,13 @@ function updateUser(string $dataFile, int $id, array $fields): ?array
 function deleteUser(string $dataFile, int $id): ?array
 {
     $data = loadData($dataFile);
+    $users = $data['users'];
 
-    foreach ($data['users'] as $index =&gt; $user) {
-        if ($user['id'] === $id) {
-            array_splice($data['users'], $index, 1);
+    for ($i = 0; $i &lt; count($users); $i++) {
+        if ($users[$i]['id'] === $id) {
+            $user = $users[$i];
+            array_splice($users, $i, 1);
+            $data['users'] = $users;
             saveData($dataFile, $data);
             return $user;
         }
@@ -2889,12 +2893,13 @@ function insertUser(string $dataFile, array $user): array
 function updateUser(string $dataFile, int $id, array $fields): ?array
 {
     $data = loadData($dataFile);
+    $users = $data['users'];
 
-    foreach ($data['users'] as $index => $user) {
-        if ($user['id'] === $id) {
-            $data['users'][$index] = array_merge($user, $fields);
+    for ($i = 0; $i < count($users); $i++) {
+        if ($users[$i]['id'] === $id) {
+            $data['users'][$i] = array_merge($users[$i], $fields);
             saveData($dataFile, $data);
-            return $data['users'][$index];
+            return $data['users'][$i];
         }
     }
 
@@ -2904,10 +2909,13 @@ function updateUser(string $dataFile, int $id, array $fields): ?array
 function deleteUser(string $dataFile, int $id): ?array
 {
     $data = loadData($dataFile);
+    $users = $data['users'];
 
-    foreach ($data['users'] as $index => $user) {
-        if ($user['id'] === $id) {
-            array_splice($data['users'], $index, 1);
+    for ($i = 0; $i < count($users); $i++) {
+        if ($users[$i]['id'] === $id) {
+            $user = $users[$i];
+            array_splice($users, $i, 1);
+            $data['users'] = $users;
             saveData($dataFile, $data);
             return $user;
         }
