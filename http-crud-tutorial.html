@@ -187,10 +187,12 @@
         .hcard p { color: var(--muted); font-size: .82rem; line-height: 1.6 }
 
         .pathline { display: flex; flex-direction: column; gap: 0; margin: 1rem 0 }
-        .pstep { display: flex; gap: .9rem; padding: .1rem 0 }
+        .pstep { display: flex; gap: 24px; padding: .1rem 0; position: relative }
+        .pstep::before { content: ''; position: absolute; left: 14px; top: 0; bottom: 0; width: 2px; background: var(--border) }
+        .pstep:first-child::before { top: 16px }
+        .pstep:last-child::before { bottom: auto; height: 16px }
         .pstep .pnum { flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); color: var(--accent); font-weight: 700; font-size: .8rem; display: flex; align-items: center; justify-content: center; position: relative; z-index: 1 }
-        .pstep .pbody { padding-bottom: 1.1rem; border-left: 2px solid var(--border); margin-left: -16px; padding-left: 26px; margin-top: -2px }
-        .pstep:last-child .pbody { border-left-color: transparent }
+        .pstep .pbody { padding-bottom: 1.1rem; margin-top: -2px }
         .pstep .pbody h4 { font-size: .9rem; margin-bottom: .15rem }
         .pstep .pbody p { color: var(--muted); font-size: .82rem; line-height: 1.55 }
         .pstep .pbody a { font-size: .78rem; font-weight: 600 }
