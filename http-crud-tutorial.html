@@ -2555,7 +2555,7 @@ COPY dist/ /usr/local/apache2/htdocs/</pre></div></details>
       - "8080:80"</pre></div></details>
                 <div class="callout info"><span class="ct">Sobre esses arquivos</span> O seu <code>package.json</code> terá também campos como <code>name</code> e <code>version</code> gerados pelo <code>npm init -y</code> — pode mantê-los; as versões dos pacotes podem variar. O <code>Dockerfile</code> serve a pasta <code>dist/</code> (gerada pelo <code>npm run build</code>) com Apache na porta <code>80</code>, mapeada pelo <code>compose.yaml</code> para a <code>8080</code>.</div>
 
-                <h2 class="sec">Próximos passos &amp; desafios</h2>
+                <h2 class="sec">Próximos passos &amp; desafios (opcional, entenda bem o resto antes)</h2>
                 <ul class="list">
                     <li>Troque o recurso: refaça o CRUD para <strong>produtos</strong> (nome, preço, estoque) em vez de usuários.</li>
                     <li>Adicione um campo novo (ex: <code class="i">phone</code>) — veja tudo que precisa mudar: HTML, validação PHP, render.</li>
