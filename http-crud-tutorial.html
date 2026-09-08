@@ -567,7 +567,7 @@ const created = response.data;</pre></div>
 │   └── data.json           <span class="cm"># o "banco" de dados</span>
 └── src/
     ├── config/
-    │   └── config.php       <span class="cm"># $dataFile + $allowedOrigins</span>
+    │   └── config.php       <span class="cm"># DATA_FILE + $allowedOrigins</span>
     ├── public/
     │   └── index.php        <span class="cm"># entry point (roteamento)</span>
     └── src/
@@ -582,13 +582,13 @@ const created = response.data;</pre></div>
                 <p class="txt">Começamos pela configuração: <em>onde</em> ficam os dados e <em>quais</em> origens podem chamar a API (o CORS que vimos no módulo <a data-goto="http">HTTP</a>).</p>
                 <div class="code-wrap"><span class="lang">config/config.php</span><pre class="code">&lt;?php
 
-$dataFile = __DIR__ . '/../../data/data.json';
+const DATA_FILE = __DIR__ . '/../../data/data.json';
 
 $allowedOrigins = [
     'http://0.0.0.0:8080', 'http://localhost:8080', 'http://127.0.0.1:8080',
     'http://0.0.0.0:5500', 'http://localhost:5500', 'http://127.0.0.1:5500',
 ];</pre></div>
-                <p class="txt"><code class="i">$dataFile</code> aponta para o <code class="i">data.json</code>. <code class="i">$allowedOrigins</code> lista as URLs de frontend autorizadas — <code class="i">8080</code> é o nosso frontend e <code class="i">5500</code> é o Live Server do VS Code. Requisições de origens fora da lista não recebem os headers de CORS e são bloqueadas pelo navegador.</p>
+                <p class="txt"><code class="i">DATA_FILE</code> aponta para o <code class="i">data.json</code>. Ela é uma <strong>constante</strong>, e não uma variável, porque quem a usa é o <code class="i">data.php</code> — e funções em PHP não enxergam variáveis do escopo global, mas enxergam constantes de qualquer lugar. Já o <code class="i">$allowedOrigins</code> pode ser variável: ele é lido direto no escopo global do <code class="i">index.php</code>. A lista traz as URLs de frontend autorizadas — <code class="i">8080</code> é o nosso frontend e <code class="i">5500</code> é o Live Server do VS Code. Requisições de origens fora da lista não recebem os headers de CORS e são bloqueadas pelo navegador.</p>
 
                 <h2 class="sec">2. O entry point — <code class="i">public/index.php</code></h2>
                 <p class="txt">Todo request entra por aqui. Este arquivo faz três coisas, nesta ordem: <strong>(1)</strong> aplica os headers de CORS, <strong>(2)</strong> responde ao preflight <code class="i">OPTIONS</code>, e <strong>(3)</strong> roteia pela URL.</p>
@@ -635,14 +635,14 @@ require_once __DIR__ . '/controllers.php';
 $method = $_SERVER['REQUEST_METHOD'];
 
 match ($method) {
-    'GET' =&gt; handleGet($dataFile),
-    'POST' =&gt; handlePost($dataFile),
-    'PUT' =&gt; handlePut($dataFile),
-    'PATCH' =&gt; handlePatch($dataFile),
-    'DELETE' =&gt; handleDelete($dataFile),
+    'GET' =&gt; handleGet(),
+    'POST' =&gt; handlePost(),
+    'PUT' =&gt; handlePut(),
+    'PATCH' =&gt; handlePatch(),
+    'DELETE' =&gt; handleDelete(),
     default =&gt; handleMethodNotAllowed(),
 };</pre></div>
-                <p class="txt">Repare que <code class="i">$dataFile</code> vem do <code class="i">config.php</code> (carregado lá no <code class="i">index.php</code>) e é passado adiante para cada handler. A partir daqui, cada método segue seu próprio caminho pelas camadas.</p>
+                <p class="txt">Repare que os handlers não recebem nada: o caminho do arquivo de dados não circula pelas camadas, ele fica onde é usado — no <code class="i">data.php</code>, via constante <code class="i">DATA_FILE</code>. A partir daqui, cada método segue seu próprio caminho pelas camadas.</p>
 
                 <h2 class="sec">4. Os controllers — <code class="i">src/controllers.php</code></h2>
                 <p class="txt">O controller é a ponte entre o HTTP e a lógica. Cada handler segue o mesmo roteiro: <strong>lê a entrada</strong> (body JSON e/ou <code class="i">id</code> da URL), <strong>chama o serviço</strong> e <strong>responde</strong>. A função <code class="i">respond()</code> centraliza o envio da resposta.</p>
@@ -661,21 +661,21 @@ function respond(array $result): void
     }
 }</pre></div>
                 <p class="txt"><code class="i">respond()</code> recebe um array com <code class="i">status</code> e (<code class="i">data</code> ou <code class="i">error</code>). Ele define o código HTTP e imprime o JSON certo. Todos os serviços retornam nesse formato — por isso o controller fica tão enxuto.</p>
-                <div class="code-wrap"><span class="lang">controllers.php</span><pre class="code">function handleGet(string $dataFile): void
+                <div class="code-wrap"><span class="lang">controllers.php</span><pre class="code">function handleGet(): void
 {
     try {
-        echo json_encode(getAllUsers($dataFile));
+        echo json_encode(getAllUsers());
     } catch (\Throwable $e) {
         http_response_code(500);
         echo json_encode(['error' =&gt; 'Internal server error']);
     }
 }
 
-function handlePost(string $dataFile): void
+function handlePost(): void
 {
     try {
         $input = json_decode(file_get_contents('php://input'), true);
-        respond(createUser($dataFile, $input));
+        respond(createUser($input));
     } catch (\Throwable $e) {
         http_response_code(500);
         echo json_encode(['error' =&gt; 'Internal server error']);
@@ -687,35 +687,35 @@ function handlePost(string $dataFile): void
                     <li>O <code class="i">try/catch</code> em cada handler garante que qualquer erro inesperado vire um <code class="i">500</code> em JSON, nunca uma tela branca de erro do PHP.</li>
                 </ul>
                 <p class="txt">Os handlers de <strong>PUT</strong>, <strong>PATCH</strong> e <strong>DELETE</strong> seguem o mesmo formato, mas extraem o <code class="i">id</code> da query string. O PATCH ainda passa <code class="i">partial: true</code> ao serviço:</p>
-                <div class="code-wrap"><span class="lang">controllers.php</span><pre class="code">function handlePut(string $dataFile): void
+                <div class="code-wrap"><span class="lang">controllers.php</span><pre class="code">function handlePut(): void
 {
     try {
         $input = json_decode(file_get_contents('php://input'), true);
         $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
-        respond(editUser($dataFile, $id, $input));
+        respond(editUser($id, $input));
     } catch (\Throwable $e) {
         http_response_code(500);
         echo json_encode(['error' =&gt; 'Internal server error']);
     }
 }
 
-function handlePatch(string $dataFile): void
+function handlePatch(): void
 {
     try {
         $input = json_decode(file_get_contents('php://input'), true);
         $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
-        respond(editUser($dataFile, $id, $input, partial: true));
+        respond(editUser($id, $input, partial: true));
     } catch (\Throwable $e) {
         http_response_code(500);
         echo json_encode(['error' =&gt; 'Internal server error']);
     }
 }
 
-function handleDelete(string $dataFile): void
+function handleDelete(): void
 {
     try {
         $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
-        respond(removeUser($dataFile, $id));
+        respond(removeUser($id));
     } catch (\Throwable $e) {
         http_response_code(500);
         echo json_encode(['error' =&gt; 'Internal server error']);
@@ -736,13 +736,13 @@ function handleMethodNotAllowed(): void
 require_once __DIR__ . '/validation.php';
 require_once __DIR__ . '/data.php';
 
-function getAllUsers(string $dataFile): array
+function getAllUsers(): array
 {
-    $data = loadData($dataFile);
+    $data = loadData();
     return ['users' =&gt; $data['users']];
 }
 
-function createUser(string $dataFile, ?array $input): array
+function createUser(?array $input): array
 {
     if (!is_array($input)) {
         return ['error' =&gt; 'Invalid JSON body', 'status' =&gt; 400];
@@ -758,7 +758,7 @@ function createUser(string $dataFile, ?array $input): array
         return ['error' =&gt; $error, 'status' =&gt; 400];
     }
 
-    $user = insertUser($dataFile, [
+    $user = insertUser([
         'name' =&gt; trim($input['name']),
         'age' =&gt; (int) $input['age'],
         'email' =&gt; $input['email'],
@@ -767,7 +767,7 @@ function createUser(string $dataFile, ?array $input): array
     return ['data' =&gt; $user, 'status' =&gt; 201];
 }</pre></div>
                 <p class="txt"><code class="i">createUser()</code> é o pipeline completo: confere se o body é um array, valida os campos obrigatórios, valida os valores e só então insere. Cada falha retorna <code class="i">400</code> com a mensagem; o sucesso retorna <code class="i">201 Created</code> com o usuário. Note o <code class="i">(int) $input['age']</code> — a idade é guardada como <strong>número</strong>, não string.</p>
-                <div class="code-wrap"><span class="lang">services.php</span><pre class="code">function editUser(string $dataFile, ?int $id, ?array $input, bool $partial = false): array
+                <div class="code-wrap"><span class="lang">services.php</span><pre class="code">function editUser(?int $id, ?array $input, bool $partial = false): array
 {
     if ($id === null) {
         return ['error' =&gt; 'User id is required', 'status' =&gt; 400];
@@ -800,7 +800,7 @@ function createUser(string $dataFile, ?array $input): array
         $fields['age'] = (int) $fields['age'];
     }
 
-    $user = updateUser($dataFile, $id, $fields);
+    $user = updateUser($id, $fields);
 
     if ($user === null) {
         return ['error' =&gt; 'User not found', 'status' =&gt; 404];
@@ -813,13 +813,13 @@ function createUser(string $dataFile, ?array $input): array
                     <li><code class="i">array_intersect_key($input, array_flip($allowed))</code> é um filtro de segurança: mantém apenas <code class="i">name</code>, <code class="i">age</code> e <code class="i">email</code>, descartando qualquer campo extra que o cliente tente injetar (como um <code class="i">id</code> forjado).</li>
                     <li>Se o <code class="i">updateUser()</code> não encontrar o id, o serviço retorna <code class="i">404</code>.</li>
                 </ul>
-                <div class="code-wrap"><span class="lang">services.php</span><pre class="code">function removeUser(string $dataFile, ?int $id): array
+                <div class="code-wrap"><span class="lang">services.php</span><pre class="code">function removeUser(?int $id): array
 {
     if ($id === null) {
         return ['error' =&gt; 'User id is required', 'status' =&gt; 400];
     }
 
-    $user = deleteUser($dataFile, $id);
+    $user = deleteUser($id);
 
     if ($user === null) {
         return ['error' =&gt; 'User not found', 'status' =&gt; 404];
@@ -890,22 +890,24 @@ function validateUserFields(array $input): ?string
                 </ul>
 
                 <h2 class="sec">7. A persistência — <code class="i">src/data.php</code></h2>
-                <p class="txt">A camada mais baixa: ninguém mais toca no arquivo. Toda leitura e escrita passa por aqui. Como o "banco" é um JSON, cada operação carrega o arquivo inteiro, mexe no array e grava de volta.</p>
+                <p class="txt">A camada mais baixa: ninguém mais toca no arquivo — nem sabe onde ele fica. O <code class="i">data.php</code> carrega o <code class="i">config.php</code> e usa o <code class="i">DATA_FILE</code> direto, então nenhuma outra camada precisa carregar esse caminho nas assinaturas. Toda leitura e escrita passa por aqui. Como o "banco" é um JSON, cada operação carrega o arquivo inteiro, mexe no array e grava de volta.</p>
                 <div class="code-wrap"><span class="lang">data.php</span><pre class="code">&lt;?php
 
-function loadData(string $dataFile): array
+require_once __DIR__ . '/../config/config.php';
+
+function loadData(): array
 {
-    return json_decode(file_get_contents($dataFile), true);
+    return json_decode(file_get_contents(DATA_FILE), true);
 }
 
-function saveData(string $dataFile, array $data): void
+function saveData(array $data): void
 {
-    file_put_contents($dataFile, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    file_put_contents(DATA_FILE, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 }</pre></div>
-                <p class="txt"><code class="i">loadData</code> lê e decodifica o JSON; <code class="i">saveData</code> codifica e grava. O <code class="i">JSON_PRETTY_PRINT</code> mantém o arquivo legível (indentado) e o <code class="i">JSON_UNESCAPED_UNICODE</code> preserva os acentos, gravando <code class="i">João</code> diretamente em vez de convertê-lo para uma sequência de escape Unicode.</p>
-                <div class="code-wrap"><span class="lang">data.php</span><pre class="code">function insertUser(string $dataFile, array $user): array
+                <p class="txt"><code class="i">loadData</code> lê e decodifica o JSON; <code class="i">saveData</code> codifica e grava. As duas leem o caminho da constante <code class="i">DATA_FILE</code>, definida no <code class="i">config.php</code>. O <code class="i">JSON_PRETTY_PRINT</code> mantém o arquivo legível (indentado) e o <code class="i">JSON_UNESCAPED_UNICODE</code> preserva os acentos, gravando <code class="i">João</code> diretamente em vez de convertê-lo para uma sequência de escape Unicode.</p>
+                <div class="code-wrap"><span class="lang">data.php</span><pre class="code">function insertUser(array $user): array
 {
-    $data = loadData($dataFile);
+    $data = loadData();
 
     $id = $data['nextId'] ?? 1;
     $data['nextId'] = $id + 1;
@@ -913,20 +915,20 @@ function saveData(string $dataFile, array $data): void
     $user['id'] = $id;
     $data['users'][] = $user;
 
-    saveData($dataFile, $data);
+    saveData($data);
 
     return $user;
 }
 
-function updateUser(string $dataFile, int $id, array $fields): ?array
+function updateUser(int $id, array $fields): ?array
 {
-    $data = loadData($dataFile);
+    $data = loadData();
     $users = $data['users'];
 
     for ($i = 0; $i &lt; count($users); $i++) {
         if ($users[$i]['id'] === $id) {
             $data['users'][$i] = array_merge($users[$i], $fields);
-            saveData($dataFile, $data);
+            saveData($data);
             return $data['users'][$i];
         }
     }
@@ -934,9 +936,9 @@ function updateUser(string $dataFile, int $id, array $fields): ?array
     return null;
 }
 
-function deleteUser(string $dataFile, int $id): ?array
+function deleteUser(int $id): ?array
 {
-    $data = loadData($dataFile);
+    $data = loadData();
     $users = $data['users'];
 
     for ($i = 0; $i &lt; count($users); $i++) {
@@ -944,7 +946,7 @@ function deleteUser(string $dataFile, int $id): ?array
             $user = $users[$i];
             array_splice($users, $i, 1);
             $data['users'] = $users;
-            saveData($dataFile, $data);
+            saveData($data);
             return $user;
         }
     }
@@ -985,8 +987,8 @@ function deleteUser(string $dataFile, int $id): ?array
 exit; // encerra após o preflight</code></div>
                     <div class="fn" data-search="json_encode json codificar"><span class="cat">JSON</span><h5>json_encode()</h5><p>Converte um valor PHP em string JSON.</p><code class="ex">json_encode(['error' =&gt; 'Not found']);</code></div>
                     <div class="fn" data-search="json_decode json decodificar parse"><span class="cat">JSON</span><h5>json_decode()</h5><p>Converte string JSON em valor PHP. Com <code style="color:var(--accent)">true</code>, retorna array associativo.</p><code class="ex">json_decode(file_get_contents('php://input'), true);</code></div>
-                    <div class="fn" data-search="file_get_contents arquivo ler stream"><span class="cat">Arquivos</span><h5>file_get_contents()</h5><p>Lê todo o conteúdo de um arquivo (ou stream) como string.</p><code class="ex">file_get_contents($dataFile); // lê data.json</code></div>
-                    <div class="fn" data-search="file_put_contents arquivo escrever salvar"><span class="cat">Arquivos</span><h5>file_put_contents()</h5><p>Escreve dados em um arquivo, sobrescrevendo o conteúdo.</p><code class="ex">file_put_contents($dataFile, json_encode($data));</code></div>
+                    <div class="fn" data-search="file_get_contents arquivo ler stream"><span class="cat">Arquivos</span><h5>file_get_contents()</h5><p>Lê todo o conteúdo de um arquivo (ou stream) como string.</p><code class="ex">file_get_contents(DATA_FILE); // lê data.json</code></div>
+                    <div class="fn" data-search="file_put_contents arquivo escrever salvar"><span class="cat">Arquivos</span><h5>file_put_contents()</h5><p>Escreve dados em um arquivo, sobrescrevendo o conteúdo.</p><code class="ex">file_put_contents(DATA_FILE, json_encode($data));</code></div>
                     <div class="fn" data-search="strtok string token dividir uri"><span class="cat">Strings</span><h5>strtok()</h5><p>Divide uma string em tokens por um delimitador. Usado para remover a query string.</p><code class="ex">$uri = strtok($_SERVER['REQUEST_URI'], '?');</code></div>
                     <div class="fn" data-search="trim string espaços"><span class="cat">Strings</span><h5>trim()</h5><p>Remove espaços em branco do início e do fim de uma string.</p><code class="ex">$name = trim($input['name']);</code></div>
                     <div class="fn" data-search="strlen string comprimento tamanho"><span class="cat">Strings</span><h5>strlen()</h5><p>Retorna o comprimento (em bytes) de uma string.</p><code class="ex">if (strlen($name) &gt; 100) { ... }</code></div>
@@ -2019,7 +2021,7 @@ document.addEventListener('DOMContentLoaded', () =&gt; renderUsers(apiUrl));</pr
 ├── data/
 │   └── data.json          <span class="cm"># "banco" em JSON</span>
 └── src/
-    ├── config/config.php   <span class="cm"># $dataFile, CORS</span>
+    ├── config/config.php   <span class="cm"># DATA_FILE, CORS</span>
     ├── public/index.php    <span class="cm"># entry point + rotas</span>
     └── src/
         ├── api.php         <span class="cm"># dispatch por método</span>
@@ -2606,7 +2608,7 @@ function notFound(): void
 
 'src/config/config.php': `<?php
 
-$dataFile = __DIR__ . '/../../data/data.json';
+const DATA_FILE = __DIR__ . '/../../data/data.json';
 
 $allowedOrigins = [
     'http://0.0.0.0:8080', 'http://localhost:8080', 'http://127.0.0.1:8080',
@@ -2620,11 +2622,11 @@ require_once __DIR__ . '/controllers.php';
 $method = $_SERVER['REQUEST_METHOD'];
 
 match ($method) {
-    'GET' => handleGet($dataFile),
-    'POST' => handlePost($dataFile),
-    'PUT' => handlePut($dataFile),
-    'PATCH' => handlePatch($dataFile),
-    'DELETE' => handleDelete($dataFile),
+    'GET' => handleGet(),
+    'POST' => handlePost(),
+    'PUT' => handlePut(),
+    'PATCH' => handlePatch(),
+    'DELETE' => handleDelete(),
     default => handleMethodNotAllowed(),
 };`,
 
@@ -2643,56 +2645,56 @@ function respond(array $result): void
     }
 }
 
-function handleGet(string $dataFile): void
+function handleGet(): void
 {
     try {
-        echo json_encode(getAllUsers($dataFile));
+        echo json_encode(getAllUsers());
     } catch (\\Throwable $e) {
         http_response_code(500);
         echo json_encode(['error' => 'Internal server error']);
     }
 }
 
-function handlePost(string $dataFile): void
-{
-    try {
-        $input = json_decode(file_get_contents('php://input'), true);
-        respond(createUser($dataFile, $input));
-    } catch (\\Throwable $e) {
-        http_response_code(500);
-        echo json_encode(['error' => 'Internal server error']);
-    }
-}
-
-function handlePut(string $dataFile): void
+function handlePost(): void
 {
     try {
         $input = json_decode(file_get_contents('php://input'), true);
-        $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
-        respond(editUser($dataFile, $id, $input));
+        respond(createUser($input));
     } catch (\\Throwable $e) {
         http_response_code(500);
         echo json_encode(['error' => 'Internal server error']);
     }
 }
 
-function handlePatch(string $dataFile): void
+function handlePut(): void
 {
     try {
         $input = json_decode(file_get_contents('php://input'), true);
         $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
-        respond(editUser($dataFile, $id, $input, partial: true));
+        respond(editUser($id, $input));
     } catch (\\Throwable $e) {
         http_response_code(500);
         echo json_encode(['error' => 'Internal server error']);
     }
 }
 
-function handleDelete(string $dataFile): void
+function handlePatch(): void
+{
+    try {
+        $input = json_decode(file_get_contents('php://input'), true);
+        $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
+        respond(editUser($id, $input, partial: true));
+    } catch (\\Throwable $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Internal server error']);
+    }
+}
+
+function handleDelete(): void
 {
     try {
         $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
-        respond(removeUser($dataFile, $id));
+        respond(removeUser($id));
     } catch (\\Throwable $e) {
         http_response_code(500);
         echo json_encode(['error' => 'Internal server error']);
@@ -2710,13 +2712,13 @@ function handleMethodNotAllowed(): void
 require_once __DIR__ . '/validation.php';
 require_once __DIR__ . '/data.php';
 
-function getAllUsers(string $dataFile): array
+function getAllUsers(): array
 {
-    $data = loadData($dataFile);
+    $data = loadData();
     return ['users' => $data['users']];
 }
 
-function createUser(string $dataFile, ?array $input): array
+function createUser(?array $input): array
 {
     if (!is_array($input)) {
         return ['error' => 'Invalid JSON body', 'status' => 400];
@@ -2732,7 +2734,7 @@ function createUser(string $dataFile, ?array $input): array
         return ['error' => $error, 'status' => 400];
     }
 
-    $user = insertUser($dataFile, [
+    $user = insertUser([
         'name' => trim($input['name']),
         'age' => (int) $input['age'],
         'email' => $input['email'],
@@ -2741,7 +2743,7 @@ function createUser(string $dataFile, ?array $input): array
     return ['data' => $user, 'status' => 201];
 }
 
-function editUser(string $dataFile, ?int $id, ?array $input, bool $partial = false): array
+function editUser(?int $id, ?array $input, bool $partial = false): array
 {
     if ($id === null) {
         return ['error' => 'User id is required', 'status' => 400];
@@ -2774,7 +2776,7 @@ function editUser(string $dataFile, ?int $id, ?array $input, bool $partial = fal
         $fields['age'] = (int) $fields['age'];
     }
 
-    $user = updateUser($dataFile, $id, $fields);
+    $user = updateUser($id, $fields);
 
     if ($user === null) {
         return ['error' => 'User not found', 'status' => 404];
@@ -2783,13 +2785,13 @@ function editUser(string $dataFile, ?int $id, ?array $input, bool $partial = fal
     return ['data' => $user, 'status' => 200];
 }
 
-function removeUser(string $dataFile, ?int $id): array
+function removeUser(?int $id): array
 {
     if ($id === null) {
         return ['error' => 'User id is required', 'status' => 400];
     }
 
-    $user = deleteUser($dataFile, $id);
+    $user = deleteUser($id);
 
     if ($user === null) {
         return ['error' => 'User not found', 'status' => 404];
@@ -2854,19 +2856,21 @@ function validateUserFields(array $input): ?string
 
 'src/src/data.php': `<?php
 
-function loadData(string $dataFile): array
+require_once __DIR__ . '/../config/config.php';
+
+function loadData(): array
 {
-    return json_decode(file_get_contents($dataFile), true);
+    return json_decode(file_get_contents(DATA_FILE), true);
 }
 
-function saveData(string $dataFile, array $data): void
+function saveData(array $data): void
 {
-    file_put_contents($dataFile, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    file_put_contents(DATA_FILE, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 }
 
-function findUserById(string $dataFile, int $id): ?array
+function findUserById(int $id): ?array
 {
-    $data = loadData($dataFile);
+    $data = loadData();
 
     foreach ($data['users'] as $user) {
         if ($user['id'] === $id) {
@@ -2877,9 +2881,9 @@ function findUserById(string $dataFile, int $id): ?array
     return null;
 }
 
-function insertUser(string $dataFile, array $user): array
+function insertUser(array $user): array
 {
-    $data = loadData($dataFile);
+    $data = loadData();
 
     $id = $data['nextId'] ?? 1;
     $data['nextId'] = $id + 1;
@@ -2887,20 +2891,20 @@ function insertUser(string $dataFile, array $user): array
     $user['id'] = $id;
     $data['users'][] = $user;
 
-    saveData($dataFile, $data);
+    saveData($data);
 
     return $user;
 }
 
-function updateUser(string $dataFile, int $id, array $fields): ?array
+function updateUser(int $id, array $fields): ?array
 {
-    $data = loadData($dataFile);
+    $data = loadData();
     $users = $data['users'];
 
     for ($i = 0; $i < count($users); $i++) {
         if ($users[$i]['id'] === $id) {
             $data['users'][$i] = array_merge($users[$i], $fields);
-            saveData($dataFile, $data);
+            saveData($data);
             return $data['users'][$i];
         }
     }
@@ -2908,9 +2912,9 @@ function updateUser(string $dataFile, int $id, array $fields): ?array
     return null;
 }
 
-function deleteUser(string $dataFile, int $id): ?array
+function deleteUser(int $id): ?array
 {
-    $data = loadData($dataFile);
+    $data = loadData();
     $users = $data['users'];
 
     for ($i = 0; $i < count($users); $i++) {
@@ -2918,7 +2922,7 @@ function deleteUser(string $dataFile, int $id): ?array
             $user = $users[$i];
             array_splice($users, $i, 1);
             $data['users'] = $users;
-            saveData($dataFile, $data);
+            saveData($data);
             return $user;
         }
     }
