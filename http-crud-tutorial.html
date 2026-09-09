@@ -562,7 +562,7 @@ const created = response.data;</pre></div>
                 </div>
 
                 <h2 class="sec">Estrutura de pastas do backend</h2>
-                <div class="code-wrap"><span class="lang">crud-api</span><pre class="code">crud-api/
+                <div class="code-wrap"><span class="lang">backend</span><pre class="code">backend/
 ├── data/
 │   └── data.json           <span class="cm"># o "banco" de dados</span>
 └── src/
@@ -576,7 +576,7 @@ const created = response.data;</pre></div>
         ├── services.php     <span class="cm"># regras de negócio</span>
         ├── validation.php   <span class="cm"># validação dos campos</span>
         └── data.php         <span class="cm"># lê/grava o JSON</span></pre></div>
-                <div class="callout tip"><span class="ct">💡 Rodando a API enquanto estuda</span> Suba a API com <code>php -S localhost:8000 -t public public/index.php</code> dentro de <code>crud-api/src</code>. O módulo <a data-goto="rodar">Rodar</a> cobre Docker e a execução manual em detalhe.</div>
+                <div class="callout tip"><span class="ct">💡 Rodando a API enquanto estuda</span> Suba a API com <code>php -S localhost:8000 -t public public/index.php</code> dentro de <code>backend/src</code>. O módulo <a data-goto="rodar">Rodar</a> cobre Docker e a execução manual em detalhe.</div>
 
                 <h2 class="sec">1. Configuração — <code class="i">config/config.php</code></h2>
                 <p class="txt">Começamos pela configuração: <em>onde</em> ficam os dados e <em>quais</em> origens podem chamar a API (o CORS que vimos no módulo <a data-goto="http">HTTP</a>).</p>
@@ -2009,15 +2009,19 @@ document.addEventListener('DOMContentLoaded', () =&gt; renderUsers(apiUrl));</pr
             <div class="wrap">
                 <div class="eyebrow">Módulo 6</div>
                 <h1 class="title">Rodar tudo &amp; código de referência</h1>
-                <p class="lead">O projeto tem duas partes independentes, cada uma <strong>dockerizada</strong>: a API PHP e o frontend JS. Você pode subir com <strong>Docker</strong> ou rodar <strong>manualmente</strong>. No fim deste módulo está o código-fonte completo de referência.</p>
+                <p class="lead">O projeto tem duas partes independentes, cada uma com seu <strong>Dockerfile</strong>: a API PHP e o frontend JS. Um único <strong>compose.yaml</strong>, na raiz, sobe as duas — mas você também pode rodar tudo <strong>manualmente</strong>. No fim deste módulo está o código-fonte completo de referência.</p>
 
                 <h2 class="sec">Estrutura de pastas</h2>
+                <p class="txt">As duas partes ficam lado a lado na raiz, cada uma com o seu <code class="i">Dockerfile</code>. O <code class="i">compose.yaml</code> fica fora delas, na raiz, porque é ele que junta as duas num só comando.</p>
+                <div class="code-wrap"><span class="lang">projeto</span><pre class="code">projeto/
+├── compose.yaml            <span class="cm"># sobe backend + frontend</span>
+├── backend/                <span class="cm"># API PHP + Dockerfile</span>
+└── frontend/               <span class="cm"># JS/Vite + Dockerfile</span></pre></div>
                 <div class="grid2">
                     <div>
-                        <h3 class="sub" style="margin-top:0">Backend — <code class="i">crud-api/</code></h3>
-                        <div class="code-wrap"><span class="lang">php</span><pre class="code">crud-api/
+                        <h3 class="sub" style="margin-top:0">Backend — <code class="i">backend/</code></h3>
+                        <div class="code-wrap"><span class="lang">php</span><pre class="code">backend/
 ├── Dockerfile
-├── compose.yaml
 ├── data/
 │   └── data.json          <span class="cm"># "banco" em JSON</span>
 └── src/
@@ -2031,10 +2035,9 @@ document.addEventListener('DOMContentLoaded', () =&gt; renderUsers(apiUrl));</pr
         └── data.php        <span class="cm"># lê/grava o JSON</span></pre></div>
                     </div>
                     <div>
-                        <h3 class="sub" style="margin-top:0">Frontend — <code class="i">crud-frontend-axios/</code></h3>
-                        <div class="code-wrap"><span class="lang">js</span><pre class="code">crud-frontend-axios/
+                        <h3 class="sub" style="margin-top:0">Frontend — <code class="i">frontend/</code></h3>
+                        <div class="code-wrap"><span class="lang">js</span><pre class="code">frontend/
 ├── Dockerfile
-├── compose.yaml
 ├── package.json
 ├── vite.config.js
 └── src/
@@ -2050,7 +2053,7 @@ document.addEventListener('DOMContentLoaded', () =&gt; renderUsers(apiUrl));</pr
                 </div>
 
                 <h2 class="sec">O arquivo vite.config.js</h2>
-                <p class="txt">O <code class="i">vite.config.js</code> da árvore acima <strong>não é gerado</strong> pelo <code class="i">npm install</code> — crie-o você mesmo na raiz do <code class="i">crud-frontend-axios/</code>. Como o <code class="i">index.html</code> fica dentro de <code class="i">src/</code>, o config aponta o <code class="i">root</code> para lá, fixa a porta em <code class="i">8080</code> (a mesma do CORS) e manda o build para <code class="i">dist/</code>:</p>
+                <p class="txt">O <code class="i">vite.config.js</code> da árvore acima <strong>não é gerado</strong> pelo <code class="i">npm install</code> — crie-o você mesmo na raiz do <code class="i">frontend/</code>. Como o <code class="i">index.html</code> fica dentro de <code class="i">src/</code>, o config aponta o <code class="i">root</code> para lá, fixa a porta em <code class="i">8080</code> (a mesma do CORS) e manda o build para <code class="i">dist/</code>:</p>
                 <div class="code-wrap"><span class="lang">vite.config.js</span><pre class="code">import { defineConfig } from 'vite';
 
 export default defineConfig({
@@ -2067,23 +2070,31 @@ export default defineConfig({
                 <div class="callout info"><span class="ct">Por que essas opções?</span> <code>root: 'src'</code> diz ao Vite onde está o <code>index.html</code>; <code>port: 8080</code> faz o <code>npm run dev</code> subir na porta certa (senão seria a <code>5173</code>, bloqueada pelo CORS); <code>outDir: '../dist'</code> gera o build na pasta que o Apache serve no Docker.</div>
 
                 <h2 class="sec">Opção 1 — Docker (recomendado)</h2>
-                <p class="txt">Cada pasta tem seu <code class="i">compose.yaml</code>. Suba cada uma:</p>
-                <div class="grid2">
-                    <div class="code-wrap"><span class="lang">crud-api</span><pre class="code">cd crud-api
+                <p class="txt">Um único <code class="i">compose.yaml</code> na raiz descreve os dois serviços. Cada <code class="i">build</code> aponta para a pasta onde está o <code class="i">Dockerfile</code> daquele serviço:</p>
+                <div class="code-wrap"><span class="lang">compose.yaml</span><pre class="code">services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:80"
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:80"</pre></div>
+                <p class="txt">Gere o build do frontend e suba as duas partes de uma vez, da raiz do projeto:</p>
+                <div class="code-wrap"><span class="lang">terminal</span><pre class="code">cd frontend &amp;&amp; npm install &amp;&amp; npm run build &amp;&amp; cd ..
+
 docker compose up --build
-<span class="cm"># API em http://localhost:8000</span></pre></div>
-                    <div class="code-wrap"><span class="lang">crud-frontend</span><pre class="code">cd crud-frontend-axios
-npm install &amp;&amp; npm run build
-docker compose up --build
+<span class="cm"># API   em http://localhost:8000</span>
 <span class="cm"># front em http://localhost:8080</span></pre></div>
-                </div>
                 <div class="callout warn"><span class="ct">Ordem importa</span> O container do frontend serve a pasta <code>dist/</code> (Apache). Rode <code>npm run build</code> <strong>antes</strong> do <code>docker compose up</code>, senão não há o que servir.</div>
+                <div class="callout tip"><span class="ct">💡 Um serviço de cada vez</span> Estando tudo num só arquivo, você ainda pode subir só uma parte: <code>docker compose up backend</code>. E <code>docker compose down</code>, da raiz, derruba as duas.</div>
 
                 <h2 class="sec">Opção 2 — Manual (desenvolvimento)</h2>
                 <div class="grid2">
-                    <div class="code-wrap"><span class="lang">api (php)</span><pre class="code">cd crud-api/src
+                    <div class="code-wrap"><span class="lang">api (php)</span><pre class="code">cd backend/src
 php -S localhost:8000 -t public public/index.php</pre></div>
-                    <div class="code-wrap"><span class="lang">frontend (vite)</span><pre class="code">cd crud-frontend-axios
+                    <div class="code-wrap"><span class="lang">frontend (vite)</span><pre class="code">cd frontend
 npm install
 npm run dev
 <span class="cm"># Vite em http://localhost:8080</span></pre></div>
@@ -2169,12 +2180,7 @@ RUN chmod -R 777 data/
 EXPOSE 80
 
 CMD ["php", "-S", "0.0.0.0:80", "-t", "src/public", "src/public/index.php"]</pre></div></details>
-                <details class="file"><summary><span class="fpath">compose.yaml</span></summary><div class="code-wrap"><pre class="code">services:
-  php-server:
-    build: .
-    ports:
-      - "8000:80"</pre></div></details>
-                <div class="callout info"><span class="ct">Portas no Docker</span> Dentro do container a API roda na porta <code>80</code>; o <code>compose.yaml</code> mapeia para a <code>8000</code> do seu computador — por isso <code>http://localhost:8000</code>.</div>
+                <div class="callout info"><span class="ct">Portas no Docker</span> Dentro do container a API roda na porta <code>80</code>; o <code>compose.yaml</code> da raiz mapeia para a <code>8000</code> do seu computador — por isso <code>http://localhost:8000</code>.</div>
 
                 <h3 class="sub">🟨 Frontend (Axios) — HTML &amp; CSS</h3>
                 <details class="file"><summary><span class="fpath">src/index.html</span></summary><div class="code-wrap"><pre class="code">&lt;!DOCTYPE html&gt;
@@ -2548,12 +2554,20 @@ dist/</pre></div></details>
                 <details class="file"><summary><span class="fpath">Dockerfile</span></summary><div class="code-wrap"><pre class="code">FROM httpd:alpine
 
 COPY dist/ /usr/local/apache2/htdocs/</pre></div></details>
+                <div class="callout info"><span class="ct">Sobre esses arquivos</span> O seu <code>package.json</code> terá também campos como <code>name</code> e <code>version</code> gerados pelo <code>npm init -y</code> — pode mantê-los; as versões dos pacotes podem variar. O <code>Dockerfile</code> serve a pasta <code>dist/</code> (gerada pelo <code>npm run build</code>) com Apache na porta <code>80</code>, mapeada pelo <code>compose.yaml</code> da raiz para a <code>8080</code>.</div>
+
+                <h3 class="sub">🐳 Raiz do projeto — orquestração</h3>
                 <details class="file"><summary><span class="fpath">compose.yaml</span></summary><div class="code-wrap"><pre class="code">services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:80"
+
   frontend:
-    build: .
+    build: ./frontend
     ports:
       - "8080:80"</pre></div></details>
-                <div class="callout info"><span class="ct">Sobre esses arquivos</span> O seu <code>package.json</code> terá também campos como <code>name</code> e <code>version</code> gerados pelo <code>npm init -y</code> — pode mantê-los; as versões dos pacotes podem variar. O <code>Dockerfile</code> serve a pasta <code>dist/</code> (gerada pelo <code>npm run build</code>) com Apache na porta <code>80</code>, mapeada pelo <code>compose.yaml</code> para a <code>8080</code>.</div>
+                <div class="callout info"><span class="ct">Um arquivo, dois serviços</span> O <code>build</code> aponta para a pasta do serviço, e é lá que o Docker procura o <code>Dockerfile</code>. Como os dois nomes de serviço estão no mesmo arquivo, <code>docker compose up</code> na raiz sobe o projeto inteiro.</div>
 
                 <h2 class="sec">Próximos passos &amp; desafios (opcional, entenda bem o resto antes)</h2>
                 <ul class="list">
