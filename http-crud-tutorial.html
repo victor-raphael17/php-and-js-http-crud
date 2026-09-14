@@ -565,24 +565,23 @@ const created = response.data;</pre></div>
                 <div class="code-wrap"><span class="lang">backend</span><pre class="code">backend/
 ├── data/
 │   └── data.json           <span class="cm"># o "banco" de dados</span>
+├── config/
+│   └── config.php          <span class="cm"># DATA_FILE + $allowedOrigins</span>
+├── public/
+│   └── index.php           <span class="cm"># entry point (roteamento)</span>
 └── src/
-    ├── config/
-    │   └── config.php       <span class="cm"># DATA_FILE + $allowedOrigins</span>
-    ├── public/
-    │   └── index.php        <span class="cm"># entry point (roteamento)</span>
-    └── src/
-        ├── api.php          <span class="cm"># dispatch por método</span>
-        ├── controllers.php  <span class="cm"># handlers + respond()</span>
-        ├── services.php     <span class="cm"># regras de negócio</span>
-        ├── validation.php   <span class="cm"># validação dos campos</span>
-        └── data.php         <span class="cm"># lê/grava o JSON</span></pre></div>
-                <div class="callout tip"><span class="ct">💡 Rodando a API enquanto estuda</span> Suba a API com <code>php -S localhost:8000 -t public public/index.php</code> dentro de <code>backend/src</code>. O módulo <a data-goto="rodar">Rodar</a> cobre Docker e a execução manual em detalhe.</div>
+    ├── api.php             <span class="cm"># dispatch por método</span>
+    ├── controllers.php     <span class="cm"># handlers + respond()</span>
+    ├── services.php        <span class="cm"># regras de negócio</span>
+    ├── validation.php      <span class="cm"># validação dos campos</span>
+    └── data.php            <span class="cm"># lê/grava o JSON</span></pre></div>
+                <div class="callout tip"><span class="ct">💡 Rodando a API enquanto estuda</span> Suba a API com <code>php -S localhost:8000 -t public public/index.php</code> dentro de <code>backend</code>. O módulo <a data-goto="rodar">Rodar</a> cobre Docker e a execução manual em detalhe.</div>
 
                 <h2 class="sec">1. Configuração — <code class="i">config/config.php</code></h2>
                 <p class="txt">Começamos pela configuração: <em>onde</em> ficam os dados e <em>quais</em> origens podem chamar a API (o CORS que vimos no módulo <a data-goto="http">HTTP</a>).</p>
                 <div class="code-wrap"><span class="lang">config/config.php</span><pre class="code">&lt;?php
 
-const DATA_FILE = __DIR__ . '/../../data/data.json';
+const DATA_FILE = __DIR__ . '/../data/data.json';
 
 $allowedOrigins = [
     'http://0.0.0.0:8080', 'http://localhost:8080', 'http://127.0.0.1:8080',
@@ -2024,15 +2023,14 @@ document.addEventListener('DOMContentLoaded', () =&gt; renderUsers(apiUrl));</pr
 ├── Dockerfile
 ├── data/
 │   └── data.json          <span class="cm"># "banco" em JSON</span>
+├── config/config.php      <span class="cm"># DATA_FILE, CORS</span>
+├── public/index.php       <span class="cm"># entry point + rotas</span>
 └── src/
-    ├── config/config.php   <span class="cm"># DATA_FILE, CORS</span>
-    ├── public/index.php    <span class="cm"># entry point + rotas</span>
-    └── src/
-        ├── api.php         <span class="cm"># dispatch por método</span>
-        ├── controllers.php
-        ├── services.php
-        ├── validation.php
-        └── data.php        <span class="cm"># lê/grava o JSON</span></pre></div>
+    ├── api.php            <span class="cm"># dispatch por método</span>
+    ├── controllers.php
+    ├── services.php
+    ├── validation.php
+    └── data.php           <span class="cm"># lê/grava o JSON</span></pre></div>
                     </div>
                     <div>
                         <h3 class="sub" style="margin-top:0">Frontend — <code class="i">frontend/</code></h3>
@@ -2092,7 +2090,7 @@ docker compose up --build
 
                 <h2 class="sec">Opção 2 — Manual (desenvolvimento)</h2>
                 <div class="grid2">
-                    <div class="code-wrap"><span class="lang">api (php)</span><pre class="code">cd backend/src
+                    <div class="code-wrap"><span class="lang">api (php)</span><pre class="code">cd backend
 php -S localhost:8000 -t public public/index.php</pre></div>
                     <div class="code-wrap"><span class="lang">frontend (vite)</span><pre class="code">cd frontend
 npm install
@@ -2172,6 +2170,8 @@ curl -X DELETE "http://localhost:8000/api/users?id=1"</pre></div>
 
 WORKDIR /app
 
+COPY config/ config/
+COPY public/ public/
 COPY src/ src/
 COPY data/ data/
 
@@ -2179,7 +2179,7 @@ RUN chmod -R 777 data/
 
 EXPOSE 80
 
-CMD ["php", "-S", "0.0.0.0:80", "-t", "src/public", "src/public/index.php"]</pre></div></details>
+CMD ["php", "-S", "0.0.0.0:80", "-t", "public", "public/index.php"]</pre></div></details>
                 <div class="callout info"><span class="ct">Portas no Docker</span> Dentro do container a API roda na porta <code>80</code>; o <code>compose.yaml</code> da raiz mapeia para a <code>8000</code> do seu computador — por isso <code>http://localhost:8000</code>.</div>
 
                 <h3 class="sub">🟨 Frontend (Axios) — HTML &amp; CSS</h3>
@@ -2591,7 +2591,7 @@ COPY dist/ /usr/local/apache2/htdocs/</pre></div></details>
 
     <script>
         const phpSources = {
-'src/public/index.php': `<?php
+'public/index.php': `<?php
 
 require_once __DIR__ . '/../config/config.php';
 
@@ -2620,16 +2620,16 @@ function notFound(): void
     echo json_encode(['error' => 'Not found']);
 }`,
 
-'src/config/config.php': `<?php
+'config/config.php': `<?php
 
-const DATA_FILE = __DIR__ . '/../../data/data.json';
+const DATA_FILE = __DIR__ . '/../data/data.json';
 
 $allowedOrigins = [
     'http://0.0.0.0:8080', 'http://localhost:8080', 'http://127.0.0.1:8080',
     'http://0.0.0.0:5500', 'http://localhost:5500', 'http://127.0.0.1:5500',
 ];`,
 
-'src/src/api.php': `<?php
+'src/api.php': `<?php
 
 require_once __DIR__ . '/controllers.php';
 
@@ -2644,7 +2644,7 @@ match ($method) {
     default => handleMethodNotAllowed(),
 };`,
 
-'src/src/controllers.php': `<?php
+'src/controllers.php': `<?php
 
 require_once __DIR__ . '/services.php';
 
@@ -2721,7 +2721,7 @@ function handleMethodNotAllowed(): void
     echo json_encode(['error' => 'Method not allowed']);
 }`,
 
-'src/src/services.php': `<?php
+'src/services.php': `<?php
 
 require_once __DIR__ . '/validation.php';
 require_once __DIR__ . '/data.php';
@@ -2814,7 +2814,7 @@ function removeUser(?int $id): array
     return ['data' => ['deleted' => $user], 'status' => 200];
 }`,
 
-'src/src/validation.php': `<?php
+'src/validation.php': `<?php
 
 function validateRequiredFields(array $input, array $fields): ?string
 {
@@ -2868,7 +2868,7 @@ function validateUserFields(array $input): ?string
     return null;
 }`,
 
-'src/src/data.php': `<?php
+'src/data.php': `<?php
 
 require_once __DIR__ . '/../config/config.php';
 
