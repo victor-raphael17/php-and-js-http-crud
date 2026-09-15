@@ -258,7 +258,7 @@
                     <div class="hcard" style="--c:var(--green)">
                         <span class="tag">Frontend</span>
                         <h4>🟨 Interface em JavaScript</h4>
-                        <p>JavaScript vanilla com <strong>ES Modules</strong> e <strong>Bootstrap 5</strong>. Lista usuários em cards e permite criar, editar e deletar. Comunicação via <strong>Axios</strong>. Roda em <code class="i">localhost:8080</code>.</p>
+                        <p>JavaScript vanilla com <strong>ES Modules</strong> e <strong>Bootstrap 5</strong>. Lista usuários em cards e permite criar, editar e deletar. Comunicação via <strong>Axios</strong>. Roda em <code class="i">localhost:8080</code> no Vite e em <code class="i">localhost:5500</code> no Docker.</p>
                     </div>
                 </div>
 
@@ -274,7 +274,7 @@
   │                         │   PUT/PATCH/DELETE     │  validation.php          │
   │          Axios          │                        │  data.php  ──▶ data.json │
   └─────────────────────────┘                        └──────────────────────────┘
-         :8080                                                  :8000</pre></div>
+         :5500 ou :8080                                         :8000</pre></div>
 
                 <h2 class="sec">O recurso: <code class="i">User</code></h2>
                 <p class="txt">Toda a aplicação gira em torno de um único recurso — o usuário — com quatro campos:</p>
@@ -454,7 +454,7 @@ const created = response.data;</pre></div>
                 <div class="code-wrap"><span class="lang">js</span><pre class="code">const response = await axios.delete("http://localhost:8000/api/users?id=1");</pre></div>
 
                 <h3 class="sub">OPTIONS — o preflight do CORS</h3>
-                <p class="txt">Quando o frontend (<code class="i">:8080</code>) chama a API (<code class="i">:8000</code>), são <strong>origens diferentes</strong>. Por segurança, o navegador faz antes uma requisição <code class="i">OPTIONS</code> perguntando “posso te fazer requisições?”. Isso é o <strong>CORS</strong> (Cross-Origin Resource Sharing).</p>
+                <p class="txt">Quando o frontend (<code class="i">:5500</code> no Docker, <code class="i">:8080</code> no Vite) chama a API (<code class="i">:8000</code>), são <strong>origens diferentes</strong>. Por segurança, o navegador faz antes uma requisição <code class="i">OPTIONS</code> perguntando “posso te fazer requisições?”. Isso é o <strong>CORS</strong> (Cross-Origin Resource Sharing).</p>
                 <div class="code-wrap"><span class="lang">preflight</span><pre class="code">1. Navegador → servidor:  OPTIONS /api/users   "posso fazer POST com JSON?"
 2. Servidor → navegador:  204 + headers CORS   "sim, pode"
 3. Navegador → servidor:  POST /api/users      (a requisição real)
@@ -563,8 +563,8 @@ const created = response.data;</pre></div>
                     </table>
                 </div>
 
-                <h2 class="sec">Estrutura de pastas do backend</h2>
-                <div class="code-wrap"><span class="lang">backend</span><pre class="code">backend/
+                <h2 class="sec">Estrutura de pastas da API</h2>
+                <div class="code-wrap"><span class="lang">api</span><pre class="code">api/
 ├── data/
 │   └── data.json           <span class="cm"># o "banco" de dados</span>
 ├── config/
@@ -577,7 +577,7 @@ const created = response.data;</pre></div>
     ├── services.php        <span class="cm"># regras de negócio</span>
     ├── validation.php      <span class="cm"># validação dos campos</span>
     └── data.php            <span class="cm"># lê/grava o JSON</span></pre></div>
-                <div class="callout tip"><span class="ct">💡 Rodando a API enquanto estuda</span> Suba a API com <code>php -S localhost:8000 -t public public/index.php</code> dentro de <code>backend</code>. O módulo <a data-goto="rodar">Rodar</a> cobre Docker e a execução manual em detalhe.</div>
+                <div class="callout tip"><span class="ct">💡 Rodando a API enquanto estuda</span> Suba a API com <code>php -S localhost:8000 -t public public/index.php</code> dentro de <code>api</code>. O módulo <a data-goto="rodar">Rodar</a> cobre Docker e a execução manual em detalhe.</div>
 
                 <h2 class="sec">1. Configuração — <code class="i">config/config.php</code></h2>
                 <p class="txt">Começamos pela configuração: <em>onde</em> ficam os dados e <em>quais</em> origens podem chamar a API (o CORS que vimos no módulo <a data-goto="http">HTTP</a>).</p>
@@ -589,7 +589,7 @@ $allowedOrigins = [
     'http://0.0.0.0:8080', 'http://localhost:8080', 'http://127.0.0.1:8080',
     'http://0.0.0.0:5500', 'http://localhost:5500', 'http://127.0.0.1:5500',
 ];</pre></div>
-                <p class="txt"><code class="i">DATA_FILE</code> aponta para o <code class="i">data.json</code>. Ela é uma <strong>constante</strong>, e não uma variável, porque quem a usa é o <code class="i">data.php</code> — e funções em PHP não enxergam variáveis do escopo global, mas enxergam constantes de qualquer lugar. Já o <code class="i">$allowedOrigins</code> pode ser variável: ele é lido direto no escopo global do <code class="i">index.php</code>. A lista traz as URLs de frontend autorizadas — <code class="i">8080</code> é o nosso frontend e <code class="i">5500</code> é o Live Server do VS Code. Requisições de origens fora da lista não recebem os headers de CORS e são bloqueadas pelo navegador.</p>
+                <p class="txt"><code class="i">DATA_FILE</code> aponta para o <code class="i">data.json</code>. Ela é uma <strong>constante</strong>, e não uma variável, porque quem a usa é o <code class="i">data.php</code> — e funções em PHP não enxergam variáveis do escopo global, mas enxergam constantes de qualquer lugar. Já o <code class="i">$allowedOrigins</code> pode ser variável: ele é lido direto no escopo global do <code class="i">index.php</code>. A lista traz as URLs de frontend autorizadas — <code class="i">8080</code> é o frontend rodando no <code class="i">npm run dev</code> (Vite) e <code class="i">5500</code> é o frontend servido pelo Docker. As duas precisam estar liberadas porque você vai usar as duas: o Vite enquanto desenvolve, o Docker quando sobe o projeto inteiro. Requisições de origens fora da lista não recebem os headers de CORS e são bloqueadas pelo navegador.</p>
 
                 <h2 class="sec">2. O entry point — <code class="i">public/index.php</code></h2>
                 <p class="txt">Todo request entra por aqui. Este arquivo faz três coisas, nesta ordem: <strong>(1)</strong> aplica os headers de CORS, <strong>(2)</strong> responde ao preflight <code class="i">OPTIONS</code>, e <strong>(3)</strong> roteia pela URL.</p>
@@ -2156,13 +2156,13 @@ document.addEventListener('DOMContentLoaded', async () =&gt; {
                 <h2 class="sec">Estrutura de pastas</h2>
                 <p class="txt">As duas partes ficam lado a lado na raiz, cada uma com o seu <code class="i">Dockerfile</code>. O <code class="i">compose.yaml</code> fica fora delas, na raiz, porque é ele que junta as duas num só comando.</p>
                 <div class="code-wrap"><span class="lang">projeto</span><pre class="code">projeto/
-├── compose.yaml            <span class="cm"># sobe backend + frontend</span>
-├── backend/                <span class="cm"># API PHP + Dockerfile</span>
+├── compose.yaml            <span class="cm"># sobe api + frontend</span>
+├── api/                    <span class="cm"># API PHP + Dockerfile</span>
 └── frontend/               <span class="cm"># JS/Vite + Dockerfile</span></pre></div>
                 <div class="grid2">
                     <div>
-                        <h3 class="sub" style="margin-top:0">Backend — <code class="i">backend/</code></h3>
-                        <div class="code-wrap"><span class="lang">php</span><pre class="code">backend/
+                        <h3 class="sub" style="margin-top:0">Backend — <code class="i">api/</code></h3>
+                        <div class="code-wrap"><span class="lang">php</span><pre class="code">api/
 ├── Dockerfile
 ├── data/
 │   └── data.json          <span class="cm"># "banco" em JSON</span>
@@ -2213,28 +2213,28 @@ export default defineConfig({
                 <h2 class="sec">Opção 1 — Docker (recomendado)</h2>
                 <p class="txt">Um único <code class="i">compose.yaml</code> na raiz descreve os dois serviços. Cada <code class="i">build</code> aponta para a pasta onde está o <code class="i">Dockerfile</code> daquele serviço:</p>
                 <div class="code-wrap"><span class="lang">compose.yaml</span><pre class="code">services:
-  backend:
-    build: ./backend
+  api:
+    build: api/
     ports:
       - "8000:80"
 
   frontend:
-    build: ./frontend
+    build: frontend/
     ports:
-      - "8080:80"</pre></div>
+      - "5500:80"</pre></div>
                 <p class="txt">Gere o build do frontend e suba as duas partes de uma vez, da raiz do projeto:</p>
                 <div class="code-wrap"><span class="lang">terminal</span><pre class="code">cd frontend &amp;&amp; npm install &amp;&amp; npm run build &amp;&amp; cd ..
 
 docker compose up --build
 <span class="cm"># API   em http://localhost:8000</span>
-<span class="cm"># front em http://localhost:8080</span></pre></div>
+<span class="cm"># front em http://localhost:5500</span></pre></div>
                 <div class="callout warn"><span class="ct">Ordem importa</span> O container do frontend serve a pasta <code>dist/</code> (Apache). Rode <code>npm run build</code> <strong>antes</strong> do <code>docker compose up</code>, senão não há o que servir.</div>
-                <div class="callout tip"><span class="ct">💡 Um serviço de cada vez</span> Estando tudo num só arquivo, você ainda pode subir só uma parte: <code>docker compose up backend</code>. E <code>docker compose down</code>, da raiz, derruba as duas.</div>
+                <div class="callout tip"><span class="ct">💡 Um serviço de cada vez</span> Estando tudo num só arquivo, você ainda pode subir só uma parte: <code>docker compose up api</code>. E <code>docker compose down</code>, da raiz, derruba as duas.</div>
                 <div class="callout info"><span class="ct">💾 E os dados?</span> Do jeito que está, o <code class="i">data.json</code> vive dentro do container: um <code>docker compose up --build</code> apaga tudo que foi cadastrado. O módulo <a data-goto="bonus">Bônus</a> mostra como resolver isso com um <strong>volume</strong>.</div>
 
                 <h2 class="sec">Opção 2 — Manual (desenvolvimento)</h2>
                 <div class="grid2">
-                    <div class="code-wrap"><span class="lang">api (php)</span><pre class="code">cd backend
+                    <div class="code-wrap"><span class="lang">api (php)</span><pre class="code">cd api
 php -S localhost:8000 -t public public/index.php</pre></div>
                     <div class="code-wrap"><span class="lang">frontend (vite)</span><pre class="code">cd frontend
 npm install
@@ -2248,11 +2248,12 @@ npm run dev
                         <thead><tr><th>Serviço</th><th>Porta</th><th>URL</th></tr></thead>
                         <tbody>
                             <tr><td>API PHP</td><td>8000</td><td class="mono">http://localhost:8000/api/users</td></tr>
-                            <tr><td>Frontend</td><td>8080</td><td class="mono">http://localhost:8080</td></tr>
+                            <tr><td>Frontend (Docker)</td><td>5500</td><td class="mono">http://localhost:5500</td></tr>
+                            <tr><td>Frontend (Vite, <code class="i">npm run dev</code>)</td><td>8080</td><td class="mono">http://localhost:8080</td></tr>
                         </tbody>
                     </table>
                 </div>
-                <div class="callout info"><span class="ct">Por que CORS?</span> Front (<code>:8080</code>) e API (<code>:8000</code>) são origens diferentes. A API só aceita origens listadas em <code>config.php</code> (<code>$allowedOrigins</code>) — que já inclui <code>localhost:8080</code> e <code>localhost:5500</code>. Se usar outra porta no front, adicione-a lá.</div>
+                <div class="callout info"><span class="ct">Por que CORS?</span> O front (<code>:5500</code> no Docker, <code>:8080</code> no Vite) e a API (<code>:8000</code>) são origens diferentes. A API só aceita origens listadas em <code>config.php</code> (<code>$allowedOrigins</code>) — que já inclui as duas. Se usar outra porta no front, adicione-a lá.</div>
 
                 <h2 class="sec">Contrato da API (o que sua API deve fazer)</h2>
                 <p class="txt">Se quiser recriar o backend do zero (em qualquer linguagem), ele precisa respeitar este contrato para o frontend funcionar:</p>
@@ -2273,7 +2274,7 @@ npm run dev
                     <li><strong>id</strong> vai como <em>query param</em> (<code class="i">?id=1</code>), nunca no corpo.</li>
                     <li><strong>age</strong> é armazenado como <strong>número</strong>, não string.</li>
                     <li>Erros retornam <code class="i">{ "error": "mensagem" }</code> com status HTTP adequado.</li>
-                    <li>Headers CORS liberando <code class="i">localhost:8080</code>.</li>
+                    <li>Headers CORS liberando <code class="i">localhost:5500</code> (Docker) e <code class="i">localhost:8080</code> (Vite).</li>
                 </ul>
 
                 <h3 class="sub">Testando pela linha de comando</h3>
@@ -2715,20 +2716,20 @@ dist/</pre></div></details>
                 <details class="file"><summary><span class="fpath">Dockerfile</span></summary><div class="code-wrap"><pre class="code">FROM httpd:alpine
 
 COPY dist/ /usr/local/apache2/htdocs/</pre></div></details>
-                <div class="callout info"><span class="ct">Sobre esses arquivos</span> O seu <code>package.json</code> terá também campos como <code>name</code> e <code>version</code> gerados pelo <code>npm init -y</code> — pode mantê-los; as versões dos pacotes podem variar. O <code>Dockerfile</code> serve a pasta <code>dist/</code> (gerada pelo <code>npm run build</code>) com Apache na porta <code>80</code>, mapeada pelo <code>compose.yaml</code> da raiz para a <code>8080</code>.</div>
+                <div class="callout info"><span class="ct">Sobre esses arquivos</span> O seu <code>package.json</code> terá também campos como <code>name</code> e <code>version</code> gerados pelo <code>npm init -y</code> — pode mantê-los; as versões dos pacotes podem variar. O <code>Dockerfile</code> serve a pasta <code>dist/</code> (gerada pelo <code>npm run build</code>) com Apache na porta <code>80</code>, mapeada pelo <code>compose.yaml</code> da raiz para a <code>5500</code>.</div>
 
                 <h3 class="sub">🐳 Raiz do projeto — orquestração</h3>
                 <details class="file"><summary><span class="fpath">compose.yaml</span></summary><div class="code-wrap"><pre class="code">services:
-  backend:
-    build: ./backend
+  api:
+    build: api/
     ports:
       - "8000:80"
 
   frontend:
-    build: ./frontend
+    build: frontend/
     ports:
-      - "8080:80"</pre></div></details>
-                <div class="callout info"><span class="ct">Um arquivo, dois serviços</span> O <code>build</code> aponta para a pasta do serviço, e é lá que o Docker procura o <code>Dockerfile</code>. Como os dois nomes de serviço estão no mesmo arquivo, <code>docker compose up</code> na raiz sobe o projeto inteiro.</div>
+      - "5500:80"</pre></div></details>
+                <div class="callout info"><span class="ct">Um arquivo, dois serviços</span> O <code>build</code> aponta para a pasta do serviço, e é lá que o Docker procura o <code>Dockerfile</code>. Como os dois nomes de serviço estão no mesmo arquivo, <code>docker compose up</code> na raiz sobe o projeto inteiro. No repositório do projeto esse arquivo tem mais duas coisas: um <code>container_name</code> em cada serviço, que fixa o nome do container em vez de deixar o Docker gerar um, e o volume do <a data-goto="bonus">bônus 1</a>, já aplicado.</div>
 
             </div>
         </section>
@@ -2744,27 +2745,27 @@ COPY dist/ /usr/local/apache2/htdocs/</pre></div></details>
                 <p class="txt">A solução do Docker para isso é o <strong>volume</strong>: uma área de armazenamento que vive fora do container e sobrevive a ele. Você aponta uma pasta do container para o volume, e o que for escrito ali fica guardado.</p>
                 <div class="grid2">
                     <div class="code-wrap"><span class="lang">compose.yaml — antes</span><pre class="code">services:
-  backend:
-    build: ./backend
+  api:
+    build: api/
     ports:
       - "8000:80"
 
   frontend:
-    build: ./frontend
+    build: frontend/
     ports:
-      - "8080:80"</pre></div>
+      - "5500:80"</pre></div>
                     <div class="code-wrap"><span class="lang">compose.yaml — depois</span><pre class="code">services:
-  backend:
-    build: ./backend
+  api:
+    build: api/
     ports:
       - "8000:80"
     volumes:
       - api-data:/app/data
 
   frontend:
-    build: ./frontend
+    build: frontend/
     ports:
-      - "8080:80"
+      - "5500:80"
 
 volumes:
   api-data:</pre></div>
@@ -2781,11 +2782,11 @@ docker compose up -d --build       <span class="cm"># rebuild: os usuários cont
 docker compose down                <span class="cm"># derruba os containers, o volume fica</span>
 
 docker volume ls                   <span class="cm"># lista os volumes (procure por *_api-data)</span>
-docker compose exec backend cat data/data.json   <span class="cm"># espia o arquivo de dentro</span>
+docker compose exec api cat data/data.json   <span class="cm"># espia o arquivo de dentro</span>
 
 docker compose down -v             <span class="cm"># o -v APAGA o volume: zera os dados</span></pre></div>
                 <div class="callout warn"><span class="ct">⚠ O <code>-v</code> apaga mesmo</span> <code>docker compose down</code> sozinho é seguro: derruba os containers e preserva o volume. Com <code>-v</code>, o volume vai junto e não há desfazer. Use quando quiser começar do zero de propósito.</div>
-                <div class="callout tip"><span class="ct">💡 Volume nomeado ou pasta do projeto?</span> Trocar <code>api-data:/app/data</code> por <code>./backend/data:/app/data</code> monta a <strong>sua pasta</strong> dentro do container (isso se chama <em>bind mount</em>). A vantagem é abrir o <code>data.json</code> no editor e ver as mudanças na hora; a desvantagem é que o arquivo de dados passa a viver no meio do código — e, se você versiona o projeto no Git, cada cadastro vira uma alteração no repositório.</div>
+                <div class="callout tip"><span class="ct">💡 Volume nomeado ou pasta do projeto?</span> Trocar <code>api-data:/app/data</code> por <code>./api/data:/app/data</code> monta a <strong>sua pasta</strong> dentro do container (isso se chama <em>bind mount</em>). A vantagem é abrir o <code>data.json</code> no editor e ver as mudanças na hora; a desvantagem é que o arquivo de dados passa a viver no meio do código — e, se você versiona o projeto no Git, cada cadastro vira uma alteração no repositório.</div>
 
                 <hr class="rule">
                 <h2 class="sec">2. O build do frontend dentro do Dockerfile</h2>
@@ -2952,6 +2953,18 @@ curl -X POST http://localhost:8000/api/users \
 curl http://localhost:8000/api/users</pre></div>
                 <p class="txt">Se você fez o bônus 1, o volume continua valendo: o <code class="i">data.sqlite</code> nasce na mesma pasta <code class="i">/app/data</code> que já está montada, e os dados sobrevivem aos rebuilds do mesmo jeito. Os usuários antigos do <code class="i">data.json</code> não são migrados automaticamente — se quiser trazê-los, cadastre-os de novo pela interface ou escreva um pequeno script que leia o JSON e faça um <code class="i">INSERT</code> de cada um.</p>
                 <div class="callout info"><span class="ct">E para MySQL ou Postgres?</span> O caminho é o mesmo: só o <code>data.php</code> muda. A diferença é que esses bancos são <strong>serviços</strong>, não arquivos — eles entram como um terceiro serviço no <code>compose.yaml</code>, com imagem, senha e volume próprios, e a string do PDO vira algo como <code>mysql:host=db;dbname=crud</code>. Comece pelo SQLite: a lógica que você escrever aqui é a mesma lá.</div>
+
+                <hr class="rule">
+                <h2 class="sec">Últimas alterações</h2>
+                <p class="txt">O que mudou neste material na revisão de setembro de 2026, em ordem de impacto para quem está estudando:</p>
+                <ul class="list">
+                    <li><strong>O código do tutorial foi corrigido.</strong> Onze falhas do backend e três do frontend — entre elas o <code class="i">PUT</code> que respondia <code class="i">500</code>, um XSS na renderização dos cards e a perda de dados em escritas simultâneas. Cada correção aparece no passo a passo <em>e</em> no código-fonte de referência, e o <strong>Relatório de correções</strong>, logo abaixo, explica uma a uma.</li>
+                    <li><strong>Callouts novos.</strong> Explicações para os pontos que a correção tornou visíveis: por que escapar dado do usuário antes do <code class="i">innerHTML</code>, o que é um <em>unhandled rejection</em>, por que <code class="i">mb_strlen</code> e não <code class="i">strlen</code>, por que a mensagem da exceção não pode ir na resposta, e o que acontece quando duas requisições gravam ao mesmo tempo.</li>
+                    <li><strong>Referência de funções nativas do PHP: 21 → 29.</strong> <code class="i">mb_strlen</code> entrou no lugar de <code class="i">strlen</code>, e chegaram também <code class="i">ctype_digit</code>, <code class="i">is_string</code>, <code class="i">is_file</code>, <code class="i">fopen</code>, <code class="i">flock</code>, <code class="i">fclose</code>, <code class="i">error_log</code> e <code class="i">count</code>.</li>
+                    <li><strong>Este módulo Bônus foi criado</strong>, no lugar da antiga seção "Próximos passos &amp; desafios": volume para os dados, build do frontend dentro do Dockerfile e a troca do JSON por um banco.</li>
+                    <li><strong>O volume do <code class="i">data.json</code> saiu do módulo Rodar</strong> e virou o bônus 1. O <code class="i">compose.yaml</code> do módulo Rodar voltou a ser o mínimo necessário para subir o projeto.</li>
+                    <li><strong>Nomes alinhados com o repositório.</strong> A pasta do backend é <code class="i">api/</code> (era <code class="i">backend/</code>) e o serviço no <code class="i">compose.yaml</code> se chama <code class="i">api</code>. O frontend no Docker passou para a porta <code class="i">5500</code>; no <code class="i">npm run dev</code> ele continua na <code class="i">8080</code>, e as duas seguem liberadas no CORS.</li>
+                </ul>
 
                 <hr class="rule">
                 <h2 class="sec">Relatório de correções</h2>
