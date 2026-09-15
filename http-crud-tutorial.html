@@ -2074,11 +2074,16 @@ export default defineConfig({
     build: ./backend
     ports:
       - "8000:80"
+    volumes:
+      - api-data:/app/data
 
   frontend:
     build: ./frontend
     ports:
-      - "8080:80"</pre></div>
+      - "8080:80"
+
+volumes:
+  api-data:</pre></div>
                 <p class="txt">Gere o build do frontend e suba as duas partes de uma vez, da raiz do projeto:</p>
                 <div class="code-wrap"><span class="lang">terminal</span><pre class="code">cd frontend &amp;&amp; npm install &amp;&amp; npm run build &amp;&amp; cd ..
 
@@ -2087,6 +2092,7 @@ docker compose up --build
 <span class="cm"># front em http://localhost:8080</span></pre></div>
                 <div class="callout warn"><span class="ct">Ordem importa</span> O container do frontend serve a pasta <code>dist/</code> (Apache). Rode <code>npm run build</code> <strong>antes</strong> do <code>docker compose up</code>, senão não há o que servir.</div>
                 <div class="callout tip"><span class="ct">💡 Um serviço de cada vez</span> Estando tudo num só arquivo, você ainda pode subir só uma parte: <code>docker compose up backend</code>. E <code>docker compose down</code>, da raiz, derruba as duas.</div>
+                <div class="callout info"><span class="ct">💾 O volume do data.json</span> Sem <code>volumes</code>, o <code class="i">data.json</code> vive só dentro do container: qualquer <code>docker compose up --build</code> reconstrói a imagem e <strong>você perde todos os usuários cadastrados</strong>. O volume nomeado <code>api-data</code> guarda a pasta <code class="i">/app/data</code> fora do container, então os dados sobrevivem a rebuilds e a <code>docker compose down</code>. Na primeira subida o Docker copia para dentro do volume o <code class="i">data.json</code> que veio na imagem — ele serve de estado inicial. Para zerar os dados de propósito, use <code>docker compose down -v</code> (o <code>-v</code> apaga o volume).</div>
 
                 <h2 class="sec">Opção 2 — Manual (desenvolvimento)</h2>
                 <div class="grid2">
@@ -2562,12 +2568,17 @@ COPY dist/ /usr/local/apache2/htdocs/</pre></div></details>
     build: ./backend
     ports:
       - "8000:80"
+    volumes:
+      - api-data:/app/data
 
   frontend:
     build: ./frontend
     ports:
-      - "8080:80"</pre></div></details>
-                <div class="callout info"><span class="ct">Um arquivo, dois serviços</span> O <code>build</code> aponta para a pasta do serviço, e é lá que o Docker procura o <code>Dockerfile</code>. Como os dois nomes de serviço estão no mesmo arquivo, <code>docker compose up</code> na raiz sobe o projeto inteiro.</div>
+      - "8080:80"
+
+volumes:
+  api-data:</pre></div></details>
+                <div class="callout info"><span class="ct">Um arquivo, dois serviços</span> O <code>build</code> aponta para a pasta do serviço, e é lá que o Docker procura o <code>Dockerfile</code>. Como os dois nomes de serviço estão no mesmo arquivo, <code>docker compose up</code> na raiz sobe o projeto inteiro. O bloco <code>volumes</code> no fim declara o volume nomeado <code>api-data</code>, que persiste a pasta de dados da API entre rebuilds.</div>
 
                 <h2 class="sec">Próximos passos &amp; desafios (opcional, entenda bem o resto antes)</h2>
                 <ul class="list">

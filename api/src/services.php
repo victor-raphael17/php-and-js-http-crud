@@ -6,7 +6,8 @@ require_once __DIR__ . '/data.php';
 function getAllUsers(string $dataFile): array
 {
     $data = loadData($dataFile);
-    return ['users' => $data['users']];
+
+    return ['data' => ['users' => $data['users']], 'status' => 200];
 }
 
 function createUser(string $dataFile, ?array $input): array
@@ -34,10 +35,11 @@ function createUser(string $dataFile, ?array $input): array
     return ['data' => $user, 'status' => 201];
 }
 
-function editUser(string $dataFile, ?int $id, ?array $input, ?bool $partial): array
+function editUser(string $dataFile, mixed $id, ?array $input, bool $partial = false): array
 {
-    if ($id === null) {
-        return ['error' => 'User id is required', 'status' => 400];
+    $error = validateUserId($id);
+    if ($error) {
+        return ['error' => $error, 'status' => 400];
     }
 
     if (!is_array($input)) {
@@ -59,6 +61,10 @@ function editUser(string $dataFile, ?int $id, ?array $input, ?bool $partial): ar
     $allowed = ['name', 'age', 'email'];
     $fields = array_intersect_key($input, array_flip($allowed));
 
+    if (empty($fields)) {
+        return ['error' => 'At least one of name, age or email must be sent', 'status' => 400];
+    }
+
     if (isset($fields['name'])) {
         $fields['name'] = trim($fields['name']);
     }
@@ -67,7 +73,7 @@ function editUser(string $dataFile, ?int $id, ?array $input, ?bool $partial): ar
         $fields['age'] = (int) $fields['age'];
     }
 
-    $user = updateUser($dataFile, $id, $fields);
+    $user = updateUser($dataFile, (int) $id, $fields);
 
     if ($user === null) {
         return ['error' => 'User not found', 'status' => 404];
@@ -76,13 +82,14 @@ function editUser(string $dataFile, ?int $id, ?array $input, ?bool $partial): ar
     return ['data' => $user, 'status' => 200];
 }
 
-function removeUser(string $dataFile, ?int $id): array
+function removeUser(string $dataFile, mixed $id): array
 {
-    if ($id === null) {
-        return ['error' => 'User id is required', 'status' => 400];
+    $error = validateUserId($id);
+    if ($error) {
+        return ['error' => $error, 'status' => 400];
     }
 
-    $user = deleteUser($dataFile, $id);
+    $user = deleteUser($dataFile, (int) $id);
 
     if ($user === null) {
         return ['error' => 'User not found', 'status' => 404];
