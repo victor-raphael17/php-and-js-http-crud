@@ -1319,7 +1319,7 @@ getUsers();</pre></div>
                 <div class="code-wrap"><span class="lang">.gitignore</span><pre class="code">node_modules/
 dist/</pre></div>
 
-                <div class="callout tip"><span class="ct">🎯 Na prática</span> Para projetos reais e frameworks (Vue, React), o Axios costuma ser a escolha mais popular pela praticidade. Mas entender o Fetch é fundamental — ele é a base de como as requisições funcionam no JavaScript. <strong>Neste curso, tanto o build guiado (módulo 5) quanto o repositório de referência (módulo 6) usam Axios.</strong></div>
+                <div class="callout tip"><span class="ct">🎯 Na prática</span> Para projetos reais e frameworks (Vue, React), o Axios costuma ser a escolha mais popular pela praticidade. Mas entender o Fetch é fundamental — ele é a base de como as requisições funcionam no JavaScript. <strong>Neste curso, tanto o build guiado (módulo 5) quanto o código de referência (módulo 6) usam Axios.</strong></div>
             </div>
         </section>
         <!-- ══════════ MÓDULO 5 — CONSTRUIR O FRONTEND ══════════ -->
@@ -1327,7 +1327,7 @@ dist/</pre></div>
             <div class="wrap">
                 <div class="eyebrow">Módulo 5</div>
                 <h1 class="title">Construindo o Frontend, passo a passo</h1>
-                <p class="lead">Agora a parte prática: do zero até a interface completa consumindo a API PHP. São <strong>7 etapas</strong> em ordem — Setup, HTML, CSS e então as quatro operações do CRUD (Listar, Criar, Deletar, Editar). Toda a comunicação com a API usa o <strong>Axios</strong>, como no repositório de referência. (Existe também o <code class="i">fetch()</code> nativo do JavaScript, que dispensa instalação — mas o Axios trata JSON e erros por você; veja a comparação no módulo <a data-goto="axios">Fetch vs Axios</a>.)</p>
+                <p class="lead">Agora a parte prática: do zero até a interface completa consumindo a API PHP. São <strong>7 etapas</strong> em ordem — Setup, HTML, CSS e então as quatro operações do CRUD (Listar, Criar, Deletar, Editar). Toda a comunicação com a API usa o <strong>Axios</strong>, como no código de referência. (Existe também o <code class="i">fetch()</code> nativo do JavaScript, que dispensa instalação — mas o Axios trata JSON e erros por você; veja a comparação no módulo <a data-goto="axios">Fetch vs Axios</a>.)</p>
                 <div class="callout warn"><span class="ct">⚠ Pré-requisitos</span> A API PHP precisa estar rodando em <code>http://localhost:8000</code> (veja o módulo <a data-goto="rodar">Rodar</a>), senão as requisições vão falhar. E você precisa do <strong>Node.js</strong> instalado para o Axios e o Vite — o passo a passo está no módulo <a data-goto="axios">Fetch vs Axios</a>.</div>
 
                 <h2 class="sec">Etapa 1 — Setup do projeto</h2>
@@ -2731,7 +2731,7 @@ COPY dist/ /usr/local/apache2/htdocs/</pre></div></details>
     build: frontend/
     ports:
       - "5500:80"</pre></div></details>
-                <div class="callout info"><span class="ct">Um arquivo, dois serviços</span> O <code>build</code> aponta para a pasta do serviço, e é lá que o Docker procura o <code>Dockerfile</code>. Como os dois nomes de serviço estão no mesmo arquivo, <code>docker compose up</code> na raiz sobe o projeto inteiro. No repositório do projeto esse arquivo tem mais duas coisas: um <code>container_name</code> em cada serviço, que fixa o nome do container em vez de deixar o Docker gerar um, e o volume do <a data-goto="bonus">bônus 1</a>, já aplicado.</div>
+                <div class="callout info"><span class="ct">Um arquivo, dois serviços</span> O <code>build</code> aponta para a pasta do serviço, e é lá que o Docker procura o <code>Dockerfile</code>. Como os dois nomes de serviço estão no mesmo arquivo, <code>docker compose up</code> na raiz sobe o projeto inteiro.</div>
 
             </div>
         </section>
@@ -2972,7 +2972,7 @@ curl http://localhost:8000/api/users</pre></div>
                     <li><strong>Referência de funções nativas do PHP: 21 → 29.</strong> <code class="i">mb_strlen</code> entrou no lugar de <code class="i">strlen</code>, e chegaram também <code class="i">ctype_digit</code>, <code class="i">is_string</code>, <code class="i">is_file</code>, <code class="i">fopen</code>, <code class="i">flock</code>, <code class="i">fclose</code>, <code class="i">error_log</code> e <code class="i">count</code>.</li>
                     <li><strong>O módulo <a data-goto="bonus">Bônus</a> foi criado</strong>, no lugar da antiga seção "Próximos passos &amp; desafios": volume para os dados, build do frontend dentro do Dockerfile e a troca do JSON por um banco.</li>
                     <li><strong>O volume do <code class="i">data.json</code> saiu do módulo Rodar</strong> e virou o bônus 1. O <code class="i">compose.yaml</code> do módulo Rodar voltou a ser o mínimo necessário para subir o projeto.</li>
-                    <li><strong>Nomes alinhados com o repositório.</strong> A pasta do backend é <code class="i">api/</code> (era <code class="i">backend/</code>) e o serviço no <code class="i">compose.yaml</code> se chama <code class="i">api</code>. O frontend no Docker passou para a porta <code class="i">5500</code>; no <code class="i">npm run dev</code> ele continua na <code class="i">8080</code>, e as duas seguem liberadas no CORS.</li>
+                    <li><strong>Nomes e portas.</strong> A pasta do backend passou a se chamar <code class="i">api/</code> (era <code class="i">backend/</code>), e com ela o serviço no <code class="i">compose.yaml</code>. O frontend no Docker mudou para a porta <code class="i">5500</code>; no <code class="i">npm run dev</code> ele continua na <code class="i">8080</code>, e as duas seguem liberadas no CORS.</li>
                 </ul>
 
                 <hr class="rule">
@@ -2994,7 +2994,6 @@ curl http://localhost:8000/api/users</pre></div>
                     </table>
                 </div>
                 <div class="callout warn"><span class="ct">⚠ Os quatro juntos, não um de cada vez</span> Essas camadas conversam entre si. Se você trocar só o <code>services.php</code> e deixar o <code>validation.php</code> antigo, a API vai responder <code>500</code> em todas as rotas com <code>id</code> — porque o serviço novo chama um <code>validateUserId()</code> que ainda não existe. Troque os quatro e só depois teste.</div>
-                <div class="callout tip"><span class="ct">💡 E se o meu PUT já funcionava?</span> Então você copiou o <code>services.php</code> do tutorial, onde o <code>$partial</code> sempre teve valor padrão. Quem clonou o repositório é que pegou a versão quebrada, sem o padrão, em que <strong>todo</strong> PUT respondia <code>500</code>. De qualquer forma, substituir o arquivo resolve os dois casos.</div>
 
                 <h3 class="sub">Passo 2 — uma linha no <code class="i">public/index.php</code></h3>
                 <p class="txt">Logo abaixo dos outros <code class="i">header()</code>, antes do <code class="i">if</code> do preflight:</p>
@@ -3060,7 +3059,7 @@ document.addEventListener('DOMContentLoaded', async () =&gt; {
 }</pre></div>
 
                 <h3 class="sub">Passo 6 — nomes e portas <span style="opacity:.7">(opcional)</span></h3>
-                <p class="txt">Só para ficar igual ao repositório. Renomeie a pasta <code class="i">backend/</code> para <code class="i">api/</code> e ajuste o <code class="i">compose.yaml</code>:</p>
+                <p class="txt">Só para ficar igual ao que o material usa hoje. Renomeie a pasta <code class="i">backend/</code> para <code class="i">api/</code> e ajuste o <code class="i">compose.yaml</code>:</p>
                 <div class="code-wrap"><span class="lang">compose.yaml</span><pre class="code">services:
   api:                   # era "backend:"
     build: api/          # era "./backend"
@@ -3104,8 +3103,7 @@ curl -s -D - -o /dev/null http://localhost:8000/api/users | grep -i content-type
 
                 <hr class="rule">
                 <h2 class="sec">Relatório de correções</h2>
-                <p class="txt">Este relatório é sobre <strong>o código deste material</strong>: as nove falhas do backend e as três do frontend que existiam nos módulos e foram corrigidas em setembro de 2026. O que você lê hoje nos módulos já é a versão corrigida. A ordem dentro de cada grupo é da falha mais grave para a mais sutil.</p>
-                <div class="callout info"><span class="ct">📄 O repositório é outro arquivo</span> O projeto publicado no repositório tinha, além destas, duas falhas próprias que <strong>nunca estiveram no material</strong> — estão listadas no fim desta página, e o relatório completo de lá está em <code>CORRECOES.md</code>.</div>
+                <p class="txt">As doze falhas que existiam no código deste material e foram corrigidas em setembro de 2026: nove no backend e três no frontend. O que você lê hoje nos módulos já é a versão corrigida. A ordem dentro de cada grupo é da falha mais grave para a mais sutil.</p>
                 <h3 class="sub">Backend — a API PHP</h3>
                 <div class="table-wrap">
                     <table class="tbl">
@@ -3131,20 +3129,6 @@ curl -s -D - -o /dev/null http://localhost:8000/api/users | grep -i content-type
                             <tr><td class="mono">scripts/dom/render.js</td><td>Novo <code>escapeHtml()</code>: nome, e-mail, idade e id passam por ele antes de entrar no <code>innerHTML</code> do card.</td><td>Era um <strong>XSS armazenado</strong>. Um usuário cadastrado como <code>&lt;img src=x onerror=alert(1)&gt;</code> não aparecia como texto: o navegador tentava carregar a imagem, falhava e executava o <code>onerror</code> — na máquina de <em>todo mundo</em> que abrisse a lista.</td></tr>
                             <tr><td class="mono">app.js</td><td>Todas as chamadas de <code>renderUsers()</code> passaram a ser <code>await</code>, e a primeira renderização ganhou <code>try/catch</code> com mensagem na tela.</td><td><code>renderUsers()</code> é <code>async</code>. Sem <code>await</code>, a Promise rejeitada não era pega por nenhum <code>catch</code>: com a API fora do ar, a página ficava em branco e o erro só aparecia no console do DevTools.</td></tr>
                             <tr><td class="mono">app.js</td><td>O endereço da API virou <code>import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api/users'</code>.</td><td>O endereço estava cravado no código: publicar o frontend em outro lugar exigia editar o <code>app.js</code>. Sem nenhuma configuração, o comportamento continua exatamente o mesmo de antes.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-                <h3 class="sub">Só no repositório — nunca esteve neste material</h3>
-                <p class="txt">O projeto publicado no repositório é um arquivo à parte deste tutorial, e tinha problemas próprios. Se você montou o seu projeto copiando dos módulos, <strong>nada disto aqui aconteceu com você</strong>. A lista existe para quem clonou o repositório e estranhou a diferença:</p>
-                <div class="table-wrap">
-                    <table class="tbl">
-                        <thead><tr><th>Arquivo</th><th>O que era</th><th>Aqui no material</th></tr></thead>
-                        <tbody>
-                            <tr><td class="mono">src/services.php</td><td><strong>Todo <code>PUT</code> respondia <code>500</code>.</strong> O <code>$partial</code> do <code>editUser()</code> estava sem valor padrão e o <code>handlePut</code> chamava a função com 3 dos 4 parâmetros: <code>ArgumentCountError</code>, capturado pelo <code>catch</code> e virando erro interno.</td><td>O material sempre teve <code>bool $partial = false</code>, com o PATCH passando <code>partial: true</code>. O PUT nunca quebrou aqui.</td></tr>
-                            <tr><td class="mono">src/controllers.php</td><td>A resposta de erro levava junto a mensagem da exceção — caminhos de arquivo e nomes de função entregues a quem chamasse a API.</td><td>O material sempre devolveu só <code>"Internal server error"</code>. O que mudou foi acrescentar o <code>error_log()</code>, para o detalhe ficar registrado no servidor.</td></tr>
-                            <tr><td class="mono">data/data.json</td><td>O arquivo versionado tinha um JSON válido <strong>seguido de um dump de array PHP colado por engano</strong>, o que o invalidava inteiro — a API tratava tudo como banco vazio, em silêncio. Havia ainda dois usuários com o mesmo <code>id</code>.</td><td>O exemplo do material sempre foi um JSON válido.</td></tr>
-                            <tr><td class="mono">openapi.json</td><td>Uma especificação OpenAPI paralela ao código, que teria de ser mantida à mão a cada mudança da API. Foi removida.</td><td>Esse arquivo nunca existiu no material.</td></tr>
-                            <tr><td class="mono">compose.yaml</td><td>Sem volume, cada <code>docker compose up --build</code> apagava os usuários cadastrados. O repositório já subiu com o volume aplicado.</td><td>Aqui o volume é o <a data-goto="bonus">bônus 1</a>, opcional e explicado passo a passo.</td></tr>
                         </tbody>
                     </table>
                 </div>
