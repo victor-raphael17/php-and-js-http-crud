@@ -13,60 +13,64 @@ function respond(array $result): void
     }
 }
 
+function respondServerError(\Throwable $e): void
+{
+    // O detalhe do erro vai para o log do servidor, nunca para o cliente.
+    error_log((string) $e);
+
+    http_response_code(500);
+    echo json_encode(['error' => 'Internal server error']);
+}
+
+function readJsonBody(): ?array
+{
+    $input = json_decode(file_get_contents('php://input'), true);
+
+    return is_array($input) ? $input : null;
+}
+
 function handleGet(string $dataFile): void
 {
     try {
-        echo json_encode(getAllUsers($dataFile));
+        respond(getAllUsers($dataFile));
     } catch (\Throwable $e) {
-        http_response_code(500);
-        echo json_encode(['error' => 'Internal server error ' . $e->getMessage()]);
+        respondServerError($e);
     }
 }
 
 function handlePost(string $dataFile): void
 {
     try {
-        $input = json_decode(file_get_contents('php://input'), true);
-        respond(createUser($dataFile, $input));
+        respond(createUser($dataFile, readJsonBody()));
     } catch (\Throwable $e) {
-        http_response_code(500);
-        echo json_encode(['error' => 'Internal server error' . $e->getMessage()]);
+        respondServerError($e);
     }
 }
 
-// paramos aqui na manhã
 function handlePut(string $dataFile): void
 {
-    try { 
-        $input = json_decode(file_get_contents('php://input'), true);
-        $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
-        respond(editUser($dataFile, $id, $input));
+    try {
+        respond(editUser($dataFile, $_GET['id'] ?? null, readJsonBody()));
     } catch (\Throwable $e) {
-        http_response_code(500);
-        echo json_encode(['error' => 'Internal server error' . $e->getMessage()]);
+        respondServerError($e);
     }
 }
 
 function handlePatch(string $dataFile): void
 {
     try {
-        $input = json_decode(file_get_contents('php://input'), true);
-        $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
-        respond(editUser($dataFile, $id, $input, $partial = true));
+        respond(editUser($dataFile, $_GET['id'] ?? null, readJsonBody(), partial: true));
     } catch (\Throwable $e) {
-        http_response_code(500);
-        echo json_encode(['error' => 'Internal server error' . $e->getMessage()]);
+        respondServerError($e);
     }
 }
 
 function handleDelete(string $dataFile): void
 {
     try {
-        $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
-        respond(removeUser($dataFile, $id));
+        respond(removeUser($dataFile, $_GET['id'] ?? null));
     } catch (\Throwable $e) {
-        http_response_code(500);
-        echo json_encode(['error' => 'Internal server error' . $e->getMessage()]);
+        respondServerError($e);
     }
 }
 

@@ -4,8 +4,13 @@ services:
     build: api/
     ports:
       - "8000:80"
+    volumes:
+      - api-data:/app/data
   frontend:
     container_name: frontend
     build: frontend/
     ports:
       - "5500:80"
+
+volumes:
+  api-data:

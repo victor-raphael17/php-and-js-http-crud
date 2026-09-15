@@ -230,6 +230,7 @@
                 <button class="nav-item" data-mod="axios"><span class="n">4</span> Fetch vs Axios</button>
                 <button class="nav-item" data-mod="frontend"><span class="n">5</span> Frontend</button>
                 <button class="nav-item" data-mod="rodar"><span class="n">6</span> Rodar</button>
+                <button class="nav-item" data-mod="bonus"><span class="n">7</span> Bônus</button>
             </nav>
         </div>
     </header>
@@ -257,7 +258,7 @@
                     <div class="hcard" style="--c:var(--green)">
                         <span class="tag">Frontend</span>
                         <h4>🟨 Interface em JavaScript</h4>
-                        <p>JavaScript vanilla com <strong>ES Modules</strong> e <strong>Bootstrap 5</strong>. Lista usuários em cards e permite criar, editar e deletar. Comunicação via <strong>Axios</strong>. Roda em <code class="i">localhost:8080</code>.</p>
+                        <p>JavaScript vanilla com <strong>ES Modules</strong> e <strong>Bootstrap 5</strong>. Lista usuários em cards e permite criar, editar e deletar. Comunicação via <strong>Axios</strong>. Roda em <code class="i">localhost:8080</code> no Vite e em <code class="i">localhost:5500</code> no Docker.</p>
                     </div>
                 </div>
 
@@ -273,7 +274,7 @@
   │                         │   PUT/PATCH/DELETE     │  validation.php          │
   │          Axios          │                        │  data.php  ──▶ data.json │
   └─────────────────────────┘                        └──────────────────────────┘
-         :8080                                                  :8000</pre></div>
+         :5500 ou :8080                                         :8000</pre></div>
 
                 <h2 class="sec">O recurso: <code class="i">User</code></h2>
                 <p class="txt">Toda a aplicação gira em torno de um único recurso — o usuário — com quatro campos:</p>
@@ -296,6 +297,7 @@
                     <div class="pstep"><div class="pnum">4</div><div class="pbody"><h4>Fetch vs Axios</h4><p>Duas formas de fazer requisições no JavaScript, instalação do Node/Axios e uso com Vite ou CDN. <a data-goto="axios">Ir para o módulo →</a></p></div></div>
                     <div class="pstep"><div class="pnum">5</div><div class="pbody"><h4>Construir o Frontend</h4><p>Passo a passo, do setup até o CRUD completo consumindo a API. <a data-goto="frontend">Ir para o módulo →</a></p></div></div>
                     <div class="pstep"><div class="pnum">6</div><div class="pbody"><h4>Rodar tudo</h4><p>Subir a API e o frontend com Docker ou manualmente, e o código-fonte real de referência. <a data-goto="rodar">Ir para o módulo →</a></p></div></div>
+                    <div class="pstep"><div class="pnum">7</div><div class="pbody"><h4>Bônus</h4><p>Três melhorias opcionais: volume para os dados, build do frontend no Dockerfile e a troca do JSON por um banco. <a data-goto="bonus">Ir para o módulo →</a></p></div></div>
                 </div>
 
                 <div class="callout tip">
@@ -452,7 +454,7 @@ const created = response.data;</pre></div>
                 <div class="code-wrap"><span class="lang">js</span><pre class="code">const response = await axios.delete("http://localhost:8000/api/users?id=1");</pre></div>
 
                 <h3 class="sub">OPTIONS — o preflight do CORS</h3>
-                <p class="txt">Quando o frontend (<code class="i">:8080</code>) chama a API (<code class="i">:8000</code>), são <strong>origens diferentes</strong>. Por segurança, o navegador faz antes uma requisição <code class="i">OPTIONS</code> perguntando “posso te fazer requisições?”. Isso é o <strong>CORS</strong> (Cross-Origin Resource Sharing).</p>
+                <p class="txt">Quando o frontend (<code class="i">:5500</code> no Docker, <code class="i">:8080</code> no Vite) chama a API (<code class="i">:8000</code>), são <strong>origens diferentes</strong>. Por segurança, o navegador faz antes uma requisição <code class="i">OPTIONS</code> perguntando “posso te fazer requisições?”. Isso é o <strong>CORS</strong> (Cross-Origin Resource Sharing).</p>
                 <div class="code-wrap"><span class="lang">preflight</span><pre class="code">1. Navegador → servidor:  OPTIONS /api/users   "posso fazer POST com JSON?"
 2. Servidor → navegador:  204 + headers CORS   "sim, pode"
 3. Navegador → servidor:  POST /api/users      (a requisição real)
@@ -561,8 +563,8 @@ const created = response.data;</pre></div>
                     </table>
                 </div>
 
-                <h2 class="sec">Estrutura de pastas do backend</h2>
-                <div class="code-wrap"><span class="lang">backend</span><pre class="code">backend/
+                <h2 class="sec">Estrutura de pastas da API</h2>
+                <div class="code-wrap"><span class="lang">api</span><pre class="code">api/
 ├── data/
 │   └── data.json           <span class="cm"># o "banco" de dados</span>
 ├── config/
@@ -575,7 +577,7 @@ const created = response.data;</pre></div>
     ├── services.php        <span class="cm"># regras de negócio</span>
     ├── validation.php      <span class="cm"># validação dos campos</span>
     └── data.php            <span class="cm"># lê/grava o JSON</span></pre></div>
-                <div class="callout tip"><span class="ct">💡 Rodando a API enquanto estuda</span> Suba a API com <code>php -S localhost:8000 -t public public/index.php</code> dentro de <code>backend</code>. O módulo <a data-goto="rodar">Rodar</a> cobre Docker e a execução manual em detalhe.</div>
+                <div class="callout tip"><span class="ct">💡 Rodando a API enquanto estuda</span> Suba a API com <code>php -S localhost:8000 -t public public/index.php</code> dentro de <code>api</code>. O módulo <a data-goto="rodar">Rodar</a> cobre Docker e a execução manual em detalhe.</div>
 
                 <h2 class="sec">1. Configuração — <code class="i">config/config.php</code></h2>
                 <p class="txt">Começamos pela configuração: <em>onde</em> ficam os dados e <em>quais</em> origens podem chamar a API (o CORS que vimos no módulo <a data-goto="http">HTTP</a>).</p>
@@ -587,7 +589,7 @@ $allowedOrigins = [
     'http://0.0.0.0:8080', 'http://localhost:8080', 'http://127.0.0.1:8080',
     'http://0.0.0.0:5500', 'http://localhost:5500', 'http://127.0.0.1:5500',
 ];</pre></div>
-                <p class="txt"><code class="i">DATA_FILE</code> aponta para o <code class="i">data.json</code>. Ela é uma <strong>constante</strong>, e não uma variável, porque quem a usa é o <code class="i">data.php</code> — e funções em PHP não enxergam variáveis do escopo global, mas enxergam constantes de qualquer lugar. Já o <code class="i">$allowedOrigins</code> pode ser variável: ele é lido direto no escopo global do <code class="i">index.php</code>. A lista traz as URLs de frontend autorizadas — <code class="i">8080</code> é o nosso frontend e <code class="i">5500</code> é o Live Server do VS Code. Requisições de origens fora da lista não recebem os headers de CORS e são bloqueadas pelo navegador.</p>
+                <p class="txt"><code class="i">DATA_FILE</code> aponta para o <code class="i">data.json</code>. Ela é uma <strong>constante</strong>, e não uma variável, porque quem a usa é o <code class="i">data.php</code> — e funções em PHP não enxergam variáveis do escopo global, mas enxergam constantes de qualquer lugar. Já o <code class="i">$allowedOrigins</code> pode ser variável: ele é lido direto no escopo global do <code class="i">index.php</code>. A lista traz as URLs de frontend autorizadas — <code class="i">8080</code> é o frontend rodando no <code class="i">npm run dev</code> (Vite) e <code class="i">5500</code> é o frontend servido pelo Docker. As duas precisam estar liberadas porque você vai usar as duas: o Vite enquanto desenvolve, o Docker quando sobe o projeto inteiro. Requisições de origens fora da lista não recebem os headers de CORS e são bloqueadas pelo navegador.</p>
 
                 <h2 class="sec">2. O entry point — <code class="i">public/index.php</code></h2>
                 <p class="txt">Todo request entra por aqui. Este arquivo faz três coisas, nesta ordem: <strong>(1)</strong> aplica os headers de CORS, <strong>(2)</strong> responde ao preflight <code class="i">OPTIONS</code>, e <strong>(3)</strong> roteia pela URL.</p>
@@ -601,6 +603,7 @@ in_array($origin, $allowedOrigins) ?
     header("Access-Control-Allow-Origin: $origin") : null;
 header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
+header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
@@ -658,66 +661,73 @@ function respond(array $result): void
     } else {
         echo json_encode($result['data']);
     }
+}
+
+function respondServerError(\Throwable $e): void
+{
+    // O detalhe do erro vai para o log do servidor, nunca para o cliente.
+    error_log((string) $e);
+
+    http_response_code(500);
+    echo json_encode(['error' =&gt; 'Internal server error']);
+}
+
+function readJsonBody(): ?array
+{
+    $input = json_decode(file_get_contents('php://input'), true);
+
+    return is_array($input) ? $input : null;
 }</pre></div>
                 <p class="txt"><code class="i">respond()</code> recebe um array com <code class="i">status</code> e (<code class="i">data</code> ou <code class="i">error</code>). Ele define o código HTTP e imprime o JSON certo. Todos os serviços retornam nesse formato — por isso o controller fica tão enxuto.</p>
+                <p class="txt">Junto dele vêm dois ajudantes. O <code class="i">respondServerError()</code> trata o imprevisto: grava o erro real no log do servidor com <code class="i">error_log()</code> e devolve ao cliente apenas <code class="i">"Internal server error"</code>. E o <code class="i">readJsonBody()</code> lê o corpo da requisição uma única vez, devolvendo <code class="i">null</code> quando o JSON é inválido — assim nenhum handler precisa repetir essas duas linhas.</p>
+                <div class="callout warn"><span class="ct">⚠ Nunca devolva a mensagem da exceção</span> É tentador fazer <code>echo json_encode(['error' =&gt; $e-&gt;getMessage()])</code> para depurar mais rápido, mas isso entrega ao cliente caminhos de arquivo, nomes de funções e detalhes internos da sua API. O lugar do detalhe é o log; a resposta leva só a mensagem genérica.</div>
                 <div class="code-wrap"><span class="lang">controllers.php</span><pre class="code">function handleGet(): void
 {
     try {
-        echo json_encode(getAllUsers());
+        respond(getAllUsers());
     } catch (\Throwable $e) {
-        http_response_code(500);
-        echo json_encode(['error' =&gt; 'Internal server error']);
+        respondServerError($e);
     }
 }
 
 function handlePost(): void
 {
     try {
-        $input = json_decode(file_get_contents('php://input'), true);
-        respond(createUser($input));
+        respond(createUser(readJsonBody()));
     } catch (\Throwable $e) {
-        http_response_code(500);
-        echo json_encode(['error' =&gt; 'Internal server error']);
+        respondServerError($e);
     }
 }</pre></div>
                 <ul class="list">
-                    <li><strong>GET</strong> não tem body nem id: chama <code class="i">getAllUsers()</code> e imprime o resultado direto.</li>
-                    <li><strong>POST</strong> lê o corpo com <code class="i">file_get_contents('php://input')</code> e <code class="i">json_decode(..., true)</code> — o <code class="i">true</code> devolve um <em>array associativo</em> em vez de objeto — e passa ao serviço.</li>
+                    <li><strong>GET</strong> não tem body nem id: chama <code class="i">getAllUsers()</code> e entrega o resultado ao <code class="i">respond()</code>, igual a todos os outros handlers.</li>
+                    <li><strong>POST</strong> lê o corpo pelo <code class="i">readJsonBody()</code>, que por baixo usa <code class="i">file_get_contents('php://input')</code> e <code class="i">json_decode(..., true)</code> — o <code class="i">true</code> devolve um <em>array associativo</em> em vez de objeto.</li>
                     <li>O <code class="i">try/catch</code> em cada handler garante que qualquer erro inesperado vire um <code class="i">500</code> em JSON, nunca uma tela branca de erro do PHP.</li>
                 </ul>
-                <p class="txt">Os handlers de <strong>PUT</strong>, <strong>PATCH</strong> e <strong>DELETE</strong> seguem o mesmo formato, mas extraem o <code class="i">id</code> da query string. O PATCH ainda passa <code class="i">partial: true</code> ao serviço:</p>
+                <p class="txt">Os handlers de <strong>PUT</strong>, <strong>PATCH</strong> e <strong>DELETE</strong> seguem o mesmo formato, mas repassam também o <code class="i">id</code> da query string. Repare que o controller entrega o <code class="i">$_GET['id'] ?? null</code> <strong>cru</strong>, sem converter para inteiro: quem decide se aquilo é um id válido é a camada de validação. O PATCH ainda passa <code class="i">partial: true</code> ao serviço:</p>
                 <div class="code-wrap"><span class="lang">controllers.php</span><pre class="code">function handlePut(): void
 {
     try {
-        $input = json_decode(file_get_contents('php://input'), true);
-        $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
-        respond(editUser($id, $input));
+        respond(editUser($_GET['id'] ?? null, readJsonBody()));
     } catch (\Throwable $e) {
-        http_response_code(500);
-        echo json_encode(['error' =&gt; 'Internal server error']);
+        respondServerError($e);
     }
 }
 
 function handlePatch(): void
 {
     try {
-        $input = json_decode(file_get_contents('php://input'), true);
-        $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
-        respond(editUser($id, $input, partial: true));
+        respond(editUser($_GET['id'] ?? null, readJsonBody(), partial: true));
     } catch (\Throwable $e) {
-        http_response_code(500);
-        echo json_encode(['error' =&gt; 'Internal server error']);
+        respondServerError($e);
     }
 }
 
 function handleDelete(): void
 {
     try {
-        $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
-        respond(removeUser($id));
+        respond(removeUser($_GET['id'] ?? null));
     } catch (\Throwable $e) {
-        http_response_code(500);
-        echo json_encode(['error' =&gt; 'Internal server error']);
+        respondServerError($e);
     }
 }
 
@@ -738,7 +748,8 @@ require_once __DIR__ . '/data.php';
 function getAllUsers(): array
 {
     $data = loadData();
-    return ['users' =&gt; $data['users']];
+
+    return ['data' =&gt; ['users' =&gt; $data['users']], 'status' =&gt; 200];
 }
 
 function createUser(?array $input): array
@@ -766,10 +777,11 @@ function createUser(?array $input): array
     return ['data' =&gt; $user, 'status' =&gt; 201];
 }</pre></div>
                 <p class="txt"><code class="i">createUser()</code> é o pipeline completo: confere se o body é um array, valida os campos obrigatórios, valida os valores e só então insere. Cada falha retorna <code class="i">400</code> com a mensagem; o sucesso retorna <code class="i">201 Created</code> com o usuário. Note o <code class="i">(int) $input['age']</code> — a idade é guardada como <strong>número</strong>, não string.</p>
-                <div class="code-wrap"><span class="lang">services.php</span><pre class="code">function editUser(?int $id, ?array $input, bool $partial = false): array
+                <div class="code-wrap"><span class="lang">services.php</span><pre class="code">function editUser(mixed $id, ?array $input, bool $partial = false): array
 {
-    if ($id === null) {
-        return ['error' =&gt; 'User id is required', 'status' =&gt; 400];
+    $error = validateUserId($id);
+    if ($error) {
+        return ['error' =&gt; $error, 'status' =&gt; 400];
     }
 
     if (!is_array($input)) {
@@ -791,6 +803,10 @@ function createUser(?array $input): array
     $allowed = ['name', 'age', 'email'];
     $fields = array_intersect_key($input, array_flip($allowed));
 
+    if (empty($fields)) {
+        return ['error' =&gt; 'At least one of name, age or email must be sent', 'status' =&gt; 400];
+    }
+
     if (isset($fields['name'])) {
         $fields['name'] = trim($fields['name']);
     }
@@ -799,7 +815,7 @@ function createUser(?array $input): array
         $fields['age'] = (int) $fields['age'];
     }
 
-    $user = updateUser($id, $fields);
+    $user = updateUser((int) $id, $fields);
 
     if ($user === null) {
         return ['error' =&gt; 'User not found', 'status' =&gt; 404];
@@ -809,16 +825,19 @@ function createUser(?array $input): array
 }</pre></div>
                 <ul class="list">
                     <li><strong>PUT e PATCH compartilham este serviço.</strong> Quando <code class="i">$partial</code> é <code class="i">false</code> (PUT), exige todos os campos. Quando <code class="i">true</code> (PATCH), pula essa exigência e valida só o que veio.</li>
+                    <li><code class="i">validateUserId($id)</code> é a primeira coisa a rodar: sem id, <code class="i">400</code>; com um id que não é número (<code class="i">?id=abc</code>), <code class="i">400</code> também. Só depois disso o <code class="i">(int) $id</code> é seguro.</li>
+                    <li>Se, depois do filtro, não sobrar <strong>nenhum</strong> campo conhecido (um PATCH com <code class="i">{}</code>, por exemplo), o serviço devolve <code class="i">400</code> em vez de fingir que atualizou algo.</li>
                     <li><code class="i">array_intersect_key($input, array_flip($allowed))</code> é um filtro de segurança: mantém apenas <code class="i">name</code>, <code class="i">age</code> e <code class="i">email</code>, descartando qualquer campo extra que o cliente tente injetar (como um <code class="i">id</code> forjado).</li>
                     <li>Se o <code class="i">updateUser()</code> não encontrar o id, o serviço retorna <code class="i">404</code>.</li>
                 </ul>
-                <div class="code-wrap"><span class="lang">services.php</span><pre class="code">function removeUser(?int $id): array
+                <div class="code-wrap"><span class="lang">services.php</span><pre class="code">function removeUser(mixed $id): array
 {
-    if ($id === null) {
-        return ['error' =&gt; 'User id is required', 'status' =&gt; 400];
+    $error = validateUserId($id);
+    if ($error) {
+        return ['error' =&gt; $error, 'status' =&gt; 400];
     }
 
-    $user = deleteUser($id);
+    $user = deleteUser((int) $id);
 
     if ($user === null) {
         return ['error' =&gt; 'User not found', 'status' =&gt; 404];
@@ -832,6 +851,20 @@ function createUser(?array $input): array
                 <p class="txt">Duas funções puras: recebem dados e retornam uma mensagem de erro ou <code class="i">null</code>. Separá-las do serviço mantém todas as regras num único lugar.</p>
                 <div class="code-wrap"><span class="lang">validation.php</span><pre class="code">&lt;?php
 
+function validateUserId(mixed $id): ?string
+{
+    if ($id === null || $id === '') {
+        return 'User id is required';
+    }
+
+    // Vem sempre da query string, então é string: só aceitamos dígitos.
+    if (!is_string($id) || !ctype_digit($id)) {
+        return 'User id must be a positive integer';
+    }
+
+    return null;
+}
+
 function validateRequiredFields(array $input, array $fields): ?string
 {
     $missing = [];
@@ -843,7 +876,9 @@ function validateRequiredFields(array $input, array $fields): ?string
     }
 
     if (!empty($missing)) {
-        return implode(', ', $missing) . ' are required';
+        $verb = count($missing) === 1 ? ' is required' : ' are required';
+
+        return implode(', ', $missing) . $verb;
     }
 
     return null;
@@ -852,13 +887,18 @@ function validateRequiredFields(array $input, array $fields): ?string
 function validateUserFields(array $input): ?string
 {
     if (isset($input['name'])) {
+        if (!is_string($input['name'])) {
+            return 'Name must be a string';
+        }
+
         $name = trim($input['name']);
 
         if ($name === '') {
             return 'Name cannot be empty';
         }
 
-        if (strlen($name) &gt; 100) {
+        // mb_strlen conta caracteres; strlen contaria bytes e cortaria acentos cedo demais.
+        if (mb_strlen($name) &gt; 100) {
             return 'Name must be at most 100 characters';
         }
     }
@@ -876,6 +916,10 @@ function validateUserFields(array $input): ?string
     }
 
     if (isset($input['email'])) {
+        if (!is_string($input['email'])) {
+            return 'Email must be a string';
+        }
+
         if (!filter_var($input['email'], FILTER_VALIDATE_EMAIL)) {
             return 'Invalid email format';
         }
@@ -884,8 +928,11 @@ function validateUserFields(array $input): ?string
     return null;
 }</pre></div>
                 <ul class="list">
-                    <li><strong>validateRequiredFields</strong> monta a lista do que falta e devolve algo como <code class="i">"name, age are required"</code>. É usada só no POST e no PUT.</li>
+                    <li><strong>validateUserId</strong> protege as rotas que recebem <code class="i">?id=</code>. Como a query string sempre chega como texto, <code class="i">ctype_digit()</code> confirma que ali só há dígitos antes de qualquer conversão.</li>
+                    <li><strong>validateRequiredFields</strong> monta a lista do que falta e devolve algo como <code class="i">"name, age are required"</code> — ou <code class="i">"name is required"</code>, quando falta um só. É usada no POST e no PUT.</li>
                     <li><strong>validateUserFields</strong> valida <em>cada campo que existir</em> — por isso serve tanto para a criação completa quanto para o PATCH parcial. O <code class="i">filter_var(..., FILTER_VALIDATE_EMAIL)</code> checa o e-mail sem precisar de regex.</li>
+                    <li><strong>Cheque o tipo antes de usar o valor.</strong> Nada impede o cliente de mandar <code class="i">{"name": ["a"]}</code>; sem o <code class="i">is_string()</code>, o <code class="i">trim()</code> receberia um array, estouraria um <code class="i">TypeError</code> e o usuário veria <code class="i">500</code> no lugar de um <code class="i">400</code> explicando o problema.</li>
+                    <li><strong>mb_strlen, não strlen.</strong> O <code class="i">strlen()</code> conta <em>bytes</em>: em UTF-8, <code class="i">"José"</code> tem 4 caracteres e 5 bytes. Para um limite que o usuário enxerga, conte caracteres.</li>
                 </ul>
 
                 <h2 class="sec">7. A persistência — <code class="i">src/data.php</code></h2>
@@ -894,71 +941,130 @@ function validateUserFields(array $input): ?string
 
 require_once __DIR__ . '/../config/config.php';
 
+function emptyData(): array
+{
+    return ['users' =&gt; [], 'nextId' =&gt; 1];
+}
+
 function loadData(): array
 {
-    return json_decode(file_get_contents(DATA_FILE), true);
+    if (!is_file(DATA_FILE)) {
+        return emptyData();
+    }
+
+    $content = file_get_contents(DATA_FILE);
+
+    if ($content === false) {
+        return emptyData();
+    }
+
+    $data = json_decode($content, true);
+
+    if (!is_array($data) || !isset($data['users'], $data['nextId'])) {
+        return emptyData();
+    }
+
+    return $data;
 }
 
 function saveData(array $data): void
 {
     file_put_contents(DATA_FILE, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+}
+
+/**
+ * Serializa um ciclo ler → alterar → gravar.
+ *
+ * Sem isso, duas requisições simultâneas leem o mesmo estado e a segunda
+ * gravação apaga a primeira. O flock faz a segunda requisição esperar.
+ */
+function withDataLock(callable $operation): mixed
+{
+    // 'c' cria o arquivo se não existir e não apaga o conteúdo.
+    $lock = fopen(DATA_FILE, 'c');
+
+    if ($lock === false) {
+        throw new RuntimeException('Could not open the data file');
+    }
+
+    try {
+        if (!flock($lock, LOCK_EX)) {
+            throw new RuntimeException('Could not lock the data file');
+        }
+
+        return $operation();
+    } finally {
+        flock($lock, LOCK_UN);
+        fclose($lock);
+    }
 }</pre></div>
                 <p class="txt"><code class="i">loadData</code> lê e decodifica o JSON; <code class="i">saveData</code> codifica e grava. As duas leem o caminho da constante <code class="i">DATA_FILE</code>, definida no <code class="i">config.php</code>. O <code class="i">JSON_PRETTY_PRINT</code> mantém o arquivo legível (indentado) e o <code class="i">JSON_UNESCAPED_UNICODE</code> preserva os acentos, gravando <code class="i">João</code> diretamente em vez de convertê-lo para uma sequência de escape Unicode.</p>
+                <p class="txt">Repare que o <code class="i">loadData</code> não confia no arquivo: se ele não existir, não puder ser lido ou tiver conteúdo inválido, a função devolve o estado vazio do <code class="i">emptyData()</code> em vez de <code class="i">null</code>. Sem essa rede, um <code class="i">data.json</code> corrompido faria o <code class="i">json_decode</code> devolver <code class="i">null</code>, o tipo de retorno <code class="i">: array</code> não aceitaria esse valor e <strong>toda</strong> requisição — inclusive o GET — responderia <code class="i">500</code>.</p>
+                <p class="txt">O <code class="i">withDataLock()</code> resolve um problema que só aparece com dois usuários ao mesmo tempo. Toda escrita aqui é um ciclo <em>ler → alterar → gravar</em>; se duas requisições fazem isso em paralelo, as duas leem o mesmo arquivo e a segunda gravação apaga o que a primeira acabou de salvar. O <code class="i">flock($lock, LOCK_EX)</code> segura a segunda requisição até a primeira terminar, e o bloco <code class="i">finally</code> garante que o cadeado seja liberado mesmo se algo falhar no meio.</p>
                 <div class="code-wrap"><span class="lang">data.php</span><pre class="code">function insertUser(array $user): array
 {
-    $data = loadData();
+    return withDataLock(function () use ($user): array {
+        $data = loadData();
 
-    $id = $data['nextId'] ?? 1;
-    $data['nextId'] = $id + 1;
+        $id = $data['nextId'];
+        $data['nextId'] = $id + 1;
 
-    $user['id'] = $id;
-    $data['users'][] = $user;
+        $user['id'] = $id;
+        $data['users'][] = $user;
 
-    saveData($data);
+        saveData($data);
 
-    return $user;
+        return $user;
+    });
 }
 
 function updateUser(int $id, array $fields): ?array
 {
-    $data = loadData();
-    $users = $data['users'];
+    return withDataLock(function () use ($id, $fields): ?array {
+        $data = loadData();
+        $users = $data['users'];
 
-    for ($i = 0; $i &lt; count($users); $i++) {
-        if ($users[$i]['id'] === $id) {
-            $data['users'][$i] = array_merge($users[$i], $fields);
-            saveData($data);
-            return $data['users'][$i];
+        for ($i = 0; $i &lt; count($users); $i++) {
+            if ($users[$i]['id'] === $id) {
+                $data['users'][$i] = array_merge($users[$i], $fields);
+                saveData($data);
+
+                return $data['users'][$i];
+            }
         }
-    }
 
-    return null;
+        return null;
+    });
 }
 
 function deleteUser(int $id): ?array
 {
-    $data = loadData();
-    $users = $data['users'];
+    return withDataLock(function () use ($id): ?array {
+        $data = loadData();
+        $users = $data['users'];
 
-    for ($i = 0; $i &lt; count($users); $i++) {
-        if ($users[$i]['id'] === $id) {
-            $user = $users[$i];
-            array_splice($users, $i, 1);
-            $data['users'] = $users;
-            saveData($data);
-            return $user;
+        for ($i = 0; $i &lt; count($users); $i++) {
+            if ($users[$i]['id'] === $id) {
+                $user = $users[$i];
+                array_splice($users, $i, 1);
+                $data['users'] = $users;
+                saveData($data);
+
+                return $user;
+            }
         }
-    }
 
-    return null;
+        return null;
+    });
 }</pre></div>
                 <ul class="list">
                     <li><strong>insertUser</strong> usa <code class="i">nextId</code> como auto-incremento: pega o próximo id, incrementa o contador, carimba o usuário e adiciona ao array.</li>
                     <li><strong>updateUser</strong> acha o usuário pelo id e usa <code class="i">array_merge($user, $fields)</code> — os campos novos sobrescrevem os antigos e o que não veio permanece. É isso que faz o PATCH parcial funcionar.</li>
                     <li><strong>deleteUser</strong> remove pelo índice com <code class="i">array_splice</code> e devolve o usuário apagado.</li>
                     <li>Retornar <code class="i">null</code> quando o id não existe é o que vira <code class="i">404</code> lá no serviço.</li>
+                    <li>As três passam por <strong>withDataLock</strong>: a função abre o arquivo, tranca com <code class="i">flock</code>, roda o bloco que você passou e destranca no fim. É o que impede duas requisições simultâneas de se atropelarem.</li>
                 </ul>
-                <div class="callout warn"><span class="ct">⚠ JSON como banco de dados</span> Guardar tudo num arquivo é ótimo para aprender, mas não escala: cada escrita reescreve o arquivo inteiro e não há controle de acesso concorrente. Num projeto real, troque a camada <code>data.php</code> por um banco (SQLite, MySQL, Postgres) — <strong>o resto da API não muda</strong>, graças à separação em camadas.</div>
+                <div class="callout warn"><span class="ct">⚠ JSON como banco de dados</span> Guardar tudo num arquivo é ótimo para aprender, mas não escala: cada escrita reescreve o arquivo inteiro e o <code>flock</code> serializa os acessos, ou seja, com muitos usuários todo mundo fica na fila. Num projeto real, troque a camada <code>data.php</code> por um banco (SQLite, MySQL, Postgres) — <strong>o resto da API não muda</strong>, graças à separação em camadas. Tem um passo a passo dessa troca no módulo <a data-goto="bonus">Bônus</a>.</div>
 
                 <h2 class="sec">Como cada método percorre as camadas</h2>
                 <p class="txt">Todos entram pelo <code class="i">index.php</code> e pelo <code class="i">api.php</code>. A partir do controller, cada método segue seu caminho até a resposta:</p>
@@ -977,7 +1083,7 @@ function deleteUser(int $id): ?array
 
                 <hr class="rule">
                 <h2 class="sec">Referência: funções nativas do PHP</h2>
-                <p class="txt">O projeto usa <strong>21 funções nativas</strong> do PHP. Aqui está o que cada uma faz e um exemplo real do código. Use o campo abaixo para filtrar.</p>
+                <p class="txt">O projeto usa <strong>29 funções nativas</strong> do PHP. Aqui está o que cada uma faz e um exemplo real do código. Use o campo abaixo para filtrar.</p>
                 <input class="filter-input" id="phpFilter" type="text" placeholder="🔎 Filtrar funções (ex: json, array, valida...)" autocomplete="off">
                 <div class="fn-grid" id="phpFns">
                     <div class="fn" data-search="header http saída"><span class="cat">HTTP</span><h5>header()</h5><p>Envia um cabeçalho HTTP bruto. Deve vir antes de qualquer saída.</p><code class="ex">header('Content-Type: application/json');</code></div>
@@ -990,18 +1096,26 @@ exit; // encerra após o preflight</code></div>
                     <div class="fn" data-search="file_put_contents arquivo escrever salvar"><span class="cat">Arquivos</span><h5>file_put_contents()</h5><p>Escreve dados em um arquivo, sobrescrevendo o conteúdo.</p><code class="ex">file_put_contents(DATA_FILE, json_encode($data));</code></div>
                     <div class="fn" data-search="strtok string token dividir uri"><span class="cat">Strings</span><h5>strtok()</h5><p>Divide uma string em tokens por um delimitador. Usado para remover a query string.</p><code class="ex">$uri = strtok($_SERVER['REQUEST_URI'], '?');</code></div>
                     <div class="fn" data-search="trim string espaços"><span class="cat">Strings</span><h5>trim()</h5><p>Remove espaços em branco do início e do fim de uma string.</p><code class="ex">$name = trim($input['name']);</code></div>
-                    <div class="fn" data-search="strlen string comprimento tamanho"><span class="cat">Strings</span><h5>strlen()</h5><p>Retorna o comprimento (em bytes) de uma string.</p><code class="ex">if (strlen($name) &gt; 100) { ... }</code></div>
+                    <div class="fn" data-search="mb_strlen string comprimento tamanho caracteres utf8 acentos"><span class="cat">Strings</span><h5>mb_strlen()</h5><p>Conta <strong>caracteres</strong> de uma string, respeitando UTF-8. O <code style="color:var(--accent)">strlen()</code> contaria bytes e cortaria nomes acentuados cedo demais.</p><code class="ex">if (mb_strlen($name) &gt; 100) { ... }</code></div>
+                    <div class="fn" data-search="ctype_digit string digitos numero validar id"><span class="cat">Strings</span><h5>ctype_digit()</h5><p>Diz se a string tem <strong>apenas dígitos</strong>. Usado para validar o <code style="color:var(--accent)">?id=</code> antes de converter.</p><code class="ex">ctype_digit($id); // '12' sim, 'abc' não</code></div>
                     <div class="fn" data-search="implode string juntar array"><span class="cat">Strings</span><h5>implode()</h5><p>Junta os elementos de um array numa string com um separador.</p><code class="ex">implode(', ', $missing); // 'name, age'</code></div>
                     <div class="fn" data-search="in_array array contém procurar"><span class="cat">Arrays</span><h5>in_array()</h5><p>Verifica se um valor existe em um array. Usado no CORS.</p><code class="ex">in_array($origin, $allowedOrigins);</code></div>
                     <div class="fn" data-search="array_merge array mesclar juntar"><span class="cat">Arrays</span><h5>array_merge()</h5><p>Combina arrays; chaves iguais são sobrescritas. Usado no update.</p><code class="ex">array_merge($user, $fields);</code></div>
                     <div class="fn" data-search="array_splice array remover deletar"><span class="cat">Arrays</span><h5>array_splice()</h5><p>Remove/insere elementos por posição. Usado para deletar.</p><code class="ex">array_splice($data['users'], $i, 1);</code></div>
                     <div class="fn" data-search="array_intersect_key array filtrar campos"><span class="cat">Arrays</span><h5>array_intersect_key()</h5><p>Mantém só as entradas cujas chaves existem em todos os arrays. Filtra campos permitidos.</p><code class="ex">array_intersect_key($input, array_flip($allowed));</code></div>
                     <div class="fn" data-search="array_flip array trocar chaves valores"><span class="cat">Arrays</span><h5>array_flip()</h5><p>Troca chaves por valores. Comum com <code style="color:var(--accent)">array_intersect_key</code>.</p><code class="ex">array_flip(['name','age']); // ['name'=&gt;0,'age'=&gt;1]</code></div>
-                    <div class="fn" data-search="isset tipos definida verificar"><span class="cat">Tipos</span><h5>isset()</h5><p>Verifica se uma variável está definida e não é null.</p><code class="ex">if (isset($_GET['id'])) { ... }</code></div>
+                    <div class="fn" data-search="isset tipos definida verificar"><span class="cat">Tipos</span><h5>isset()</h5><p>Verifica se uma variável está definida e não é null.</p><code class="ex">if (isset($input['name'])) { ... }</code></div>
                     <div class="fn" data-search="empty tipos vazio verificar"><span class="cat">Tipos</span><h5>empty()</h5><p>Verifica se uma variável está vazia (null, '', 0, [], false).</p><code class="ex">if (!empty($missing)) { ... }</code></div>
                     <div class="fn" data-search="is_array tipos array verificar"><span class="cat">Tipos</span><h5>is_array()</h5><p>Verifica se a variável é um array.</p><code class="ex">if (!is_array($input)) { ... }</code></div>
                     <div class="fn" data-search="is_numeric tipos número verificar"><span class="cat">Tipos</span><h5>is_numeric()</h5><p>Verifica se é número ou string numérica.</p><code class="ex">if (!is_numeric($input['age'])) { ... }</code></div>
                     <div class="fn" data-search="filter_var tipos validar email"><span class="cat">Tipos</span><h5>filter_var()</h5><p>Filtra/valida uma variável. Com <code style="color:var(--accent)">FILTER_VALIDATE_EMAIL</code>, valida e-mails.</p><code class="ex">filter_var($email, FILTER_VALIDATE_EMAIL);</code></div>
+                    <div class="fn" data-search="is_string tipos texto verificar"><span class="cat">Tipos</span><h5>is_string()</h5><p>Verifica se o valor é uma string. Evita passar um array para o <code style="color:var(--accent)">trim()</code> e estourar um <code style="color:var(--accent)">TypeError</code>.</p><code class="ex">if (!is_string($input['name'])) { ... }</code></div>
+                    <div class="fn" data-search="is_file arquivos existe verificar"><span class="cat">Arquivos</span><h5>is_file()</h5><p>Diz se o caminho existe e é um arquivo comum.</p><code class="ex">if (!is_file(DATA_FILE)) { ... }</code></div>
+                    <div class="fn" data-search="fopen arquivos abrir handle"><span class="cat">Arquivos</span><h5>fopen()</h5><p>Abre um arquivo e devolve um handle. O modo <code style="color:var(--accent)">'c'</code> cria se não existir, sem apagar o conteúdo.</p><code class="ex">$lock = fopen(DATA_FILE, 'c');</code></div>
+                    <div class="fn" data-search="flock arquivos trava lock concorrencia"><span class="cat">Arquivos</span><h5>flock()</h5><p>Tranca um arquivo. Com <code style="color:var(--accent)">LOCK_EX</code>, as outras requisições esperam a vez; <code style="color:var(--accent)">LOCK_UN</code> destranca.</p><code class="ex">flock($lock, LOCK_EX);</code></div>
+                    <div class="fn" data-search="fclose arquivos fechar handle"><span class="cat">Arquivos</span><h5>fclose()</h5><p>Fecha o handle aberto pelo <code style="color:var(--accent)">fopen()</code>, liberando o recurso.</p><code class="ex">fclose($lock);</code></div>
+                    <div class="fn" data-search="error_log log erro servidor depurar"><span class="cat">HTTP</span><h5>error_log()</h5><p>Grava uma mensagem no log do servidor. É onde o detalhe do erro deve ficar — nunca na resposta ao cliente.</p><code class="ex">error_log((string) $e);</code></div>
+                    <div class="fn" data-search="count array contar tamanho quantidade"><span class="cat">Arrays</span><h5>count()</h5><p>Conta os elementos de um array.</p><code class="ex">count($missing) === 1 ? ' is' : ' are';</code></div>
                 </div>
 
                 <h3 class="sub">Constantes e superglobais usadas</h3>
@@ -1009,6 +1123,8 @@ exit; // encerra após o preflight</code></div>
                     <span class="badge">JSON_PRETTY_PRINT</span>
                     <span class="badge">JSON_UNESCAPED_UNICODE</span>
                     <span class="badge">FILTER_VALIDATE_EMAIL</span>
+                    <span class="badge">LOCK_EX</span>
+                    <span class="badge">LOCK_UN</span>
                     <span class="badge">$_SERVER['REQUEST_URI']</span>
                     <span class="badge">$_SERVER['REQUEST_METHOD']</span>
                     <span class="badge">$_SERVER['HTTP_ORIGIN']</span>
@@ -1506,7 +1622,18 @@ export async function getUsers(apiUrl) {
 let usersCache = [];
 
 export function findUserById(id) {
-    return usersCache.find((user) => user.id === id);
+    return usersCache.find((user) =&gt; user.id === id);
+}
+
+// Nunca interpole dado do usuário direto no innerHTML: um nome como
+// &lt;img src=x onerror=alert(1)&gt; viraria código executável na página.
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&amp;/g, '&amp;amp;')
+        .replace(/&lt;/g, '&amp;lt;')
+        .replace(/&gt;/g, '&amp;gt;')
+        .replace(/"/g, '&amp;quot;')
+        .replace(/'/g, '&amp;#39;');
 }
 
 export async function renderUsers(apiUrl) {
@@ -1526,11 +1653,11 @@ export async function renderUsers(apiUrl) {
         userDiv.classList.add('col-md-3');
 
         userDiv.innerHTML = `
-            &lt;div class="card user-card h-100" id="${user.id}"&gt;
+            &lt;div class="card user-card h-100" id="${escapeHtml(user.id)}"&gt;
                 &lt;div class="card-body"&gt;
-                    &lt;h5 class="card-title"&gt;${user.name}&lt;/h5&gt;
-                    &lt;p class="card-text mb-1"&gt;&lt;strong&gt;Age:&lt;/strong&gt; ${user.age}&lt;/p&gt;
-                    &lt;p class="card-text"&gt;&lt;strong&gt;Email:&lt;/strong&gt; ${user.email}&lt;/p&gt;
+                    &lt;h5 class="card-title"&gt;${escapeHtml(user.name)}&lt;/h5&gt;
+                    &lt;p class="card-text mb-1"&gt;&lt;strong&gt;Age:&lt;/strong&gt; ${escapeHtml(user.age)}&lt;/p&gt;
+                    &lt;p class="card-text"&gt;&lt;strong&gt;Email:&lt;/strong&gt; ${escapeHtml(user.email)}&lt;/p&gt;
                 &lt;/div&gt;
                 &lt;div class="card-footer d-flex gap-2"&gt;
                     &lt;button class="btn btn-sm btn-outline-dark flex-fill" data-action="edit"&gt;Edit&lt;/button&gt;
@@ -1543,16 +1670,26 @@ export async function renderUsers(apiUrl) {
     });
 }</pre></div>
                 <div class="callout tip"><span class="ct">💡 usersCache e data-action</span> O <code>usersCache</code> guarda a última lista buscada; <code>findUserById()</code> faz o lookup local, sem chamar a API de novo. Os atributos <code>data-action="edit"</code> e <code>data-action="delete"</code> nos botões serão usados mais tarde para a <strong>delegação de eventos</strong>.</div>
+                <div class="callout warn"><span class="ct">⚠ Por que o escapeHtml()</span> O <code>innerHTML</code> não imprime texto: ele <strong>interpreta HTML</strong>. Se um usuário se cadastrar com o nome <code>&lt;img src=x onerror=alert(1)&gt;</code>, o navegador não mostra esse texto — ele tenta carregar a imagem, falha, e executa o <code>onerror</code>. Isso é um <strong>XSS</strong>: o atacante roda o JavaScript dele na página de quem abrir a lista, com acesso a cookies e ao que mais estiver ali. O <code>escapeHtml()</code> troca <code>&lt;</code>, <code>&gt;</code>, <code>&amp;</code>, <code>"</code> e <code>'</code> pelas entidades correspondentes, então o nome volta a ser <em>texto</em>. Regra prática: todo dado que veio de fora passa pelo escape antes de entrar no <code>innerHTML</code> — ou use <code>textContent</code>, que nunca interpreta HTML.</div>
 
                 <h3 class="sub">app.js — primeira parte</h3>
                 <p class="txt">Agora conectamos tudo. Por enquanto, o <code class="i">app.js</code> só importa o <code class="i">renderUsers</code> e o chama quando a página carrega. <strong>Vamos adicionar o resto aos poucos</strong> nas próximas etapas.</p>
                 <div class="code-wrap"><span class="lang">app.js</span><pre class="code">import { renderUsers } from './scripts/dom/render.js';
 
-const apiUrl = 'http://localhost:8000/api/users';
+const apiUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api/users';
 
 <span class="cm">// Quando o DOM estiver pronto, renderiza a lista</span>
-document.addEventListener('DOMContentLoaded', () =&gt; renderUsers(apiUrl));</pre></div>
+document.addEventListener('DOMContentLoaded', async () =&gt; {
+    try {
+        await renderUsers(apiUrl);
+    } catch (error) {
+        <span class="cm">// Na Etapa 5 trocamos isso por uma mensagem na tela</span>
+        console.error(error);
+    }
+});</pre></div>
                 <div class="callout tip"><span class="ct">💡 DOMContentLoaded</span> Dispara quando o HTML foi parseado (sem esperar imagens/CSS). É o momento seguro para manipular o DOM.</div>
+                <div class="callout warn"><span class="ct">⚠ Não esqueça o await</span> <code>renderUsers()</code> é <code>async</code>, então ela devolve uma <em>Promise</em>. Chamar <code>renderUsers(apiUrl)</code> sem <code>await</code> funciona enquanto tudo dá certo — mas se a API estiver fora do ar, a Promise é rejeitada e ninguém está escutando: o erro vira um <em>unhandled rejection</em> que só aparece no console do DevTools. A página fica em branco e o usuário não faz ideia do porquê. Com <code>await</code> dentro de um <code>try/catch</code>, a falha vira uma mensagem na tela. Vale para <strong>toda</strong> chamada de <code>renderUsers()</code> no projeto.</div>
+                <div class="callout tip"><span class="ct">💡 import.meta.env.VITE_API_URL</span> O endereço da API não fica cravado no código: o Vite expõe em <code>import.meta.env</code> toda variável de ambiente que comece com <code>VITE_</code>. Sem configurar nada, o <code>??</code> entrega o padrão <code>http://localhost:8000/api/users</code> e tudo funciona como antes. No dia em que a API mudar de endereço, basta criar um arquivo <code>.env</code> na raiz do frontend com <code>VITE_API_URL=https://sua-api.com/api/users</code> e rodar o build de novo — nenhuma linha de código muda.</div>
                 <div class="code-wrap"><span class="lang">resultado no navegador</span><pre class="code">┌─────────────┐  ┌─────────────┐
 │  João        │  │  Ana         │
 │  Age: 25     │  │  Age: 30     │
@@ -1625,7 +1762,7 @@ form.addEventListener('submit', async (event) =&gt; {
         await createUser(apiUrl, { name, age, email });
 
         form.reset();
-        renderUsers(apiUrl);
+        await renderUsers(apiUrl);
     } catch (error) {
         showError(error.message);
     }
@@ -1687,7 +1824,7 @@ usersSection.addEventListener('click', async (event) =&gt; {
 
         try {
             await deleteUser(apiUrl, user.id);
-            renderUsers(apiUrl);
+            await renderUsers(apiUrl);
         } catch (error) {
             showError(error.message);
         }
@@ -1832,7 +1969,7 @@ cancelBtn.addEventListener('click', exitEditMode);</pre></div>
     }
 
     exitEditMode();
-    renderUsers(apiUrl);
+    await renderUsers(apiUrl);
 } catch (error) {
     showError(error.message);
 }</pre></div>
@@ -1847,7 +1984,7 @@ try {
     <span class="cm">// ← Adicione esta verificação:</span>
     if (editingId === user.id) exitEditMode();
 
-    renderUsers(apiUrl);
+    await renderUsers(apiUrl);
 } catch (error) {
     showError(error.message);
 }</pre></div>
@@ -1881,7 +2018,7 @@ import { createUser } from './scripts/api/create.js';
 import { deleteUser } from './scripts/api/delete.js';
 import { updateUser, patchUser } from './scripts/api/update.js';
 
-const apiUrl = 'http://localhost:8000/api/users';
+const apiUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api/users';
 
 <span class="cm">// Referências do DOM</span>
 const form = document.getElementById('create-user-form');
@@ -1950,7 +2087,7 @@ usersSection.addEventListener('click', async (event) =&gt; {
         try {
             await deleteUser(apiUrl, user.id);
             if (editingId === user.id) exitEditMode();
-            renderUsers(apiUrl);
+            await renderUsers(apiUrl);
         } catch (error) {
             showError(error.message);
         }
@@ -1992,14 +2129,20 @@ form.addEventListener('submit', async (event) =&gt; {
         }
 
         exitEditMode();
-        renderUsers(apiUrl);
+        await renderUsers(apiUrl);
     } catch (error) {
         showError(error.message);
     }
 });
 
 <span class="cm">// --- Primeira renderização ---</span>
-document.addEventListener('DOMContentLoaded', () =&gt; renderUsers(apiUrl));</pre></div></details>
+document.addEventListener('DOMContentLoaded', async () =&gt; {
+    try {
+        await renderUsers(apiUrl);
+    } catch (error) {
+        showError(error.message);
+    }
+});</pre></div></details>
                 <div class="callout info"><span class="ct">🟨 E o código de referência?</span> Está no módulo <a data-goto="rodar">Rodar</a> — arquivo por arquivo, é exatamente o código que você acabou de construir aqui, pronto para copiar e conferir com o seu.</div>
             </div>
         </section>
@@ -2013,13 +2156,13 @@ document.addEventListener('DOMContentLoaded', () =&gt; renderUsers(apiUrl));</pr
                 <h2 class="sec">Estrutura de pastas</h2>
                 <p class="txt">As duas partes ficam lado a lado na raiz, cada uma com o seu <code class="i">Dockerfile</code>. O <code class="i">compose.yaml</code> fica fora delas, na raiz, porque é ele que junta as duas num só comando.</p>
                 <div class="code-wrap"><span class="lang">projeto</span><pre class="code">projeto/
-├── compose.yaml            <span class="cm"># sobe backend + frontend</span>
-├── backend/                <span class="cm"># API PHP + Dockerfile</span>
+├── compose.yaml            <span class="cm"># sobe api + frontend</span>
+├── api/                    <span class="cm"># API PHP + Dockerfile</span>
 └── frontend/               <span class="cm"># JS/Vite + Dockerfile</span></pre></div>
                 <div class="grid2">
                     <div>
-                        <h3 class="sub" style="margin-top:0">Backend — <code class="i">backend/</code></h3>
-                        <div class="code-wrap"><span class="lang">php</span><pre class="code">backend/
+                        <h3 class="sub" style="margin-top:0">Backend — <code class="i">api/</code></h3>
+                        <div class="code-wrap"><span class="lang">php</span><pre class="code">api/
 ├── Dockerfile
 ├── data/
 │   └── data.json          <span class="cm"># "banco" em JSON</span>
@@ -2070,27 +2213,28 @@ export default defineConfig({
                 <h2 class="sec">Opção 1 — Docker (recomendado)</h2>
                 <p class="txt">Um único <code class="i">compose.yaml</code> na raiz descreve os dois serviços. Cada <code class="i">build</code> aponta para a pasta onde está o <code class="i">Dockerfile</code> daquele serviço:</p>
                 <div class="code-wrap"><span class="lang">compose.yaml</span><pre class="code">services:
-  backend:
-    build: ./backend
+  api:
+    build: api/
     ports:
       - "8000:80"
 
   frontend:
-    build: ./frontend
+    build: frontend/
     ports:
-      - "8080:80"</pre></div>
+      - "5500:80"</pre></div>
                 <p class="txt">Gere o build do frontend e suba as duas partes de uma vez, da raiz do projeto:</p>
                 <div class="code-wrap"><span class="lang">terminal</span><pre class="code">cd frontend &amp;&amp; npm install &amp;&amp; npm run build &amp;&amp; cd ..
 
 docker compose up --build
 <span class="cm"># API   em http://localhost:8000</span>
-<span class="cm"># front em http://localhost:8080</span></pre></div>
+<span class="cm"># front em http://localhost:5500</span></pre></div>
                 <div class="callout warn"><span class="ct">Ordem importa</span> O container do frontend serve a pasta <code>dist/</code> (Apache). Rode <code>npm run build</code> <strong>antes</strong> do <code>docker compose up</code>, senão não há o que servir.</div>
-                <div class="callout tip"><span class="ct">💡 Um serviço de cada vez</span> Estando tudo num só arquivo, você ainda pode subir só uma parte: <code>docker compose up backend</code>. E <code>docker compose down</code>, da raiz, derruba as duas.</div>
+                <div class="callout tip"><span class="ct">💡 Um serviço de cada vez</span> Estando tudo num só arquivo, você ainda pode subir só uma parte: <code>docker compose up api</code>. E <code>docker compose down</code>, da raiz, derruba as duas.</div>
+                <div class="callout info"><span class="ct">💾 E os dados?</span> Do jeito que está, o <code class="i">data.json</code> vive dentro do container: um <code>docker compose up --build</code> apaga tudo que foi cadastrado. O módulo <a data-goto="bonus">Bônus</a> mostra como resolver isso com um <strong>volume</strong>.</div>
 
                 <h2 class="sec">Opção 2 — Manual (desenvolvimento)</h2>
                 <div class="grid2">
-                    <div class="code-wrap"><span class="lang">api (php)</span><pre class="code">cd backend
+                    <div class="code-wrap"><span class="lang">api (php)</span><pre class="code">cd api
 php -S localhost:8000 -t public public/index.php</pre></div>
                     <div class="code-wrap"><span class="lang">frontend (vite)</span><pre class="code">cd frontend
 npm install
@@ -2104,11 +2248,12 @@ npm run dev
                         <thead><tr><th>Serviço</th><th>Porta</th><th>URL</th></tr></thead>
                         <tbody>
                             <tr><td>API PHP</td><td>8000</td><td class="mono">http://localhost:8000/api/users</td></tr>
-                            <tr><td>Frontend</td><td>8080</td><td class="mono">http://localhost:8080</td></tr>
+                            <tr><td>Frontend (Docker)</td><td>5500</td><td class="mono">http://localhost:5500</td></tr>
+                            <tr><td>Frontend (Vite, <code class="i">npm run dev</code>)</td><td>8080</td><td class="mono">http://localhost:8080</td></tr>
                         </tbody>
                     </table>
                 </div>
-                <div class="callout info"><span class="ct">Por que CORS?</span> Front (<code>:8080</code>) e API (<code>:8000</code>) são origens diferentes. A API só aceita origens listadas em <code>config.php</code> (<code>$allowedOrigins</code>) — que já inclui <code>localhost:8080</code> e <code>localhost:5500</code>. Se usar outra porta no front, adicione-a lá.</div>
+                <div class="callout info"><span class="ct">Por que CORS?</span> O front (<code>:5500</code> no Docker, <code>:8080</code> no Vite) e a API (<code>:8000</code>) são origens diferentes. A API só aceita origens listadas em <code>config.php</code> (<code>$allowedOrigins</code>) — que já inclui as duas. Se usar outra porta no front, adicione-a lá.</div>
 
                 <h2 class="sec">Contrato da API (o que sua API deve fazer)</h2>
                 <p class="txt">Se quiser recriar o backend do zero (em qualquer linguagem), ele precisa respeitar este contrato para o frontend funcionar:</p>
@@ -2129,7 +2274,7 @@ npm run dev
                     <li><strong>id</strong> vai como <em>query param</em> (<code class="i">?id=1</code>), nunca no corpo.</li>
                     <li><strong>age</strong> é armazenado como <strong>número</strong>, não string.</li>
                     <li>Erros retornam <code class="i">{ "error": "mensagem" }</code> com status HTTP adequado.</li>
-                    <li>Headers CORS liberando <code class="i">localhost:8080</code>.</li>
+                    <li>Headers CORS liberando <code class="i">localhost:5500</code> (Docker) e <code class="i">localhost:8080</code> (Vite).</li>
                 </ul>
 
                 <h3 class="sub">Testando pela linha de comando</h3>
@@ -2360,7 +2505,18 @@ export async function deleteUser(apiUrl, id) {
 let usersCache = [];
 
 export function findUserById(id) {
-    return usersCache.find((user) => user.id === id);
+    return usersCache.find((user) =&gt; user.id === id);
+}
+
+// Nunca interpole dado do usuário direto no innerHTML: um nome como
+// &lt;img src=x onerror=alert(1)&gt; viraria código executável na página.
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&amp;/g, '&amp;amp;')
+        .replace(/&lt;/g, '&amp;lt;')
+        .replace(/&gt;/g, '&amp;gt;')
+        .replace(/"/g, '&amp;quot;')
+        .replace(/'/g, '&amp;#39;');
 }
 
 export async function renderUsers(apiUrl) {
@@ -2380,11 +2536,11 @@ export async function renderUsers(apiUrl) {
         userDiv.classList.add('col-md-3');
 
         userDiv.innerHTML = `
-            &lt;div class="card user-card h-100" id="${user.id}"&gt;
+            &lt;div class="card user-card h-100" id="${escapeHtml(user.id)}"&gt;
                 &lt;div class="card-body"&gt;
-                    &lt;h5 class="card-title"&gt;${user.name}&lt;/h5&gt;
-                    &lt;p class="card-text mb-1"&gt;&lt;strong&gt;Age:&lt;/strong&gt; ${user.age}&lt;/p&gt;
-                    &lt;p class="card-text"&gt;&lt;strong&gt;Email:&lt;/strong&gt; ${user.email}&lt;/p&gt;
+                    &lt;h5 class="card-title"&gt;${escapeHtml(user.name)}&lt;/h5&gt;
+                    &lt;p class="card-text mb-1"&gt;&lt;strong&gt;Age:&lt;/strong&gt; ${escapeHtml(user.age)}&lt;/p&gt;
+                    &lt;p class="card-text"&gt;&lt;strong&gt;Email:&lt;/strong&gt; ${escapeHtml(user.email)}&lt;/p&gt;
                 &lt;/div&gt;
                 &lt;div class="card-footer d-flex gap-2"&gt;
                     &lt;button class="btn btn-sm btn-outline-dark flex-fill" data-action="edit"&gt;Edit&lt;/button&gt;
@@ -2401,7 +2557,7 @@ import { createUser } from './scripts/api/create.js';
 import { deleteUser } from './scripts/api/delete.js';
 import { updateUser, patchUser } from './scripts/api/update.js';
 
-const apiUrl = 'http://localhost:8000/api/users';
+const apiUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api/users';
 
 <span class="cm">// Referências do DOM</span>
 const form = document.getElementById('create-user-form');
@@ -2470,7 +2626,7 @@ usersSection.addEventListener('click', async (event) =&gt; {
         try {
             await deleteUser(apiUrl, user.id);
             if (editingId === user.id) exitEditMode();
-            renderUsers(apiUrl);
+            await renderUsers(apiUrl);
         } catch (error) {
             showError(error.message);
         }
@@ -2512,14 +2668,20 @@ form.addEventListener('submit', async (event) =&gt; {
         }
 
         exitEditMode();
-        renderUsers(apiUrl);
+        await renderUsers(apiUrl);
     } catch (error) {
         showError(error.message);
     }
 });
 
 <span class="cm">// --- Primeira renderização ---</span>
-document.addEventListener('DOMContentLoaded', () =&gt; renderUsers(apiUrl));</pre></div></details>
+document.addEventListener('DOMContentLoaded', async () =&gt; {
+    try {
+        await renderUsers(apiUrl);
+    } catch (error) {
+        showError(error.message);
+    }
+});</pre></div></details>
                 <div class="callout info"><span class="ct">Tudo igual ao que você construiu</span> <strong>Todos</strong> os arquivos do frontend acima (HTML, CSS, camada de API, render.js e app.js) são exatamente os que você construiu no módulo <a data-goto="frontend">Frontend</a> — o que você montou lá é o código de referência final.</div>
 
                 <h3 class="sub">🟨 Frontend (Axios) — configuração &amp; Docker</h3>
@@ -2554,28 +2716,306 @@ dist/</pre></div></details>
                 <details class="file"><summary><span class="fpath">Dockerfile</span></summary><div class="code-wrap"><pre class="code">FROM httpd:alpine
 
 COPY dist/ /usr/local/apache2/htdocs/</pre></div></details>
-                <div class="callout info"><span class="ct">Sobre esses arquivos</span> O seu <code>package.json</code> terá também campos como <code>name</code> e <code>version</code> gerados pelo <code>npm init -y</code> — pode mantê-los; as versões dos pacotes podem variar. O <code>Dockerfile</code> serve a pasta <code>dist/</code> (gerada pelo <code>npm run build</code>) com Apache na porta <code>80</code>, mapeada pelo <code>compose.yaml</code> da raiz para a <code>8080</code>.</div>
+                <div class="callout info"><span class="ct">Sobre esses arquivos</span> O seu <code>package.json</code> terá também campos como <code>name</code> e <code>version</code> gerados pelo <code>npm init -y</code> — pode mantê-los; as versões dos pacotes podem variar. O <code>Dockerfile</code> serve a pasta <code>dist/</code> (gerada pelo <code>npm run build</code>) com Apache na porta <code>80</code>, mapeada pelo <code>compose.yaml</code> da raiz para a <code>5500</code>.</div>
 
                 <h3 class="sub">🐳 Raiz do projeto — orquestração</h3>
                 <details class="file"><summary><span class="fpath">compose.yaml</span></summary><div class="code-wrap"><pre class="code">services:
-  backend:
-    build: ./backend
+  api:
+    build: api/
     ports:
       - "8000:80"
 
   frontend:
-    build: ./frontend
+    build: frontend/
     ports:
-      - "8080:80"</pre></div></details>
-                <div class="callout info"><span class="ct">Um arquivo, dois serviços</span> O <code>build</code> aponta para a pasta do serviço, e é lá que o Docker procura o <code>Dockerfile</code>. Como os dois nomes de serviço estão no mesmo arquivo, <code>docker compose up</code> na raiz sobe o projeto inteiro.</div>
+      - "5500:80"</pre></div></details>
+                <div class="callout info"><span class="ct">Um arquivo, dois serviços</span> O <code>build</code> aponta para a pasta do serviço, e é lá que o Docker procura o <code>Dockerfile</code>. Como os dois nomes de serviço estão no mesmo arquivo, <code>docker compose up</code> na raiz sobe o projeto inteiro. No repositório do projeto esse arquivo tem mais duas coisas: um <code>container_name</code> em cada serviço, que fixa o nome do container em vez de deixar o Docker gerar um, e o volume do <a data-goto="bonus">bônus 1</a>, já aplicado.</div>
 
-                <h2 class="sec">Próximos passos &amp; desafios (opcional, entenda bem o resto antes)</h2>
+            </div>
+        </section>
+        <!-- ══════════ MÓDULO 7 — BÔNUS ══════════ -->
+        <section class="module" id="mod-bonus">
+            <div class="wrap">
+                <div class="eyebrow">Módulo 7</div>
+                <h1 class="title">Bônus</h1>
+                <p class="lead">Três melhorias opcionais para quando o CRUD já estiver funcionando. Elas são <strong>independentes</strong>: você pode fazer uma, duas ou as três, em qualquer ordem. Nenhuma muda o contrato da API — o frontend continua exatamente o mesmo.</p>
+
+                <h2 class="sec">1. Um volume para o <code class="i">data.json</code></h2>
+                <p class="txt">Cadastre três usuários, rode <code class="i">docker compose up --build</code> e olhe a lista: ela voltou ao estado inicial. O <code class="i">data.json</code> que a API escreve mora <strong>dentro</strong> do container, e todo rebuild cria um container novo a partir da imagem — com o arquivo do jeito que ele estava quando a imagem foi construída. Tudo que foi cadastrado desde então se perde.</p>
+                <p class="txt">A solução do Docker para isso é o <strong>volume</strong>: uma área de armazenamento que vive fora do container e sobrevive a ele. Você aponta uma pasta do container para o volume, e o que for escrito ali fica guardado.</p>
+                <div class="grid2">
+                    <div class="code-wrap"><span class="lang">compose.yaml — antes</span><pre class="code">services:
+  api:
+    build: api/
+    ports:
+      - "8000:80"
+
+  frontend:
+    build: frontend/
+    ports:
+      - "5500:80"</pre></div>
+                    <div class="code-wrap"><span class="lang">compose.yaml — depois</span><pre class="code">services:
+  api:
+    build: api/
+    ports:
+      - "8000:80"
+    volumes:
+      - api-data:/app/data
+
+  frontend:
+    build: frontend/
+    ports:
+      - "5500:80"
+
+volumes:
+  api-data:</pre></div>
+                </div>
                 <ul class="list">
-                    <li>Troque o recurso: refaça o CRUD para <strong>produtos</strong> (nome, preço, estoque) em vez de usuários.</li>
-                    <li>Adicione um campo novo (ex: <code class="i">phone</code>) — veja tudo que precisa mudar: HTML, validação PHP, render.</li>
-                    <li>Substitua o <code class="i">data.json</code> por um banco real (SQLite/MySQL) mantendo o mesmo contrato.</li>
-                    <li>Adicione busca/filtro na listagem usando query string (<code class="i">?name=...</code>).</li>
-                    <li>Troque o <code class="i">confirm()</code> por um modal do Bootstrap.</li>
+                    <li><code class="i">volumes:</code> <strong>dentro do serviço</strong> diz o que montar: <code class="i">api-data:/app/data</code> liga o volume chamado <code class="i">api-data</code> à pasta <code class="i">/app/data</code> do container (onde o <code class="i">Dockerfile</code> copiou o <code class="i">data.json</code>).</li>
+                    <li><code class="i">volumes:</code> <strong>no fim do arquivo</strong>, sem indentação, é a declaração do volume nomeado. Sem ela o Compose não sabe o que é <code class="i">api-data</code>. Os dois pontos no fim e nada depois significam "use as configurações padrão".</li>
+                    <li>Na <strong>primeira</strong> vez que o volume é usado, o Docker copia para dentro dele o que já existia na pasta do container — ou seja, o seu <code class="i">data.json</code> inicial. Da segunda em diante, o que manda é o conteúdo do volume.</li>
+                </ul>
+                <div class="code-wrap"><span class="lang">terminal</span><pre class="code">docker compose up -d --build
+<span class="cm"># cadastre alguns usuários pela interface...</span>
+
+docker compose up -d --build       <span class="cm"># rebuild: os usuários continuam lá</span>
+docker compose down                <span class="cm"># derruba os containers, o volume fica</span>
+
+docker volume ls                   <span class="cm"># lista os volumes (procure por *_api-data)</span>
+docker compose exec api cat data/data.json   <span class="cm"># espia o arquivo de dentro</span>
+
+docker compose down -v             <span class="cm"># o -v APAGA o volume: zera os dados</span></pre></div>
+                <div class="callout warn"><span class="ct">⚠ O <code>-v</code> apaga mesmo</span> <code>docker compose down</code> sozinho é seguro: derruba os containers e preserva o volume. Com <code>-v</code>, o volume vai junto e não há desfazer. Use quando quiser começar do zero de propósito.</div>
+                <div class="callout tip"><span class="ct">💡 Volume nomeado ou pasta do projeto?</span> Trocar <code>api-data:/app/data</code> por <code>./api/data:/app/data</code> monta a <strong>sua pasta</strong> dentro do container (isso se chama <em>bind mount</em>). A vantagem é abrir o <code>data.json</code> no editor e ver as mudanças na hora; a desvantagem é que o arquivo de dados passa a viver no meio do código — e, se você versiona o projeto no Git, cada cadastro vira uma alteração no repositório.</div>
+
+                <hr class="rule">
+                <h2 class="sec">2. O build do frontend dentro do Dockerfile</h2>
+                <p class="txt">Hoje o <code class="i">Dockerfile</code> do frontend só copia a pasta <code class="i">dist/</code>. Isso quer dizer que <strong>você</strong> precisa lembrar de rodar <code class="i">npm install</code> e <code class="i">npm run build</code> antes de subir o Docker — e, se esquecer, o Apache serve a versão antiga ou uma pasta vazia. Dá para transferir esse trabalho para a própria construção da imagem.</p>
+                <p class="txt">A ferramenta é o <strong>multi-stage build</strong>: um único <code class="i">Dockerfile</code> com duas etapas <code class="i">FROM</code>. A primeira tem o Node e serve só para gerar o <code class="i">dist/</code>; a segunda é a imagem final, que leva apenas o resultado. O Node, o <code class="i">node_modules</code> e o código-fonte ficam para trás — a imagem publicada continua sendo só o Apache com os arquivos estáticos.</p>
+                <div class="code-wrap"><span class="lang">frontend/Dockerfile — antes</span><pre class="code">FROM httpd:alpine
+
+COPY dist/ /usr/local/apache2/htdocs/</pre></div>
+                <div class="code-wrap"><span class="lang">frontend/Dockerfile — depois</span><pre class="code"># ETAPA 1 — build: instala o Node, as dependências e gera o dist/
+FROM node:22-alpine AS build
+
+WORKDIR /app
+
+# Só os manifestos primeiro: o Docker reaproveita esta camada
+# enquanto o package.json e o lock não mudarem.
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY . .
+RUN npm run build
+
+# ETAPA 2 — runtime: só o Apache e os arquivos prontos
+FROM httpd:alpine
+
+COPY --from=build /app/dist/ /usr/local/apache2/htdocs/</pre></div>
+                <p class="txt">Crie também um <code class="i">.dockerignore</code> na pasta <code class="i">frontend/</code>. Sem ele, o <code class="i">COPY . .</code> levaria a sua <code class="i">node_modules</code> local (centenas de megabytes, compilada para o <em>seu</em> sistema operacional) para dentro da imagem, atrasando o build e podendo até quebrá-lo:</p>
+                <div class="code-wrap"><span class="lang">frontend/.dockerignore</span><pre class="code">node_modules
+dist</pre></div>
+                <ul class="list">
+                    <li><code class="i">FROM node:22-alpine AS build</code> dá um nome à etapa. O <code class="i">COPY --from=build</code> lá embaixo é quem vai buscar o resultado nela.</li>
+                    <li><strong>Copiar o <code class="i">package.json</code> antes do resto</strong> não é capricho: o Docker guarda cada instrução em cache e só refaz a partir da primeira que mudou. Com essa ordem, alterar o <code class="i">app.js</code> não obriga a reinstalar as dependências de novo.</li>
+                    <li><code class="i">npm ci</code> instala exatamente as versões do <code class="i">package-lock.json</code>, sem atualizar nada — é a instalação certa para build automatizado. (Ele exige o lock; se o seu projeto não tiver um, rode <code class="i">npm install</code> uma vez e versione o arquivo gerado.)</li>
+                    <li>A partir daí, <code class="i">docker compose up --build</code> faz tudo sozinho. O <code class="i">npm run dev</code> continua existindo para o desenvolvimento do dia a dia, com hot reload.</li>
+                </ul>
+                <div class="callout info"><span class="ct">O que muda no seu fluxo</span> Antes: <code>cd frontend &amp;&amp; npm install &amp;&amp; npm run build &amp;&amp; cd .. &amp;&amp; docker compose up --build</code>. Depois: <code>docker compose up --build</code>. O primeiro build demora mais (o Docker precisa baixar a imagem do Node e instalar os pacotes); os seguintes aproveitam o cache.</div>
+
+                <hr class="rule">
+                <h2 class="sec">3. Trocar o <code class="i">data.json</code> por um banco de dados</h2>
+                <p class="txt">Este é o bônus que mostra <strong>por que</strong> o projeto foi dividido em camadas. O <code class="i">data.json</code> tem limites conhecidos: toda escrita reescreve o arquivo inteiro, as requisições precisam esperar uma pela outra por causa do <code class="i">flock</code>, e não existe busca — para achar um usuário, o PHP percorre o array inteiro. Um banco resolve os três.</p>
+                <p class="txt">Vamos usar <strong>SQLite</strong>: um banco SQL completo que mora em um único arquivo, sem servidor para instalar nem senha para configurar. A extensão <code class="i">pdo_sqlite</code> já vem habilitada na imagem <code class="i">php:8.3-cli</code>, então não há nada a instalar no <code class="i">Dockerfile</code>.</p>
+                <div class="callout tip"><span class="ct">💡 Quantos arquivos mudam</span> Exatamente <strong>dois</strong>: o <code>config/config.php</code> (o caminho do arquivo) e o <code>src/data.php</code> (a camada de dados). <code>index.php</code>, <code>api.php</code>, <code>controllers.php</code>, <code>services.php</code> e <code>validation.php</code> não mudam <em>uma linha</em> — eles chamam <code>loadData()</code>, <code>insertUser()</code>, <code>updateUser()</code> e <code>deleteUser()</code> sem saber o que existe do outro lado. O frontend também não muda: a resposta HTTP continua idêntica.</div>
+                <h3 class="sub">Passo 1 — o caminho do banco</h3>
+                <div class="code-wrap"><span class="lang">config/config.php</span><pre class="code">&lt;?php
+
+// const DATA_FILE = __DIR__ . '/../data/data.json';   ← sai
+const DB_FILE = __DIR__ . '/../data/data.sqlite';      // ← entra
+
+$allowedOrigins = [
+    'http://0.0.0.0:8080', 'http://localhost:8080', 'http://127.0.0.1:8080',
+    'http://0.0.0.0:5500', 'http://localhost:5500', 'http://127.0.0.1:5500',
+];</pre></div>
+                <h3 class="sub">Passo 2 — a nova camada de dados</h3>
+                <p class="txt">O arquivo inteiro é substituído. As funções mantêm <strong>os mesmos nomes, os mesmos parâmetros e os mesmos retornos</strong> de antes — é esse contrato que permite trocar o motor sem tocar no resto:</p>
+                <div class="code-wrap"><span class="lang">src/data.php</span><pre class="code">&lt;?php
+
+require_once __DIR__ . '/../config/config.php';
+
+function db(): PDO
+{
+    static $pdo = null;
+
+    if ($pdo === null) {
+        $pdo = new PDO('sqlite:' . DB_FILE);
+        $pdo-&gt;setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $pdo-&gt;setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+
+        $pdo-&gt;exec('CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            age INTEGER NOT NULL,
+            email TEXT NOT NULL
+        )');
+    }
+
+    return $pdo;
+}
+
+// O SQLite devolve tudo como string; a API promete id e age numéricos.
+function normalizeUser(array $user): array
+{
+    $user['id'] = (int) $user['id'];
+    $user['age'] = (int) $user['age'];
+
+    return $user;
+}
+
+function loadData(): array
+{
+    $users = db()-&gt;query('SELECT id, name, age, email FROM users ORDER BY id')-&gt;fetchAll();
+
+    return ['users' =&gt; array_map('normalizeUser', $users)];
+}
+
+function findUserById(int $id): ?array
+{
+    $stmt = db()-&gt;prepare('SELECT id, name, age, email FROM users WHERE id = ?');
+    $stmt-&gt;execute([$id]);
+    $user = $stmt-&gt;fetch();
+
+    return $user === false ? null : normalizeUser($user);
+}
+
+function insertUser(array $user): array
+{
+    $stmt = db()-&gt;prepare('INSERT INTO users (name, age, email) VALUES (?, ?, ?)');
+    $stmt-&gt;execute([$user['name'], $user['age'], $user['email']]);
+
+    $user['id'] = (int) db()-&gt;lastInsertId();
+
+    return $user;
+}
+
+function updateUser(int $id, array $fields): ?array
+{
+    if (findUserById($id) === null) {
+        return null;
+    }
+
+    $columns = [];
+    $values = [];
+
+    // Os nomes de coluna vêm do array_intersect_key do services.php:
+    // só 'name', 'age' e 'email' chegam aqui. Os VALORES vão por placeholder.
+    foreach ($fields as $column =&gt; $value) {
+        $columns[] = "$column = ?";
+        $values[] = $value;
+    }
+
+    $values[] = $id;
+
+    $stmt = db()-&gt;prepare('UPDATE users SET ' . implode(', ', $columns) . ' WHERE id = ?');
+    $stmt-&gt;execute($values);
+
+    return findUserById($id);
+}
+
+function deleteUser(int $id): ?array
+{
+    $user = findUserById($id);
+
+    if ($user === null) {
+        return null;
+    }
+
+    db()-&gt;prepare('DELETE FROM users WHERE id = ?')-&gt;execute([$id]);
+
+    return $user;
+}</pre></div>
+                <ul class="list">
+                    <li><strong><code class="i">db()</code></strong> abre a conexão uma única vez por requisição (<code class="i">static $pdo</code>) e cria a tabela se ela ainda não existir — assim o banco nasce sozinho na primeira subida, sem script de instalação.</li>
+                    <li><strong><code class="i">?</code> em vez de concatenar.</strong> Todo valor entra por <em>prepared statement</em>. Se você escrevesse <code class="i">"... WHERE id = $id"</code>, um id como <code class="i">1 OR 1=1</code> viraria SQL executável — é assim que nasce um <strong>SQL injection</strong>.</li>
+                    <li><strong>Os nomes de coluna do <code class="i">updateUser</code></strong> não podem ir por placeholder (SQL não permite), então eles são montados na string. Isso só é seguro porque o <code class="i">services.php</code> já filtrou as chaves com <code class="i">array_intersect_key</code>: ali só chegam <code class="i">name</code>, <code class="i">age</code> e <code class="i">email</code>. Nunca monte SQL com uma chave que veio direto do cliente.</li>
+                    <li><strong><code class="i">AUTOINCREMENT</code> no lugar do <code class="i">nextId</code>.</strong> Quem gera o id agora é o banco; o <code class="i">lastInsertId()</code> devolve o número recém-criado. O campo <code class="i">nextId</code> do JSON deixa de existir.</li>
+                    <li><strong><code class="i">normalizeUser</code></strong> existe porque o SQLite devolve tudo como texto. Sem o <code class="i">(int)</code>, o <code class="i">id</code> viria como <code class="i">"1"</code> e o <code class="i">findUserById</code> do frontend — que compara com <code class="i">===</code> — nunca encontraria ninguém.</li>
+                    <li><strong>O <code class="i">withDataLock</code> some.</strong> Controlar acesso concorrente é trabalho do banco, não seu.</li>
+                </ul>
+                <h3 class="sub">Passo 3 — subir</h3>
+                <div class="code-wrap"><span class="lang">terminal</span><pre class="code">docker compose up -d --build
+
+curl -X POST http://localhost:8000/api/users \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Maria", "age": 22, "email": "maria@email.com"}'
+
+curl http://localhost:8000/api/users</pre></div>
+                <p class="txt">Se você fez o bônus 1, o volume continua valendo: o <code class="i">data.sqlite</code> nasce na mesma pasta <code class="i">/app/data</code> que já está montada, e os dados sobrevivem aos rebuilds do mesmo jeito. Os usuários antigos do <code class="i">data.json</code> não são migrados automaticamente — se quiser trazê-los, cadastre-os de novo pela interface ou escreva um pequeno script que leia o JSON e faça um <code class="i">INSERT</code> de cada um.</p>
+                <div class="callout info"><span class="ct">E para MySQL ou Postgres?</span> O caminho é o mesmo: só o <code>data.php</code> muda. A diferença é que esses bancos são <strong>serviços</strong>, não arquivos — eles entram como um terceiro serviço no <code>compose.yaml</code>, com imagem, senha e volume próprios, e a string do PDO vira algo como <code>mysql:host=db;dbname=crud</code>. Comece pelo SQLite: a lógica que você escrever aqui é a mesma lá.</div>
+
+                <hr class="rule">
+                <h2 class="sec">Últimas alterações</h2>
+                <p class="txt">O que mudou neste material na revisão de setembro de 2026, em ordem de impacto para quem está estudando:</p>
+                <ul class="list">
+                    <li><strong>O código do tutorial foi corrigido.</strong> Onze falhas do backend e três do frontend — entre elas o <code class="i">PUT</code> que respondia <code class="i">500</code>, um XSS na renderização dos cards e a perda de dados em escritas simultâneas. Cada correção aparece no passo a passo <em>e</em> no código-fonte de referência, e o <strong>Relatório de correções</strong>, logo abaixo, explica uma a uma.</li>
+                    <li><strong>Callouts novos.</strong> Explicações para os pontos que a correção tornou visíveis: por que escapar dado do usuário antes do <code class="i">innerHTML</code>, o que é um <em>unhandled rejection</em>, por que <code class="i">mb_strlen</code> e não <code class="i">strlen</code>, por que a mensagem da exceção não pode ir na resposta, e o que acontece quando duas requisições gravam ao mesmo tempo.</li>
+                    <li><strong>Referência de funções nativas do PHP: 21 → 29.</strong> <code class="i">mb_strlen</code> entrou no lugar de <code class="i">strlen</code>, e chegaram também <code class="i">ctype_digit</code>, <code class="i">is_string</code>, <code class="i">is_file</code>, <code class="i">fopen</code>, <code class="i">flock</code>, <code class="i">fclose</code>, <code class="i">error_log</code> e <code class="i">count</code>.</li>
+                    <li><strong>Este módulo Bônus foi criado</strong>, no lugar da antiga seção "Próximos passos &amp; desafios": volume para os dados, build do frontend dentro do Dockerfile e a troca do JSON por um banco.</li>
+                    <li><strong>O volume do <code class="i">data.json</code> saiu do módulo Rodar</strong> e virou o bônus 1. O <code class="i">compose.yaml</code> do módulo Rodar voltou a ser o mínimo necessário para subir o projeto.</li>
+                    <li><strong>Nomes alinhados com o repositório.</strong> A pasta do backend é <code class="i">api/</code> (era <code class="i">backend/</code>) e o serviço no <code class="i">compose.yaml</code> se chama <code class="i">api</code>. O frontend no Docker passou para a porta <code class="i">5500</code>; no <code class="i">npm run dev</code> ele continua na <code class="i">8080</code>, e as duas seguem liberadas no CORS.</li>
+                </ul>
+
+                <hr class="rule">
+                <h2 class="sec">Relatório de correções</h2>
+                <p class="txt">Este relatório lista tudo que foi corrigido no código do projeto em setembro de 2026, depois de uma revisão completa do repositório. Todas as correções também foram aplicadas ao material do tutorial, então o que você lê nos módulos é o código já corrigido. A ordem dentro de cada grupo é da falha mais grave para a mais sutil.</p>
+                <div class="callout info"><span class="ct">📄 Também em arquivo</span> O mesmo relatório está no repositório, em <code>CORRECOES.md</code>.</div>
+                <h3 class="sub">Backend — a API PHP</h3>
+                <div class="table-wrap">
+                    <table class="tbl">
+                        <thead><tr><th>Arquivo</th><th>O que mudou</th><th>Por quê</th></tr></thead>
+                        <tbody>
+                            <tr><td class="mono">src/controllers.php + src/services.php</td><td>O <code>PUT</code> voltou a funcionar: <code>editUser()</code> tem de novo o valor padrão em <code>$partial</code> e o <code>handlePatch</code> passa <code>partial: true</code> como argumento nomeado.</td><td><strong>Toda</strong> requisição <code>PUT</code> respondia <code>500</code>. A função exigia 4 argumentos e o <code>handlePut</code> passava 3, o que faz o PHP lançar <code>ArgumentCountError</code> — capturado pelo <code>catch (\Throwable)</code> e transformado em erro interno. Na interface, editar os três campos de uma vez nunca salvava.</td></tr>
+                            <tr><td class="mono">public/index.php</td><td>Passou a enviar <code>header('Content-Type: application/json')</code> em todas as respostas.</td><td>A API devolvia JSON anunciado como <code>text/html</code>. O Axios continuava entendendo, mas qualquer outro cliente (curl, Insomnia, outro serviço) recebia a informação errada sobre o que estava lendo.</td></tr>
+                            <tr><td class="mono">src/controllers.php</td><td>A mensagem da exceção parou de ir na resposta. Agora <code>respondServerError()</code> grava o detalhe com <code>error_log()</code> e devolve só <code>"Internal server error"</code>.</td><td>O cliente recebia coisas como <code>Internal server errorToo few arguments to function editUser(), 3 passed in /app/src/controllers.php on line 43</code> — caminhos internos e estrutura do código expostos a quem chamasse a API.</td></tr>
+                            <tr><td class="mono">src/validation.php</td><td><code>is_string()</code> antes do <code>trim()</code> (no <code>name</code>) e do <code>filter_var()</code> (no <code>email</code>).</td><td>Um corpo como <code>{"name": ["a"]}</code> fazia o <code>trim()</code> receber um array, lançar <code>TypeError</code> e a API responder <code>500</code>. Erro do cliente tem de virar <code>400</code> com explicação, não erro do servidor.</td></tr>
+                            <tr><td class="mono">src/validation.php + src/services.php</td><td>Novo <code>validateUserId()</code>: o <code>id</code> da query string é validado com <code>ctype_digit()</code> antes de virar inteiro. O controller repassa <code>$_GET['id'] ?? null</code> cru.</td><td><code>(int) 'abc'</code> é <code>0</code>, então <code>?id=abc</code> virava uma busca pelo usuário 0 e respondia <code>404 User not found</code>. O certo é <code>400</code>: o problema não é o usuário não existir, é o id ser inválido.</td></tr>
+                            <tr><td class="mono">src/data.php</td><td><code>loadData()</code> devolve o estado vazio quando o arquivo não existe, não pode ser lido ou tem JSON inválido.</td><td>No tutorial a função era <code>return json_decode(file_get_contents(DATA_FILE), true);</code> com tipo de retorno <code>: array</code>. Com o arquivo ausente ou corrompido, o <code>json_decode</code> devolve <code>null</code>, o tipo não aceita e <strong>toda</strong> rota passa a responder <code>500</code> — inclusive o GET.</td></tr>
+                            <tr><td class="mono">src/data.php</td><td>Novo <code>withDataLock()</code>: as escritas passam por <code>flock($lock, LOCK_EX)</code>.</td><td>Cada escrita é um ciclo ler → alterar → gravar. Duas requisições simultâneas liam o mesmo arquivo e a segunda gravação apagava a primeira — dois cadastros ao mesmo tempo, um usuário salvo. Verificado com 30 POSTs em paralelo: antes havia perda, depois os 30 são gravados com ids únicos.</td></tr>
+                            <tr><td class="mono">src/validation.php</td><td><code>mb_strlen()</code> no lugar de <code>strlen()</code> no limite de 100 caracteres do nome.</td><td><code>strlen()</code> conta bytes. Em UTF-8 um caractere acentuado ocupa 2, então nomes com acento eram rejeitados antes de chegar aos 100 caracteres que a mensagem promete.</td></tr>
+                            <tr><td class="mono">src/services.php</td><td>Um <code>PATCH</code> cujo corpo não traz nenhum campo conhecido agora responde <code>400</code>.</td><td><code>PATCH ?id=1</code> com <code>{}</code> respondia <code>200</code> e devolvia o usuário intacto, como se algo tivesse sido atualizado. Silêncio em cima de um pedido sem sentido esconde o bug de quem chamou.</td></tr>
+                            <tr><td class="mono">src/validation.php</td><td>A mensagem de campo obrigatório concorda em número: <code>"name is required"</code> no singular, <code>"name, age are required"</code> no plural.</td><td>Faltando um único campo, a API respondia <code>"name are required"</code>. Não quebra nada — mas é a mensagem que o usuário lê na tela.</td></tr>
+                            <tr><td class="mono">src/controllers.php</td><td><code>handleGet()</code> passou a usar o <code>respond()</code>, e a leitura do corpo foi extraída para <code>readJsonBody()</code>.</td><td>O GET era o único handler que montava a resposta por conta própria, com <code>echo json_encode(...)</code> direto. Padronizar tira o caso especial e evita que ele fique para trás na próxima mudança.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <h3 class="sub">Frontend</h3>
+                <div class="table-wrap">
+                    <table class="tbl">
+                        <thead><tr><th>Arquivo</th><th>O que mudou</th><th>Por quê</th></tr></thead>
+                        <tbody>
+                            <tr><td class="mono">scripts/dom/render.js</td><td>Novo <code>escapeHtml()</code>: nome, e-mail, idade e id passam por ele antes de entrar no <code>innerHTML</code> do card.</td><td>Era um <strong>XSS armazenado</strong>. Um usuário cadastrado como <code>&lt;img src=x onerror=alert(1)&gt;</code> não aparecia como texto: o navegador tentava carregar a imagem, falhava e executava o <code>onerror</code> — na máquina de <em>todo mundo</em> que abrisse a lista.</td></tr>
+                            <tr><td class="mono">app.js</td><td>Todas as chamadas de <code>renderUsers()</code> passaram a ser <code>await</code>, e a primeira renderização ganhou <code>try/catch</code> com mensagem na tela.</td><td><code>renderUsers()</code> é <code>async</code>. Sem <code>await</code>, a Promise rejeitada não era pega por nenhum <code>catch</code>: com a API fora do ar, a página ficava em branco e o erro só aparecia no console do DevTools.</td></tr>
+                            <tr><td class="mono">app.js</td><td>O endereço da API virou <code>import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api/users'</code>.</td><td>O endereço estava cravado no código: publicar o frontend em outro lugar exigia editar o <code>app.js</code>. Sem nenhuma configuração, o comportamento continua exatamente o mesmo de antes.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <h3 class="sub">Dados e infraestrutura</h3>
+                <div class="table-wrap">
+                    <table class="tbl">
+                        <thead><tr><th>Arquivo</th><th>O que mudou</th><th>Por quê</th></tr></thead>
+                        <tbody>
+                            <tr><td class="mono">data/data.json</td><td>O arquivo foi restaurado: agora é um JSON válido com o usuário de exemplo.</td><td>O arquivo versionado tinha um JSON válido <strong>seguido de um dump de array PHP colado por engano</strong>, o que o tornava inválido inteiro. O <code>json_decode</code> devolvia <code>null</code> e a API tratava tudo como banco vazio, sem avisar ninguém. Havia ainda dois usuários com o mesmo <code>id</code>.</td></tr>
+                            <tr><td class="mono">compose.yaml</td><td>Volume nomeado <code>api-data</code> montado em <code>/app/data</code>.</td><td>Sem volume, cada <code>docker compose up --build</code> apagava tudo que tinha sido cadastrado. O passo a passo está no módulo <strong>Bônus</strong>.</td></tr>
+                            <tr><td class="mono">api/openapi.json</td><td>Arquivo removido do projeto.</td><td>Era uma especificação OpenAPI paralela ao código, que precisaria ser mantida à mão a cada mudança da API — e que já divergia da documentação do próprio repositório.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <h3 class="sub">O que continua igual</h3>
+                <ul class="list">
+                    <li><strong>O contrato HTTP.</strong> As rotas, os métodos, os formatos de corpo e os códigos de sucesso continuam iguais. Um frontend escrito contra a API antiga funciona com a nova.</li>
+                    <li><strong>A arquitetura em camadas.</strong> Nenhum arquivo novo, nenhuma camada a mais: as correções ficaram na camada onde o problema estava.</li>
+                    <li><strong>O fluxo de trabalho.</strong> <code>npm install</code> e <code>npm run build</code> antes do <code>docker compose up</code> continuam sendo o caminho principal. Automatizar isso é o bônus 2, opcional.</li>
                 </ul>
             </div>
         </section>
@@ -2601,6 +3041,7 @@ in_array($origin, $allowedOrigins) ?
     header("Access-Control-Allow-Origin: $origin") : null;
 header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
+header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
@@ -2659,59 +3100,64 @@ function respond(array $result): void
     }
 }
 
+function respondServerError(\\Throwable $e): void
+{
+    // O detalhe do erro vai para o log do servidor, nunca para o cliente.
+    error_log((string) $e);
+
+    http_response_code(500);
+    echo json_encode(['error' => 'Internal server error']);
+}
+
+function readJsonBody(): ?array
+{
+    $input = json_decode(file_get_contents('php://input'), true);
+
+    return is_array($input) ? $input : null;
+}
+
 function handleGet(): void
 {
     try {
-        echo json_encode(getAllUsers());
+        respond(getAllUsers());
     } catch (\\Throwable $e) {
-        http_response_code(500);
-        echo json_encode(['error' => 'Internal server error']);
+        respondServerError($e);
     }
 }
 
 function handlePost(): void
 {
     try {
-        $input = json_decode(file_get_contents('php://input'), true);
-        respond(createUser($input));
+        respond(createUser(readJsonBody()));
     } catch (\\Throwable $e) {
-        http_response_code(500);
-        echo json_encode(['error' => 'Internal server error']);
+        respondServerError($e);
     }
 }
 
 function handlePut(): void
 {
     try {
-        $input = json_decode(file_get_contents('php://input'), true);
-        $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
-        respond(editUser($id, $input));
+        respond(editUser($_GET['id'] ?? null, readJsonBody()));
     } catch (\\Throwable $e) {
-        http_response_code(500);
-        echo json_encode(['error' => 'Internal server error']);
+        respondServerError($e);
     }
 }
 
 function handlePatch(): void
 {
     try {
-        $input = json_decode(file_get_contents('php://input'), true);
-        $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
-        respond(editUser($id, $input, partial: true));
+        respond(editUser($_GET['id'] ?? null, readJsonBody(), partial: true));
     } catch (\\Throwable $e) {
-        http_response_code(500);
-        echo json_encode(['error' => 'Internal server error']);
+        respondServerError($e);
     }
 }
 
 function handleDelete(): void
 {
     try {
-        $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
-        respond(removeUser($id));
+        respond(removeUser($_GET['id'] ?? null));
     } catch (\\Throwable $e) {
-        http_response_code(500);
-        echo json_encode(['error' => 'Internal server error']);
+        respondServerError($e);
     }
 }
 
@@ -2729,7 +3175,8 @@ require_once __DIR__ . '/data.php';
 function getAllUsers(): array
 {
     $data = loadData();
-    return ['users' => $data['users']];
+
+    return ['data' => ['users' => $data['users']], 'status' => 200];
 }
 
 function createUser(?array $input): array
@@ -2757,10 +3204,11 @@ function createUser(?array $input): array
     return ['data' => $user, 'status' => 201];
 }
 
-function editUser(?int $id, ?array $input, bool $partial = false): array
+function editUser(mixed $id, ?array $input, bool $partial = false): array
 {
-    if ($id === null) {
-        return ['error' => 'User id is required', 'status' => 400];
+    $error = validateUserId($id);
+    if ($error) {
+        return ['error' => $error, 'status' => 400];
     }
 
     if (!is_array($input)) {
@@ -2782,6 +3230,10 @@ function editUser(?int $id, ?array $input, bool $partial = false): array
     $allowed = ['name', 'age', 'email'];
     $fields = array_intersect_key($input, array_flip($allowed));
 
+    if (empty($fields)) {
+        return ['error' => 'At least one of name, age or email must be sent', 'status' => 400];
+    }
+
     if (isset($fields['name'])) {
         $fields['name'] = trim($fields['name']);
     }
@@ -2790,7 +3242,7 @@ function editUser(?int $id, ?array $input, bool $partial = false): array
         $fields['age'] = (int) $fields['age'];
     }
 
-    $user = updateUser($id, $fields);
+    $user = updateUser((int) $id, $fields);
 
     if ($user === null) {
         return ['error' => 'User not found', 'status' => 404];
@@ -2799,13 +3251,14 @@ function editUser(?int $id, ?array $input, bool $partial = false): array
     return ['data' => $user, 'status' => 200];
 }
 
-function removeUser(?int $id): array
+function removeUser(mixed $id): array
 {
-    if ($id === null) {
-        return ['error' => 'User id is required', 'status' => 400];
+    $error = validateUserId($id);
+    if ($error) {
+        return ['error' => $error, 'status' => 400];
     }
 
-    $user = deleteUser($id);
+    $user = deleteUser((int) $id);
 
     if ($user === null) {
         return ['error' => 'User not found', 'status' => 404];
@@ -2815,6 +3268,20 @@ function removeUser(?int $id): array
 }`,
 
 'src/validation.php': `<?php
+
+function validateUserId(mixed $id): ?string
+{
+    if ($id === null || $id === '') {
+        return 'User id is required';
+    }
+
+    // Vem sempre da query string, então é string: só aceitamos dígitos.
+    if (!is_string($id) || !ctype_digit($id)) {
+        return 'User id must be a positive integer';
+    }
+
+    return null;
+}
 
 function validateRequiredFields(array $input, array $fields): ?string
 {
@@ -2827,7 +3294,9 @@ function validateRequiredFields(array $input, array $fields): ?string
     }
 
     if (!empty($missing)) {
-        return implode(', ', $missing) . ' are required';
+        $verb = count($missing) === 1 ? ' is required' : ' are required';
+
+        return implode(', ', $missing) . $verb;
     }
 
     return null;
@@ -2836,13 +3305,18 @@ function validateRequiredFields(array $input, array $fields): ?string
 function validateUserFields(array $input): ?string
 {
     if (isset($input['name'])) {
+        if (!is_string($input['name'])) {
+            return 'Name must be a string';
+        }
+
         $name = trim($input['name']);
 
         if ($name === '') {
             return 'Name cannot be empty';
         }
 
-        if (strlen($name) > 100) {
+        // mb_strlen conta caracteres; strlen contaria bytes e cortaria acentos cedo demais.
+        if (mb_strlen($name) > 100) {
             return 'Name must be at most 100 characters';
         }
     }
@@ -2860,6 +3334,10 @@ function validateUserFields(array $input): ?string
     }
 
     if (isset($input['email'])) {
+        if (!is_string($input['email'])) {
+            return 'Email must be a string';
+        }
+
         if (!filter_var($input['email'], FILTER_VALIDATE_EMAIL)) {
             return 'Invalid email format';
         }
@@ -2872,9 +3350,30 @@ function validateUserFields(array $input): ?string
 
 require_once __DIR__ . '/../config/config.php';
 
+function emptyData(): array
+{
+    return ['users' => [], 'nextId' => 1];
+}
+
 function loadData(): array
 {
-    return json_decode(file_get_contents(DATA_FILE), true);
+    if (!is_file(DATA_FILE)) {
+        return emptyData();
+    }
+
+    $content = file_get_contents(DATA_FILE);
+
+    if ($content === false) {
+        return emptyData();
+    }
+
+    $data = json_decode($content, true);
+
+    if (!is_array($data) || !isset($data['users'], $data['nextId'])) {
+        return emptyData();
+    }
+
+    return $data;
 }
 
 function saveData(array $data): void
@@ -2882,66 +3381,88 @@ function saveData(array $data): void
     file_put_contents(DATA_FILE, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 }
 
-function findUserById(int $id): ?array
+/**
+ * Serializa um ciclo ler → alterar → gravar.
+ *
+ * Sem isso, duas requisições simultâneas leem o mesmo estado e a segunda
+ * gravação apaga a primeira. O flock faz a segunda requisição esperar.
+ */
+function withDataLock(callable $operation): mixed
 {
-    $data = loadData();
+    // 'c' cria o arquivo se não existir e não apaga o conteúdo.
+    $lock = fopen(DATA_FILE, 'c');
 
-    foreach ($data['users'] as $user) {
-        if ($user['id'] === $id) {
-            return $user;
-        }
+    if ($lock === false) {
+        throw new RuntimeException('Could not open the data file');
     }
 
-    return null;
+    try {
+        if (!flock($lock, LOCK_EX)) {
+            throw new RuntimeException('Could not lock the data file');
+        }
+
+        return $operation();
+    } finally {
+        flock($lock, LOCK_UN);
+        fclose($lock);
+    }
 }
 
 function insertUser(array $user): array
 {
-    $data = loadData();
+    return withDataLock(function () use ($user): array {
+        $data = loadData();
 
-    $id = $data['nextId'] ?? 1;
-    $data['nextId'] = $id + 1;
+        $id = $data['nextId'];
+        $data['nextId'] = $id + 1;
 
-    $user['id'] = $id;
-    $data['users'][] = $user;
+        $user['id'] = $id;
+        $data['users'][] = $user;
 
-    saveData($data);
+        saveData($data);
 
-    return $user;
+        return $user;
+    });
 }
 
 function updateUser(int $id, array $fields): ?array
 {
-    $data = loadData();
-    $users = $data['users'];
+    return withDataLock(function () use ($id, $fields): ?array {
+        $data = loadData();
+        $users = $data['users'];
 
-    for ($i = 0; $i < count($users); $i++) {
-        if ($users[$i]['id'] === $id) {
-            $data['users'][$i] = array_merge($users[$i], $fields);
-            saveData($data);
-            return $data['users'][$i];
+        for ($i = 0; $i < count($users); $i++) {
+            if ($users[$i]['id'] === $id) {
+                $data['users'][$i] = array_merge($users[$i], $fields);
+                saveData($data);
+
+                return $data['users'][$i];
+            }
         }
-    }
 
-    return null;
+        return null;
+    });
 }
 
 function deleteUser(int $id): ?array
 {
-    $data = loadData();
-    $users = $data['users'];
+    return withDataLock(function () use ($id): ?array {
+        $data = loadData();
+        $users = $data['users'];
 
-    for ($i = 0; $i < count($users); $i++) {
-        if ($users[$i]['id'] === $id) {
-            $user = $users[$i];
-            array_splice($users, $i, 1);
-            $data['users'] = $users;
-            saveData($data);
-            return $user;
+        for ($i = 0; $i < count($users); $i++) {
+            if ($users[$i]['id'] === $id) {
+                $user = $users[$i];
+                array_splice($users, $i, 1);
+                $data['users'] = $users;
+                saveData($data);
+
+                return $user;
+            }
         }
-    }
 
-    return null;
+        return null;
+    });
 }`,
         };
 
@@ -2979,7 +3500,7 @@ function deleteUser(int $id): ?array
             });
         }
 
-        const modules = ['inicio', 'http', 'api', 'axios', 'frontend', 'rodar'];
+        const modules = ['inicio', 'http', 'api', 'axios', 'frontend', 'rodar', 'bonus'];
         let currentMod = 'inicio';
         function showModule(id) {
             if (modules.indexOf(id) === -1) id = 'inicio';

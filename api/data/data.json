@@ -1,34 +1,11 @@
 {
     "users": [
         {
-            "name": "asdf",
-            "age": 41,
-            "email": "sadf@gmail.com",
-            "id": 3
-        },
-        {
-            "name": "asdf",
-            "age": 41,
-            "email": "sadf@gmail.com",
-            "id": 3
+            "name": "João",
+            "age": 25,
+            "email": "joao@email.com",
+            "id": 1
         }
     ],
-    "nextId": 4
+    "nextId": 2
 }
-[
-    users => [
-        [
-            name => "asdf",
-            age => 41,
-            email => "sadf@gmail.com",
-            id => 3
-        ],
-        [
-            name => "asdfdas",
-            age => 41,
-            email => "sadf@gmail.com",
-            id => 5
-        ]
-    ],
-    nextId => 6
-]
