@@ -1,6 +1,8 @@
 # Relatório de correções
 
-Este relatório lista tudo que foi corrigido no código do projeto em setembro de 2026, depois de uma revisão completa do repositório. Todas as correções também foram aplicadas ao material do tutorial, então o que você lê nos módulos é o código já corrigido. A ordem dentro de cada grupo é da falha mais grave para a mais sutil.
+Este relatório é sobre **o código deste repositório**, revisado e corrigido em setembro de 2026. A ordem dentro de cada grupo é da falha mais grave para a mais sutil.
+
+O `http-crud-tutorial.html` é material independente, com o seu próprio código: duas das falhas abaixo — o `PUT` quebrado e o vazamento da mensagem da exceção — existiam só aqui e nunca estiveram no tutorial, e o `data.json` corrompido e o `openapi.json` são arquivos que só existem aqui. O relatório do que foi corrigido no material está no próprio tutorial, no módulo *Correções e migração*.
 
 ## Backend — a API PHP
 
@@ -38,7 +40,7 @@ Este relatório lista tudo que foi corrigido no código do projeto em setembro d
 
 **O que mudou.** `loadData()` devolve o estado vazio quando o arquivo não existe, não pode ser lido ou tem JSON inválido.
 
-**Por quê.** No tutorial a função era `return json_decode(file_get_contents(DATA_FILE), true);` com tipo de retorno `: array`. Com o arquivo ausente ou corrompido, o `json_decode` devolve `null`, o tipo não aceita e **toda** rota passa a responder `500` — inclusive o GET.
+**Por quê.** A versão antiga já tratava o `null`, mas parava aí: o `file_get_contents` num arquivo ausente emite um warning do PHP a cada requisição, e um JSON válido sem as chaves `users` e `nextId` passava direto, para quebrar mais adiante em quem fizesse `$data['users']`. Agora as três situações — arquivo ausente, leitura falha e estrutura inesperada — caem no mesmo estado vazio.
 
 ### `src/data.php`
 
