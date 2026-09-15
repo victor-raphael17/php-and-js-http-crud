@@ -3049,7 +3049,7 @@ document.addEventListener('DOMContentLoaded', async () =&gt; {
                 <p class="txt">O <code class="i">await</code> vale para <strong>toda</strong> chamada de <code class="i">renderUsers()</code>, sem exceção — todas já estão dentro de funções <code class="i">async</code>, então é só acrescentar a palavra.</p>
 
                 <h3 class="sub">Passo 5 — confira o seu <code class="i">data.json</code></h3>
-                <p class="txt">Rode isto dentro da pasta do backend:</p>
+                <p class="txt">Este passo é só uma conferência: o seu <code class="i">data.json</code> foi criado pela própria API, não veio pronto daqui, então o normal é que esteja íntegro. Vale checar mesmo assim, principalmente se você já editou o arquivo à mão em algum momento. Rode isto dentro da pasta do backend:</p>
                 <div class="code-wrap"><span class="lang">terminal</span><pre class="code">php -r "var_dump(json_decode(file_get_contents('data/data.json'), true));"</pre></div>
                 <p class="txt">Se aparecer <code class="i">NULL</code>, o arquivo não é um JSON válido. Com o <code class="i">data.php</code> novo isso não derruba mais a API — mas ela vai tratar o arquivo como vazio, e os seus usuários somem da lista. Nesse caso, conserte o arquivo à mão; ele precisa ter exatamente esta forma:</p>
                 <div class="code-wrap"><span class="lang">data/data.json</span><pre class="code">{
