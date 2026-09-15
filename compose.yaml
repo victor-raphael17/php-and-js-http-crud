@@ -1,0 +1,11 @@
+services:
+  php-server:
+    container_name: api
+    build: crud-api/
+    ports:
+      - "8000:80"
+  frontend:
+    container_name: frontend
+    build: crud-frontend-axios/
+    ports:
+      - "5500:80"
