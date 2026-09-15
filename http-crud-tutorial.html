@@ -231,6 +231,7 @@
                 <button class="nav-item" data-mod="frontend"><span class="n">5</span> Frontend</button>
                 <button class="nav-item" data-mod="rodar"><span class="n">6</span> Rodar</button>
                 <button class="nav-item" data-mod="bonus"><span class="n">7</span> Bônus</button>
+                <button class="nav-item" data-mod="correcoes"><span class="n">8</span> Correções</button>
             </nav>
         </div>
     </header>
@@ -298,6 +299,7 @@
                     <div class="pstep"><div class="pnum">5</div><div class="pbody"><h4>Construir o Frontend</h4><p>Passo a passo, do setup até o CRUD completo consumindo a API. <a data-goto="frontend">Ir para o módulo →</a></p></div></div>
                     <div class="pstep"><div class="pnum">6</div><div class="pbody"><h4>Rodar tudo</h4><p>Subir a API e o frontend com Docker ou manualmente, e o código-fonte real de referência. <a data-goto="rodar">Ir para o módulo →</a></p></div></div>
                     <div class="pstep"><div class="pnum">7</div><div class="pbody"><h4>Bônus</h4><p>Três melhorias opcionais: volume para os dados, build do frontend no Dockerfile e a troca do JSON por um banco. <a data-goto="bonus">Ir para o módulo →</a></p></div></div>
+                    <div class="pstep"><div class="pnum">8</div><div class="pbody"><h4>Correções e migração</h4><p>O que mudou no material, como trazer um projeto antigo para a versão corrigida e o relatório de cada correção. <a data-goto="correcoes">Ir para o módulo →</a></p></div></div>
                 </div>
 
                 <div class="callout tip">
@@ -2953,18 +2955,152 @@ curl -X POST http://localhost:8000/api/users \
 curl http://localhost:8000/api/users</pre></div>
                 <p class="txt">Se você fez o bônus 1, o volume continua valendo: o <code class="i">data.sqlite</code> nasce na mesma pasta <code class="i">/app/data</code> que já está montada, e os dados sobrevivem aos rebuilds do mesmo jeito. Os usuários antigos do <code class="i">data.json</code> não são migrados automaticamente — se quiser trazê-los, cadastre-os de novo pela interface ou escreva um pequeno script que leia o JSON e faça um <code class="i">INSERT</code> de cada um.</p>
                 <div class="callout info"><span class="ct">E para MySQL ou Postgres?</span> O caminho é o mesmo: só o <code>data.php</code> muda. A diferença é que esses bancos são <strong>serviços</strong>, não arquivos — eles entram como um terceiro serviço no <code>compose.yaml</code>, com imagem, senha e volume próprios, e a string do PDO vira algo como <code>mysql:host=db;dbname=crud</code>. Comece pelo SQLite: a lógica que você escrever aqui é a mesma lá.</div>
+            </div>
+        </section>
+        <!-- ══════════ MÓDULO 8 — CORREÇÕES & MIGRAÇÃO ══════════ -->
+        <section class="module" id="mod-correcoes">
+            <div class="wrap">
+                <div class="eyebrow">Módulo 8</div>
+                <h1 class="title">Correções e migração</h1>
+                <p class="lead">O código deste material foi revisado e corrigido. Aqui está o resumo do que mudou, o passo a passo para trazer um projeto antigo para a versão corrigida, e o relatório com o motivo de cada correção.</p>
 
-                <hr class="rule">
                 <h2 class="sec">Últimas alterações</h2>
                 <p class="txt">O que mudou neste material na revisão de setembro de 2026, em ordem de impacto para quem está estudando:</p>
                 <ul class="list">
                     <li><strong>O código do tutorial foi corrigido.</strong> Onze falhas do backend e três do frontend — entre elas o <code class="i">PUT</code> que respondia <code class="i">500</code>, um XSS na renderização dos cards e a perda de dados em escritas simultâneas. Cada correção aparece no passo a passo <em>e</em> no código-fonte de referência, e o <strong>Relatório de correções</strong>, logo abaixo, explica uma a uma.</li>
                     <li><strong>Callouts novos.</strong> Explicações para os pontos que a correção tornou visíveis: por que escapar dado do usuário antes do <code class="i">innerHTML</code>, o que é um <em>unhandled rejection</em>, por que <code class="i">mb_strlen</code> e não <code class="i">strlen</code>, por que a mensagem da exceção não pode ir na resposta, e o que acontece quando duas requisições gravam ao mesmo tempo.</li>
                     <li><strong>Referência de funções nativas do PHP: 21 → 29.</strong> <code class="i">mb_strlen</code> entrou no lugar de <code class="i">strlen</code>, e chegaram também <code class="i">ctype_digit</code>, <code class="i">is_string</code>, <code class="i">is_file</code>, <code class="i">fopen</code>, <code class="i">flock</code>, <code class="i">fclose</code>, <code class="i">error_log</code> e <code class="i">count</code>.</li>
-                    <li><strong>Este módulo Bônus foi criado</strong>, no lugar da antiga seção "Próximos passos &amp; desafios": volume para os dados, build do frontend dentro do Dockerfile e a troca do JSON por um banco.</li>
+                    <li><strong>O módulo <a data-goto="bonus">Bônus</a> foi criado</strong>, no lugar da antiga seção "Próximos passos &amp; desafios": volume para os dados, build do frontend dentro do Dockerfile e a troca do JSON por um banco.</li>
                     <li><strong>O volume do <code class="i">data.json</code> saiu do módulo Rodar</strong> e virou o bônus 1. O <code class="i">compose.yaml</code> do módulo Rodar voltou a ser o mínimo necessário para subir o projeto.</li>
                     <li><strong>Nomes alinhados com o repositório.</strong> A pasta do backend é <code class="i">api/</code> (era <code class="i">backend/</code>) e o serviço no <code class="i">compose.yaml</code> se chama <code class="i">api</code>. O frontend no Docker passou para a porta <code class="i">5500</code>; no <code class="i">npm run dev</code> ele continua na <code class="i">8080</code>, e as duas seguem liberadas no CORS.</li>
                 </ul>
+
+                <hr class="rule">
+                <h2 class="sec">Migrar o seu projeto para a versão corrigida</h2>
+                <p class="txt">Se você já tinha o CRUD rodando pelo material antigo, <strong>não precisa recomeçar</strong>. São sete arquivos para tocar: quatro do backend substituídos por inteiro e três com alterações pequenas e pontuais. Nenhum dado é perdido — o seu <code class="i">data.json</code> continua valendo do jeito que está.</p>
+                <div class="callout warn"><span class="ct">⚠ Antes de começar</span> Faça um <code>git commit</code> do que você tem hoje (ou uma cópia da pasta). Assim, se algo der errado no meio, você volta ao estado anterior com um comando em vez de refazer na mão.</div>
+
+                <h3 class="sub">Passo 1 — substitua quatro arquivos do backend</h3>
+                <p class="txt">Vá ao módulo <a data-goto="rodar">Rodar</a>, abra o <strong>Código-fonte completo</strong> e copie estes quatro por inteiro, um por um:</p>
+                <div class="table-wrap">
+                    <table class="tbl">
+                        <thead><tr><th>Arquivo</th><th>O que veio junto</th></tr></thead>
+                        <tbody>
+                            <tr><td class="mono">src/controllers.php</td><td><code>respondServerError()</code>, <code>readJsonBody()</code>, o GET pelo <code>respond()</code> e o <code>id</code> repassado cru</td></tr>
+                            <tr><td class="mono">src/services.php</td><td><code>validateUserId()</code> no lugar do <code>$id === null</code>, o 400 do PATCH vazio e o <code>(int) $id</code> só depois da validação</td></tr>
+                            <tr><td class="mono">src/validation.php</td><td>o próprio <code>validateUserId()</code>, os <code>is_string()</code>, o <code>mb_strlen</code> e a concordância de <code>is/are required</code></td></tr>
+                            <tr><td class="mono">src/data.php</td><td><code>emptyData()</code>, o <code>loadData()</code> tolerante e o <code>withDataLock()</code></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="callout warn"><span class="ct">⚠ Os quatro juntos, não um de cada vez</span> Essas camadas conversam entre si. Se você trocar só o <code>services.php</code> e deixar o <code>validation.php</code> antigo, a API vai responder <code>500</code> em todas as rotas com <code>id</code> — porque o serviço novo chama um <code>validateUserId()</code> que ainda não existe. Troque os quatro e só depois teste.</div>
+                <div class="callout tip"><span class="ct">💡 E se o meu PUT já funcionava?</span> Então você copiou o <code>services.php</code> do tutorial, onde o <code>$partial</code> sempre teve valor padrão. Quem clonou o repositório é que pegou a versão quebrada, sem o padrão, em que <strong>todo</strong> PUT respondia <code>500</code>. De qualquer forma, substituir o arquivo resolve os dois casos.</div>
+
+                <h3 class="sub">Passo 2 — uma linha no <code class="i">public/index.php</code></h3>
+                <p class="txt">Logo abaixo dos outros <code class="i">header()</code>, antes do <code class="i">if</code> do preflight:</p>
+                <div class="code-wrap"><span class="lang">public/index.php</span><pre class="code">header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+header('Content-Type: application/json');   // ← acrescente esta linha</pre></div>
+
+                <h3 class="sub">Passo 3 — o escape no <code class="i">render.js</code></h3>
+                <p class="txt">Duas mudanças no <code class="i">scripts/dom/render.js</code>: a função nova e o uso dela no template do card.</p>
+                <div class="code-wrap"><span class="lang">antes</span><pre class="code">userDiv.innerHTML = `
+    &lt;div class="card user-card h-100" id="${user.id}"&gt;
+        &lt;div class="card-body"&gt;
+            &lt;h5 class="card-title"&gt;${user.name}&lt;/h5&gt;
+            &lt;p class="card-text mb-1"&gt;&lt;strong&gt;Age:&lt;/strong&gt; ${user.age}&lt;/p&gt;
+            &lt;p class="card-text"&gt;&lt;strong&gt;Email:&lt;/strong&gt; ${user.email}&lt;/p&gt;</pre></div>
+                <div class="code-wrap"><span class="lang">depois</span><pre class="code">// 1) acrescente esta função no topo do arquivo,
+//    logo depois do findUserById():
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&amp;/g, '&amp;amp;')
+        .replace(/&lt;/g, '&amp;lt;')
+        .replace(/&gt;/g, '&amp;gt;')
+        .replace(/"/g, '&amp;quot;')
+        .replace(/'/g, '&amp;#39;');
+}
+
+// 2) passe todo valor do usuário por ela:
+userDiv.innerHTML = `
+    &lt;div class="card user-card h-100" id="${escapeHtml(user.id)}"&gt;
+        &lt;div class="card-body"&gt;
+            &lt;h5 class="card-title"&gt;${escapeHtml(user.name)}&lt;/h5&gt;
+            &lt;p class="card-text mb-1"&gt;&lt;strong&gt;Age:&lt;/strong&gt; ${escapeHtml(user.age)}&lt;/p&gt;
+            &lt;p class="card-text"&gt;&lt;strong&gt;Email:&lt;/strong&gt; ${escapeHtml(user.email)}&lt;/p&gt;</pre></div>
+
+                <h3 class="sub">Passo 4 — três ajustes no <code class="i">app.js</code></h3>
+                <div class="code-wrap"><span class="lang">app.js</span><pre class="code">// 1) o endereço da API deixa de ser fixo:
+const apiUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api/users';
+
+// 2) as chamadas soltas de renderUsers ganham await
+//    (são duas: uma no delete e uma no submit — a terceira
+//     está na primeira renderização, logo abaixo)
+await renderUsers(apiUrl);
+
+// 3) a primeira renderização passa a tratar o erro:
+document.addEventListener('DOMContentLoaded', async () =&gt; {
+    try {
+        await renderUsers(apiUrl);
+    } catch (error) {
+        showError(error.message);
+    }
+});</pre></div>
+                <p class="txt">O <code class="i">await</code> vale para <strong>toda</strong> chamada de <code class="i">renderUsers()</code>, sem exceção — todas já estão dentro de funções <code class="i">async</code>, então é só acrescentar a palavra.</p>
+
+                <h3 class="sub">Passo 5 — confira o seu <code class="i">data.json</code></h3>
+                <p class="txt">Rode isto dentro da pasta do backend:</p>
+                <div class="code-wrap"><span class="lang">terminal</span><pre class="code">php -r "var_dump(json_decode(file_get_contents('data/data.json'), true));"</pre></div>
+                <p class="txt">Se aparecer <code class="i">NULL</code>, o arquivo não é um JSON válido. Com o <code class="i">data.php</code> novo isso não derruba mais a API — mas ela vai tratar o arquivo como vazio, e os seus usuários somem da lista. Nesse caso, conserte o arquivo à mão; ele precisa ter exatamente esta forma:</p>
+                <div class="code-wrap"><span class="lang">data/data.json</span><pre class="code">{
+  "users": [
+    { "name": "João", "age": 25, "email": "joao@email.com", "id": 1 }
+  ],
+  "nextId": 2
+}</pre></div>
+
+                <h3 class="sub">Passo 6 — nomes e portas <span style="opacity:.7">(opcional)</span></h3>
+                <p class="txt">Só para ficar igual ao repositório. Renomeie a pasta <code class="i">backend/</code> para <code class="i">api/</code> e ajuste o <code class="i">compose.yaml</code>:</p>
+                <div class="code-wrap"><span class="lang">compose.yaml</span><pre class="code">services:
+  api:                   # era "backend:"
+    build: api/          # era "./backend"
+    ports:
+      - "8000:80"
+
+  frontend:
+    build: frontend/
+    ports:
+      - "5500:80"        # era "8080:80"</pre></div>
+                <p class="txt">Se preferir deixar como está, nada quebra: o <code class="i">$allowedOrigins</code> do <code class="i">config.php</code> libera as duas portas, e o nome da pasta é só organização.</p>
+
+                <h3 class="sub">Passo 7 — teste o que estava quebrado</h3>
+                <p class="txt">Suba a API e rode os cinco comandos abaixo. Cada um cobre uma correção — se todos responderem o esperado, a migração deu certo:</p>
+                <div class="code-wrap"><span class="lang">terminal</span><pre class="code"># 1) o PUT, que antes respondia 500
+curl -i -X PUT "http://localhost:8000/api/users?id=1" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Maria", "age": 30, "email": "maria@email.com"}'
+# esperado: 200 e o usuário atualizado
+
+# 2) id inválido — antes era 404, agora é 400
+curl -i -X DELETE "http://localhost:8000/api/users?id=abc"
+# esperado: 400 {"error":"User id must be a positive integer"}
+
+# 3) tipo errado — antes era 500, agora é 400
+curl -i -X POST http://localhost:8000/api/users \
+  -H "Content-Type: application/json" \
+  -d '{"name": ["x"], "age": 30, "email": "a@b.com"}'
+# esperado: 400 {"error":"Name must be a string"}
+
+# 4) PATCH sem campo nenhum — antes era 200, agora é 400
+curl -i -X PATCH "http://localhost:8000/api/users?id=1" \
+  -H "Content-Type: application/json" -d '{}'
+# esperado: 400
+
+# 5) o Content-Type da resposta
+curl -s -D - -o /dev/null http://localhost:8000/api/users | grep -i content-type
+# esperado: Content-Type: application/json</pre></div>
+                <p class="txt">Falta um teste que o curl não faz: cadastre pela interface um usuário com o nome <code class="i">&lt;b&gt;teste&lt;/b&gt;</code>. Se o card mostrar o nome <strong>com as tags à vista</strong>, o escape está funcionando. Se mostrar <strong>teste</strong> em negrito, o <code class="i">render.js</code> ainda é o antigo.</p>
+                <div class="callout tip"><span class="ct">✅ Terminou</span> A partir daqui o seu projeto é igual ao do material. Os três bônus do módulo <a data-goto="bonus">Bônus</a> continuam disponíveis e são independentes desta migração.</div>
 
                 <hr class="rule">
                 <h2 class="sec">Relatório de correções</h2>
@@ -3015,7 +3151,7 @@ curl http://localhost:8000/api/users</pre></div>
                 <ul class="list">
                     <li><strong>O contrato HTTP.</strong> As rotas, os métodos, os formatos de corpo e os códigos de sucesso continuam iguais. Um frontend escrito contra a API antiga funciona com a nova.</li>
                     <li><strong>A arquitetura em camadas.</strong> Nenhum arquivo novo, nenhuma camada a mais: as correções ficaram na camada onde o problema estava.</li>
-                    <li><strong>O fluxo de trabalho.</strong> <code>npm install</code> e <code>npm run build</code> antes do <code>docker compose up</code> continuam sendo o caminho principal. Automatizar isso é o bônus 2, opcional.</li>
+                    <li><strong>O fluxo de trabalho.</strong> <code>npm install</code> e <code>npm run build</code> antes do <code>docker compose up</code> continuam sendo o caminho principal. Automatizar isso é o bônus 2 do módulo <a data-goto="bonus">Bônus</a>, opcional.</li>
                 </ul>
             </div>
         </section>
@@ -3500,7 +3636,7 @@ function deleteUser(int $id): ?array
             });
         }
 
-        const modules = ['inicio', 'http', 'api', 'axios', 'frontend', 'rodar', 'bonus'];
+        const modules = ['inicio', 'http', 'api', 'axios', 'frontend', 'rodar', 'bonus', 'correcoes'];
         let currentMod = 'inicio';
         function showModule(id) {
             if (modules.indexOf(id) === -1) id = 'inicio';
